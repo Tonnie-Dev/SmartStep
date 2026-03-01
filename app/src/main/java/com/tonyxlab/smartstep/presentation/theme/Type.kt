@@ -1,4 +1,4 @@
-package com.tonyxlab.smartstep.ui.theme
+package com.tonyxlab.smartstep.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
