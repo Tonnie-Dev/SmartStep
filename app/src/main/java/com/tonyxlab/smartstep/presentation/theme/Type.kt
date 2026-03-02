@@ -46,7 +46,7 @@ val Typography = Typography(
     )
 )
 
-object ExtraTypography {
+object ExtendedTypography {
 
         val TitleAccent = TextStyle(
         fontFamily = InterFontFamily,
@@ -93,24 +93,24 @@ object ExtraTypography {
 
 val Typography.TittleAccent
         @Composable
-        get() = ExtraTypography. TitleAccent
+        get() = ExtendedTypography. TitleAccent
 
 val Typography.BodyLargeRegular
         @Composable
-        get() = ExtraTypography. BodyLargeRegular
+        get() = ExtendedTypography. BodyLargeRegular
 
 val Typography.BodyLargeMedium
         @Composable
-        get() = ExtraTypography. BodyLargeMedium
+        get() = ExtendedTypography. BodyLargeMedium
 
 val Typography.BodyMediumRegular
        @Composable
-        get() = ExtraTypography. BodyMediumRegular
+        get() = ExtendedTypography. BodyMediumRegular
 
 val Typography.BodyMediumMedium
         @Composable
-        get() = ExtraTypography. BodyMediumMedium
+        get() = ExtendedTypography. BodyMediumMedium
 
 val Typography.BodySmallRegular
         @Composable
-        get() = ExtraTypography. BodySmallRegular
+        get() = ExtendedTypography. BodySmallRegular
