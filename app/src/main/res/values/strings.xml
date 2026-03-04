@@ -24,12 +24,18 @@
 
     <!--Caption Texts-->
     <string name="caption_text_profile_desc">This information helps calculate your activity more accurately.</string>
+    <string name="caption_text_calculate_distance">Used to calculate distance</string>
+    <string name="caption_text_calculate_calories">Used to calculate calories</string>
 
 
     <!--Label Texts-->
     <string name="label_text_gender">Gender</string>
     <string name="label_text_height">Height</string>
     <string name="label_text_weight">Weight</string>
+    <string name="label_text_cm">cm</string>
+    <string name="label_text_ft_in">ft/in</string>
+    <string name="label_text_ft">ft</string>
+    <string name="label_text_in">in</string>
 
     <!--Menu Texts-->
     <string name="menu_text_male">Male</string>
@@ -37,6 +43,8 @@
 
     <!--Button Texts-->
     <string name="button_text_start">Start</string>
+    <string name="button_text_ok">Ok</string>
+    <string name="button_text_cancel">Cancel</string>
 
 
     <!--Text Button Texts-->

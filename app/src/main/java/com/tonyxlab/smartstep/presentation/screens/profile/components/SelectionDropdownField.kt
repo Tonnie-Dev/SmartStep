@@ -89,6 +89,7 @@ fun SelectionDropdownField(
 @PreviewLightDark
 @Composable
 private fun SelectionDropdownField_Preview() {
+
     val options = listOf("Male", "Female")
 
     SmartStepTheme {
