@@ -53,7 +53,8 @@
 
 
     <!--Content Description Texts-->
-    <string name="cds_text_pizza_logo">Pizza Logo</string>
+    <string name="cds_text_check_mark">Check Mark</string>
+
 
 
     <!--Snackbar Texts-->

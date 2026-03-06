@@ -19,14 +19,14 @@ val customMaterialShapes = Shapes(
 object ExtendedShapes {
 
     val RoundedCornerShape10 = RoundedCornerShape(10.dp)
-
+    val EndVerticalRoundedCornerShape100 = RoundedCornerShape(topEnd = 100.dp, bottomEnd = 100.dp)
     /*val HorizontalRoundedCornerShape12 = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
 
     val HorizontalRoundedCornerShape16 = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
 
     val HorizontalRoundedCornerShape24 = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
 
-    val VerticalRoundedCornerShape12 = RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp)
+
 
     val VerticalRoundedCornerShape16 = RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp)
 
@@ -36,6 +36,10 @@ object ExtendedShapes {
 val Shapes.RoundedCornerShape10
     @Composable
     get() = ExtendedShapes.RoundedCornerShape10
+
+val Shapes.EndVerticalRoundedCornerShape100
+@Composable
+get() = ExtendedShapes.EndVerticalRoundedCornerShape100
 /*
 val Shapes.HorizontalRoundedCornerShape16
     @Composable
