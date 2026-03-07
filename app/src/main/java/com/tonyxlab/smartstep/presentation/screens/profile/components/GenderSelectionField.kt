@@ -19,33 +19,35 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.util.fastForEach
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
+import com.tonyxlab.smartstep.presentation.screens.profile.handling.Gender
 import com.tonyxlab.smartstep.presentation.theme.BodyLargeRegular
 import com.tonyxlab.smartstep.presentation.theme.BodySmallRegular
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectionDropdownField(
+fun GenderSelectionField(
     label: String,
-    selectedOption: String,
-    options: List<String>,
-    onSelectOption: (String) -> Unit,
+    selectedGender: Gender,
+    options: List<Gender>,
+    onSelectOption: (Gender) -> Unit,
     expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
     ExposedDropdownMenuBox(
             modifier = modifier,
             expanded = expanded,
-            onExpandedChange = {}
+            onExpandedChange = onExpandedChange
     ) {
 
         OutlinedTextField(
                 modifier = Modifier
-                        // TODO: Check this Deprecation
+                        // TODO: Check on this deprecation
                         .menuAnchor()
                         .fillMaxWidth(),
-                value = selectedOption,
+                value = selectedGender.toString(),
                 onValueChange = {},
                 readOnly = true,
                 label = {
@@ -53,44 +55,45 @@ fun SelectionDropdownField(
                             text = label,
                             style = MaterialTheme.typography.BodySmallRegular.copy(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
-                            ),
-
                             )
+                    )
                 },
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                 },
-                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
         )
 
         ExposedDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = {}
+                onDismissRequest = { onExpandedChange(false) }
         ) {
 
-            options.fastForEach { option ->
-                DropdownMenuItem(
+            options.fastForEach { gender ->
 
+                DropdownMenuItem(
                         text = {
                             Text(
-                                    text = option,
+                                    text = gender.toString(),
                                     style = MaterialTheme.typography.BodyLargeRegular.copy(
                                             color = MaterialTheme.colorScheme.onSurface
                                     )
                             )
                         },
-                        onClick = { onSelectOption(option) }
+                        onClick = {
+                            onSelectOption(gender)
+                            onExpandedChange(false)
+                        }
                 )
             }
         }
     }
 }
-
 @PreviewLightDark
 @Composable
-private fun SelectionDropdownField_Preview() {
+private fun GenderSelectionField_Preview() {
 
-    val options = listOf("Male", "Female")
+    val options = Gender.entries
 
     SmartStepTheme {
 
@@ -101,19 +104,22 @@ private fun SelectionDropdownField_Preview() {
                         .padding(MaterialTheme.spacing.spaceMedium)
         ) {
 
-            SelectionDropdownField(
+            GenderSelectionField(
                     label = stringResource(id = R.string.label_text_gender),
                     options = options,
-                    selectedOption = "Male",
+                    selectedGender = Gender.MALE,
                     onSelectOption = {},
+                    onExpandedChange = {},
                     expanded = false
+
             )
 
-            SelectionDropdownField(
+            GenderSelectionField(
                     label = stringResource(id = R.string.label_text_gender),
                     options = options,
-                    selectedOption = "Male",
+                    selectedGender = Gender.FEMALE,
                     onSelectOption = {},
+                    onExpandedChange = {},
                     expanded = true
             )
         }
