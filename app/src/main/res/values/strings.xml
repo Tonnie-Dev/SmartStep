@@ -48,6 +48,7 @@
 
 
     <!--Text Button Texts-->
+    <string name="text_button_skip">Skip</string>
     <string name="text_button_cancel">Cancel</string>
 
 
