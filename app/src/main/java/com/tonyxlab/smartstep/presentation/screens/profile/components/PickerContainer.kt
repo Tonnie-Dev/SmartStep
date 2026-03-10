@@ -39,7 +39,8 @@ fun PickerContainer(
     pickerDescription: String,
     unitOneText: String,
     unitTwoText: String,
-    onSelectMeasurementMode: () -> Unit,
+    onToggleUnitOne: () -> Unit,
+    onToggleUnitTwo: () -> Unit,
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
     wheelPicker: @Composable (() -> Unit)? = null
@@ -74,29 +75,13 @@ fun PickerContainer(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            // Unit Toggle
-
-            Row(
-                    modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = MaterialTheme.spacing.spaceTwelve * 2),
-                    horizontalArrangement = Arrangement.Center
-            ) {
-
-                AppLabel(
-                        modifier = Modifier.weight(1f),
-                        labelText = unitOneText,
-                        shape = MaterialTheme.shapes.StartVerticalRoundedCornerShape100,
-                        onClick = onSelectMeasurementMode,
-                        selected = true
-                )
-                AppLabel(
-                        modifier = Modifier.weight(1f),
-                        labelText = unitTwoText,
-                        shape = MaterialTheme.shapes.EndVerticalRoundedCornerShape100,
-                        onClick = onSelectMeasurementMode
-                )
-            }
+            UnitToggle(
+                    modifier = Modifier,
+                    unitOneText = unitOneText,
+                    unitTwoText = unitTwoText,
+                    onToggleUnitOne = {},
+                    onToggleUnitTwo = {},
+            )
 
             // Wheel Picker
             wheelPicker?.invoke()
@@ -127,14 +112,44 @@ fun PickerContainer(
     }
 }
 
+@Composable
+fun UnitToggle(
+    unitOneText: String,
+    unitTwoText: String,
+    onToggleUnitOne: () -> Unit,
+    onToggleUnitTwo: () -> Unit,
+    modifier: Modifier = Modifier
+) {
 
+    // Unit Toggle
+
+    Row(
+            modifier = modifier
+                    .fillMaxWidth()
+                    .padding(bottom = MaterialTheme.spacing.spaceTwelve * 2),
+            horizontalArrangement = Arrangement.Center
+    ) {
+
+        AppLabel(
+                modifier = Modifier.weight(1f),
+                labelText = unitOneText,
+                shape = MaterialTheme.shapes.StartVerticalRoundedCornerShape100,
+                onClick = onToggleUnitOne,
+                selected = true
+        )
+        AppLabel(
+                modifier = Modifier.weight(1f),
+                labelText = unitTwoText,
+                shape = MaterialTheme.shapes.EndVerticalRoundedCornerShape100,
+                onClick = onToggleUnitTwo
+        )
+    }
+}
 
 @Preview
 @Composable
-private fun PickerContainerPreviewSingleColumn() {
+private fun PickerContainerPreviewSingleColumnStandard() {
 
-    val items = (0..200).toList()
-            .map { it.toString() }
     SmartStepTheme {
         Box(
                 modifier = Modifier
@@ -148,14 +163,16 @@ private fun PickerContainerPreviewSingleColumn() {
                     pickerDescription = stringResource(id = R.string.caption_text_calculate_distance),
                     unitOneText = stringResource(id = R.string.label_text_cm),
                     unitTwoText = stringResource(id = R.string.label_text_ft_in),
-                    onSelectMeasurementMode = {},
+                    onToggleUnitOne = {},
+                    onToggleUnitTwo = {},
                     onCancel = {},
                     onConfirm = {},
                     wheelPicker = {
-                        SingleColumnWheelPicker(
+                        StandardWheelPicker(
                                 modifier = Modifier,
-                                items = items, onItemSelected = {},
-                             //   initialIndex = items.size / 2
+                                selectedValue = 170,
+                                valuesRange = 100..250,
+                                onValueSelected = {}
                         )
                     }
             )

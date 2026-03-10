@@ -13,6 +13,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -23,7 +25,8 @@ import com.tonyxlab.smartstep.presentation.screens.profile.handling.Gender
 import com.tonyxlab.smartstep.presentation.theme.BodyLargeRegular
 import com.tonyxlab.smartstep.presentation.theme.BodySmallRegular
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
-
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GenderSelectionField(
@@ -31,15 +34,14 @@ fun GenderSelectionField(
     selectedGender: Gender,
     options: List<Gender>,
     onSelectOption: (Gender) -> Unit,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
+    var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(
             modifier = modifier,
             expanded = expanded,
-            onExpandedChange = onExpandedChange
+            onExpandedChange = {expanded  != expanded}
     ) {
 
         OutlinedTextField(
@@ -66,7 +68,7 @@ fun GenderSelectionField(
 
         ExposedDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { onExpandedChange(false) }
+                onDismissRequest = { expanded = false }
         ) {
 
             options.fastForEach { gender ->
@@ -82,7 +84,7 @@ fun GenderSelectionField(
                         },
                         onClick = {
                             onSelectOption(gender)
-                            onExpandedChange(false)
+                            expanded = false
                         }
                 )
             }
@@ -109,8 +111,7 @@ private fun GenderSelectionField_Preview() {
                     options = options,
                     selectedGender = Gender.MALE,
                     onSelectOption = {},
-                    onExpandedChange = {},
-                    expanded = false
+
 
             )
 
@@ -119,8 +120,7 @@ private fun GenderSelectionField_Preview() {
                     options = options,
                     selectedGender = Gender.FEMALE,
                     onSelectOption = {},
-                    onExpandedChange = {},
-                    expanded = true
+
             )
         }
     }

@@ -1,13 +1,11 @@
 package com.tonyxlab.smartstep.presentation.screens.profile.components
 
-
-
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -28,35 +26,41 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.tonyxlab.smartstep.R
+import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun WheelPicker(
-    items: List<String>,
-    onItemSelected: (Int) -> Unit,
+fun StandardWheelPicker(
+    selectedValue: Int,
+    valuesRange: IntRange,
+    onValueSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    initialIndex: Int = 0,
     visibleItemsCount: Int = 5,
-    itemHeight: Dp = 48.dp,
+    itemHeight: Dp = MaterialTheme.spacing.spaceDoubleDp * 22,
     textStyle: TextStyle = MaterialTheme.typography.titleMedium,
     selectedTextStyle: TextStyle = MaterialTheme.typography.titleMedium.copy(
             fontWeight = FontWeight.Bold
     ),
 ) {
+
     require(visibleItemsCount % 2 == 1) {
         "visibleItemsCount must be an odd number so the picker has a true center row."
     }
+
+    val items = remember (valuesRange){ valuesRange.toList()  }
 
     require(items.isNotEmpty()) {
         "items must not be empty"
     }
 
     val centerItemIndex = visibleItemsCount / 2
-    val coercedInitialIndex = initialIndex.coerceIn(items.indices)
+
+    val coercedSelectedValue = selectedValue.coerceIn(valuesRange.first, valuesRange.last)
+    val initialSelectedIndex = coercedSelectedValue - valuesRange.first
+
 
     /**
      * We add empty spacer rows above and below the real items.
@@ -71,7 +75,7 @@ fun WheelPicker(
     }
 
     val listState = rememberLazyListState(
-            initialFirstVisibleItemIndex = coercedInitialIndex
+            initialFirstVisibleItemIndex = initialSelectedIndex
     )
 
     val flingBehavior = rememberSnapFlingBehavior(
@@ -88,16 +92,14 @@ fun WheelPicker(
         }
     }
 
-    LaunchedEffect(Unit) {
-        onItemSelected(selectedItemIndex)
+    val selectedItemValue by remember {
+        derivedStateOf {
+            items[selectedItemIndex]
+        }
     }
 
-    LaunchedEffect(listState) {
-        snapshotFlow { selectedItemIndex }
-                .distinctUntilChanged()
-                .collect { index ->
-                    onItemSelected(index)
-                }
+    LaunchedEffect(selectedItemValue) {
+        onValueSelected(selectedItemValue)
     }
 
     Box(
@@ -106,10 +108,6 @@ fun WheelPicker(
                     .height(itemHeight * visibleItemsCount),
             contentAlignment = Alignment.Center
     ) {
-        /**
-         * Center highlight band.
-         * This stays fixed while the list scrolls behind it.
-         */
         Box(
                 modifier = Modifier
                         .fillMaxWidth()
@@ -124,9 +122,13 @@ fun WheelPicker(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            items(displayItems) { item ->
-                val actualIndex = item?.let { items.indexOf(it) }
-                val isSelected = actualIndex == selectedItemIndex
+            items(
+                    count = displayItems.size,
+                    key = { index -> "wheel_item_$index" }
+            ) { index ->
+                val item = displayItems[index]
+                val actualIndex = index - centerItemIndex
+                val isSelected = item != null && actualIndex == selectedItemIndex
 
                 Box(
                         modifier = Modifier
@@ -135,7 +137,7 @@ fun WheelPicker(
                         contentAlignment = Alignment.Center
                 ) {
                     Text(
-                            text = item.orEmpty(),
+                            text = item?.toString().orEmpty(),
                             style = if (isSelected) selectedTextStyle else textStyle,
                             color = if (isSelected) {
                                 MaterialTheme.colorScheme.onSurface
@@ -155,8 +157,7 @@ fun WheelPicker(
 
 @Preview(showBackground = true, backgroundColor = 0xFFEAF3FF)
 @Composable
-private fun SingleColumnWheelPickerPreview() {
-    val items = (100..120).map { it.toString() }
+private fun SingleColumnStandardWheelPickerPreview() {
 
     SmartStepTheme {
         Box(
@@ -164,26 +165,23 @@ private fun SingleColumnWheelPickerPreview() {
                 contentAlignment = Alignment.Center
         ) {
 
-
             PickerContainer(
                     pickerTitle = stringResource(id = R.string.label_text_height),
                     pickerDescription = stringResource(id = R.string.caption_text_calculate_distance),
                     unitOneText = stringResource(id = R.string.label_text_cm),
                     unitTwoText = stringResource(id = R.string.label_text_ft_in),
-                    onSelectMeasurementMode = {},
                     onCancel = {},
                     onConfirm = {},
                     wheelPicker = {
-
-                        WheelPicker(
-                                items = items,
-                                initialIndex = 11,
-                                onItemSelected = {},
-                                modifier = Modifier
-                                        .fillMaxWidth()
-                        )
-
-                    })
+                        StandardWheelPicker(
+                                selectedValue = 170,
+                                valuesRange = 100..250,
+                                onValueSelected = {},
+                                )
+                    },
+                    onToggleUnitOne = {},
+                    onToggleUnitTwo = {}
+            )
         }
     }
 }
