@@ -20,6 +20,7 @@ import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.screens.profile.components.GenderSelectionField
 import com.tonyxlab.smartstep.presentation.screens.profile.components.HeightPicker
 import com.tonyxlab.smartstep.presentation.screens.profile.components.ProfileSelectionField
+import com.tonyxlab.smartstep.presentation.screens.profile.components.WeightPicker
 import com.tonyxlab.smartstep.presentation.screens.profile.handling.HeightMode
 import com.tonyxlab.smartstep.presentation.screens.profile.handling.ProfileUiEvent
 import com.tonyxlab.smartstep.presentation.screens.profile.handling.ProfileUiState
@@ -84,16 +85,31 @@ fun ProfileScreenContent(
                     }
 
                     // Height Picker
-
                     with(uiState.heightPickerState){
 
                         ProfileSelectionField(
                                 label = stringResource(id = R.string.label_text_height),
                                 value = displayHeight,
-                                onClick = {}
+                                onClick = { onEvent(ProfileUiEvent.HeightPickerVisibilityChange)}
                         )
                         if (this.visible){
                             HeightPicker(
+                                    modifier = Modifier,
+                                    onEvent = onEvent
+                            )
+                        }
+                    }
+
+                    // Weight Picker
+                    with(uiState.weightPickerState){
+
+                        ProfileSelectionField(
+                                label = stringResource(id = R.string.label_text_weight),
+                                value = displayWeight,
+                                onClick = { onEvent(ProfileUiEvent.WeightPickerVisibilityChange)}
+                        )
+                        if (this.visible){
+                            WeightPicker(
                                     modifier = Modifier,
                                     onEvent = onEvent
                             )

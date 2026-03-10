@@ -36,6 +36,8 @@
     <string name="label_text_ft_in">ft/in</string>
     <string name="label_text_ft">ft</string>
     <string name="label_text_in">in</string>
+    <string name="label_text_kg">kg</string>
+    <string name="label_text_lbs">lbs</string>
 
     <!--Menu Texts-->
     <string name="menu_text_male">Male</string>
@@ -46,21 +48,15 @@
     <string name="button_text_ok">Ok</string>
     <string name="button_text_cancel">Cancel</string>
 
-
     <!--Text Button Texts-->
     <string name="text_button_skip">Skip</string>
     <string name="text_button_cancel">Cancel</string>
 
-
-
     <!--Content Description Texts-->
     <string name="cds_text_check_mark">Check Mark</string>
 
-
-
     <!--Snackbar Texts-->
     <string name="snack_text_item_added_to_cart">Item Added to Cart</string>
-
 
     <!--Toast Texts-->
     <string name="toast_text_copied">Copied to Clipboard</string>
@@ -76,7 +72,6 @@
 
     <!--Placeholder Texts-->
     <string name="placeholder_text_search">Search for delicious food…</string>
-
 
     <!--Meta Data Texts-->
     <string name="dollar_price_tag">$%.2f</string>
