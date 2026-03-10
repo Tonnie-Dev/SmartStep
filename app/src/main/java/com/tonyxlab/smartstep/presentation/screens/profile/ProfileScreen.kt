@@ -18,6 +18,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.screens.profile.components.GenderSelectionField
+import com.tonyxlab.smartstep.presentation.screens.profile.components.HeightPicker
+import com.tonyxlab.smartstep.presentation.screens.profile.components.ProfileSelectionField
+import com.tonyxlab.smartstep.presentation.screens.profile.handling.HeightMode
 import com.tonyxlab.smartstep.presentation.screens.profile.handling.ProfileUiEvent
 import com.tonyxlab.smartstep.presentation.screens.profile.handling.ProfileUiState
 import com.tonyxlab.smartstep.presentation.theme.BodyLargeRegular
@@ -67,16 +70,34 @@ fun ProfileScreenContent(
                         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)
                 ) {
 
+                    // Gender Field
                     with(uiState.genderSelectionState) {
 
                         GenderSelectionField(
                                 label = stringResource(id = R.string.label_text_gender),
                                 selectedGender = this.selectedGender,
                                 options = this.genderOptions,
+                                onClickGenderSelection = {onEvent(ProfileUiEvent.GenderSelectionVisibilityChange)},
                                 onSelectOption = { onEvent(ProfileUiEvent.SelectGender(it)) },
-
                                 )
 
+                    }
+
+                    // Height Picker
+
+                    with(uiState.heightPickerState){
+
+                        ProfileSelectionField(
+                                label = stringResource(id = R.string.label_text_height),
+                                value = displayHeight,
+                                onClick = {}
+                        )
+                        if (this.visible){
+                            HeightPicker(
+                                    modifier = Modifier,
+                                    onEvent = onEvent
+                            )
+                        }
                     }
 
                 }

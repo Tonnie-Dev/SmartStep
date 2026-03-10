@@ -27,27 +27,22 @@ import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 
 @Composable
 fun HeightPicker(
-    selectedCentimeter: Int,
-    selectedFeet: Int,
-    selectedInches: Int,
-    heightMode: HeightMode = HeightMode.CENTIMETERS,
-    feetRange: IntRange = 3..8,
-    inchesRange: IntRange = 0..11,
+    modifier: Modifier = Modifier,
+    selectedCentimeter: Int = 170,
     centimeterRange: IntRange = 100..250,
+    selectedFeet: Int = 5,
+    feetRange: IntRange = 3..8,
+    selectedInches: Int = 9,
+    inchesRange: IntRange = 0..11,
+    heightMode: HeightMode = HeightMode.CENTIMETERS,
     onEvent: (ProfileUiEvent) -> Unit
-    /*onCentimeterSelected: (Int) -> Unit,
-    onFeetSelected: (Int) -> Unit,
-    onInchesSelected: (Int) -> Unit,
-    onToggleHeightUnitOne:() -> Unit,
-    onToggleHeightUnitTwo:() -> Unit,
-    onConfirmHeight: () -> Unit,
-    onDismissPicker: () -> Unit*/
 ) {
-    Dialog(
 
+    Dialog(
             onDismissRequest = { onEvent(ProfileUiEvent.CancelHeightDialog) }
     ) {
         PickerContainer(
+                modifier = modifier,
                 pickerTitle = stringResource(id = R.string.label_text_height),
                 pickerDescription = stringResource(id = R.string.caption_text_calculate_distance),
                 unitOneText = stringResource(id = R.string.label_text_cm),
@@ -61,20 +56,17 @@ fun HeightPicker(
                     when (heightMode) {
 
                         HeightMode.CENTIMETERS -> {
-
                             StandardWheelPicker(
                                     modifier = Modifier,
-                                    selectedValue = 170,
+                                    selectedValue = selectedCentimeter,
                                     valuesRange = centimeterRange,
                                     onValueSelected = {
                                         onEvent(ProfileUiEvent.OnCentimetersSelected(value = it))
                                     },
-
                             )
                         }
 
                         HeightMode.FEET_INCHES -> {
-
                             FeetInchesWheelPicker(
                                     modifier = Modifier,
                                     selectedFeet = selectedFeet,
@@ -107,13 +99,6 @@ fun FeetInchesWheelPicker(
     visibleItemsCount: Int = 5,
     itemHeight: Dp = 48.dp,
 ) {
-    /*val feetItems = remember(feetRange) {
-        feetRange.map { it.toString() }
-    }
-
-    val inchItems = remember(inchesRange) {
-        inchesRange.map { it.toString() }
-    }*/
 
     val feetInitialIndex = (selectedFeet - feetRange.first)
             .coerceIn(0, feetRange.toList().lastIndex)
@@ -142,8 +127,7 @@ fun FeetInchesWheelPicker(
                     onValueSelected = { index ->
                         onFeetSelected(feetRange.first + index)
                     },
-
-            )
+                    )
 
             // Static "ft" label aligned with selected center row
             Box(

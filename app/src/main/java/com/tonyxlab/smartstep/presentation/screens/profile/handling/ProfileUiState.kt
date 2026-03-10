@@ -5,13 +5,14 @@ import com.tonyxlab.smartstep.presentation.core.base.handling.UiState
 
 data class ProfileUiState(
     val genderSelectionState: GenderSelectionState = GenderSelectionState(),
-
+    val heightPickerState: HeightPickerState = HeightPickerState()
     ) : UiState {
 
     @Stable
     data class GenderSelectionState(
         val selectedGender: Gender = Gender.MALE,
-        val genderOptions: List<Gender> = Gender.entries
+        val genderOptions: List<Gender> = Gender.entries,
+
     )
 
     @Stable
