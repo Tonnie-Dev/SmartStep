@@ -16,21 +16,42 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.tonyxlab.smartstep.R
+import com.tonyxlab.smartstep.presentation.core.base.BaseContentLayout
+import com.tonyxlab.smartstep.presentation.core.components.AppTopBar
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.screens.profile.components.GenderSelectionField
 import com.tonyxlab.smartstep.presentation.screens.profile.components.HeightPicker
 import com.tonyxlab.smartstep.presentation.screens.profile.components.ProfileSelectionField
 import com.tonyxlab.smartstep.presentation.screens.profile.components.WeightPicker
-import com.tonyxlab.smartstep.presentation.screens.profile.handling.HeightMode
 import com.tonyxlab.smartstep.presentation.screens.profile.handling.ProfileUiEvent
 import com.tonyxlab.smartstep.presentation.screens.profile.handling.ProfileUiState
+import com.tonyxlab.smartstep.presentation.screens.profile.handling.ProfileViewModel
 import com.tonyxlab.smartstep.presentation.theme.BodyLargeRegular
 import com.tonyxlab.smartstep.presentation.theme.RoundedCornerShape14
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun ProfileScreen(modifier: Modifier = Modifier) {
+fun ProfileScreen(
+    viewModel: ProfileViewModel = koinViewModel()
+) {
 
+    BaseContentLayout(
+            viewModel = viewModel,
+            topBar = {
+                AppTopBar(
+                        titleText = stringResource(id = R.string.topbar_text_my_profile),
+                        actionText = stringResource(id = R.string.text_button_skip),
+                        onActionClick = { viewModel.onEvent(ProfileUiEvent.SkipOnboarding) }
+                )
+            }
+    ) { uiState ->
+
+        ProfileScreenContent(
+                uiState = uiState,
+                onEvent = viewModel::onEvent
+        )
+    }
 }
 
 @Composable
@@ -38,7 +59,6 @@ fun ProfileScreenContent(
     uiState: ProfileUiState,
     onEvent: (ProfileUiEvent) -> Unit,
     modifier: Modifier = Modifier
-
 ) {
 
     Box(
@@ -48,7 +68,9 @@ fun ProfileScreenContent(
                     .padding(horizontal = MaterialTheme.spacing.spaceMedium)
                     .padding(vertical = MaterialTheme.spacing.spaceLarge)
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceMedium)) {
+        Column(
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceMedium)
+        ) {
 
             Text(
                     text = stringResource(id = R.string.caption_text_profile_desc),
@@ -78,21 +100,20 @@ fun ProfileScreenContent(
                                 label = stringResource(id = R.string.label_text_gender),
                                 selectedGender = this.selectedGender,
                                 options = this.genderOptions,
-                                onClickGenderSelection = {onEvent(ProfileUiEvent.GenderSelectionVisibilityChange)},
+                                onClickGenderSelection = { onEvent(ProfileUiEvent.GenderSelectionVisibilityChange) },
                                 onSelectOption = { onEvent(ProfileUiEvent.SelectGender(it)) },
-                                )
-
+                        )
                     }
 
                     // Height Picker
-                    with(uiState.heightPickerState){
+                    with(uiState.heightPickerState) {
 
                         ProfileSelectionField(
                                 label = stringResource(id = R.string.label_text_height),
                                 value = displayHeight,
-                                onClick = { onEvent(ProfileUiEvent.HeightPickerVisibilityChange)}
+                                onClick = { onEvent(ProfileUiEvent.HeightPickerVisibilityChange) }
                         )
-                        if (this.visible){
+                        if (this.visible) {
                             HeightPicker(
                                     modifier = Modifier,
                                     onEvent = onEvent
@@ -101,14 +122,14 @@ fun ProfileScreenContent(
                     }
 
                     // Weight Picker
-                    with(uiState.weightPickerState){
+                    with(uiState.weightPickerState) {
 
                         ProfileSelectionField(
                                 label = stringResource(id = R.string.label_text_weight),
                                 value = displayWeight,
-                                onClick = { onEvent(ProfileUiEvent.WeightPickerVisibilityChange)}
+                                onClick = { onEvent(ProfileUiEvent.WeightPickerVisibilityChange) }
                         )
-                        if (this.visible){
+                        if (this.visible) {
                             WeightPicker(
                                     modifier = Modifier,
                                     onEvent = onEvent

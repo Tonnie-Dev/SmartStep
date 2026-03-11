@@ -39,7 +39,7 @@ fun WeightPicker(
                 unitTwoText = stringResource(id = R.string.label_text_lbs),
                 onToggleUnitOne = { onEvent(ProfileUiEvent.SelectWeightMode(WeightMode.KILOS)) },
                 onToggleUnitTwo = { onEvent(ProfileUiEvent.SelectWeightMode(WeightMode.POUNDS)) },
-                onConfirm = { onEvent(ProfileUiEvent.ConfirmHeightDialog) },
+                onConfirm = { onEvent(ProfileUiEvent.ConfirmWeightDialog) },
                 onCancel = { onEvent(ProfileUiEvent.CancelHeightDialog) },
                 wheelPicker = {
 

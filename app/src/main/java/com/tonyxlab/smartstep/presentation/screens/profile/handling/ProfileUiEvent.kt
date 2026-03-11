@@ -4,6 +4,8 @@ import com.tonyxlab.smartstep.presentation.core.base.handling.UiEvent
 
 sealed interface ProfileUiEvent : UiEvent {
 
+    data object SkipOnboarding : ProfileUiEvent
+
     data object GenderSelectionVisibilityChange : ProfileUiEvent
     data object HeightPickerVisibilityChange : ProfileUiEvent
     data object WeightPickerVisibilityChange : ProfileUiEvent
@@ -22,6 +24,6 @@ sealed interface ProfileUiEvent : UiEvent {
 
     data object ConfirmHeightDialog : ProfileUiEvent
     data object CancelHeightDialog : ProfileUiEvent
-    data object OnConfirmWeightDialog : ProfileUiEvent
+    data object ConfirmWeightDialog : ProfileUiEvent
     data object CancelWeightDialog : ProfileUiEvent
 }

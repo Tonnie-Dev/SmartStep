@@ -7,13 +7,13 @@ data class ProfileUiState(
     val genderSelectionState: GenderSelectionState = GenderSelectionState(),
     val heightPickerState: HeightPickerState = HeightPickerState(),
     val weightPickerState: WeightPickerState = WeightPickerState()
-    ) : UiState {
+) : UiState {
 
     @Stable
     data class GenderSelectionState(
+        val visible: Boolean = false,
         val selectedGender: Gender = Gender.MALE,
         val genderOptions: List<Gender> = Gender.entries,
-
     )
 
     @Stable
@@ -36,14 +36,13 @@ data class ProfileUiState(
 
     @Stable
     data class WeightPickerState(
-            val visible: Boolean = false,
-            val weightMode: WeightMode = WeightMode.KILOS,
-            val selectedKilos:Int =60,
-            val selectedPounds:Int = 143
-    ){
-        val displayWeight:String
-            get() = when(weightMode){
-
+        val visible: Boolean = false,
+        val weightMode: WeightMode = WeightMode.KILOS,
+        val selectedKilos: Int = 60,
+        val selectedPounds: Int = 143
+    ) {
+        val displayWeight: String
+            get() = when (weightMode) {
                 WeightMode.KILOS -> "$selectedKilos kg"
                 WeightMode.POUNDS -> "$selectedPounds lbs"
             }
@@ -62,8 +61,6 @@ enum class Gender {
     }
 
 }
-
-
 
 enum class HeightMode { CENTIMETERS, FEET_INCHES }
 enum class WeightMode { KILOS, POUNDS }
