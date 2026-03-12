@@ -95,12 +95,10 @@ fun ProfileScreenContent(
 
                     // Gender Field
                     with(uiState.genderSelectionState) {
-
                         GenderSelectionField(
                                 label = stringResource(id = R.string.label_text_gender),
                                 selectedGender = this.selectedGender,
                                 options = this.genderOptions,
-                                onClickGenderSelection = { onEvent(ProfileUiEvent.GenderSelectionVisibilityChange) },
                                 onSelectOption = { onEvent(ProfileUiEvent.SelectGender(it)) },
                         )
                     }

@@ -6,7 +6,6 @@ sealed interface ProfileUiEvent : UiEvent {
 
     data object SkipOnboarding : ProfileUiEvent
 
-    data object GenderSelectionVisibilityChange : ProfileUiEvent
     data object HeightPickerVisibilityChange : ProfileUiEvent
     data object WeightPickerVisibilityChange : ProfileUiEvent
 

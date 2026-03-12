@@ -13,7 +13,6 @@ class ProfileViewModel() : ProfileBaseViewModel() {
         when (event) {
 
             ProfileUiEvent.SkipOnboarding -> {}
-            ProfileUiEvent.GenderSelectionVisibilityChange -> onGenderSelectionVisibilityChange()
             ProfileUiEvent.HeightPickerVisibilityChange -> onHeightPickerVisibilityChange()
             ProfileUiEvent.WeightPickerVisibilityChange -> onWeightPickerVisibilityChange()
             is ProfileUiEvent.SelectGender -> onSelectGender(event.gender)
@@ -32,17 +31,7 @@ class ProfileViewModel() : ProfileBaseViewModel() {
         }
     }
 
-    private fun onGenderSelectionVisibilityChange() {
-        updateState {
-            it.copy(
-                    genderSelectionState = it.genderSelectionState.copy(
-                            visible = !it.genderSelectionState.visible
-                    )
-            )
-        }
-    }
-
-    private fun onHeightPickerVisibilityChange() {
+       private fun onHeightPickerVisibilityChange() {
         updateState {
             it.copy(
                     heightPickerState = it.heightPickerState.copy(
