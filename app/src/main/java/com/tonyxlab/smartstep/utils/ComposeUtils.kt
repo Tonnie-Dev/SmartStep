@@ -62,10 +62,9 @@ fun InvisibleSpacer(
 @Composable
 fun Modifier.clickableWithoutRipple(onClick: () -> Unit): Modifier =
     this.then(Modifier.pointerInput(Unit) {
-        detectTapGestures(onTap = { onClick }
+        detectTapGestures(onTap = { onClick() }
         )
-    }
-    )
+    })
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable

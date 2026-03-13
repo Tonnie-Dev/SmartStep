@@ -1,6 +1,7 @@
 package com.tonyxlab.smartstep.presentation.screens.profile.handling
 
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
+import timber.log.Timber
 
 typealias ProfileBaseViewModel = BaseViewModel<ProfileUiState, ProfileUiEvent, ProfileActionEvent>
 
@@ -32,6 +33,8 @@ class ProfileViewModel() : ProfileBaseViewModel() {
     }
 
        private fun onHeightPickerVisibilityChange() {
+
+           Timber.tag("ProfileVM").i("Visibility change}")
         updateState {
             it.copy(
                     heightPickerState = it.heightPickerState.copy(
@@ -63,6 +66,8 @@ class ProfileViewModel() : ProfileBaseViewModel() {
     }
 
     private fun onSelectHeightMode(heightMode: HeightMode) {
+
+        Timber.tag("ProfileVM").i("Height clicked: $heightMode")
         updateState {
             it.copy(heightPickerState = it.heightPickerState.copy(heightMode = heightMode))
         }

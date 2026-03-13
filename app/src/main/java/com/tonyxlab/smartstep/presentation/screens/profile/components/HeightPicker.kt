@@ -1,5 +1,6 @@
 package com.tonyxlab.smartstep.presentation.screens.profile.components
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,10 +21,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.screens.profile.handling.HeightMode
 import com.tonyxlab.smartstep.presentation.screens.profile.handling.ProfileUiEvent
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
+import timber.log.Timber
 
 @Composable
 fun HeightPicker(
@@ -39,7 +42,8 @@ fun HeightPicker(
 ) {
 
     Dialog(
-            onDismissRequest = { onEvent(ProfileUiEvent.CancelHeightDialog) }
+            onDismissRequest = { onEvent(ProfileUiEvent.CancelHeightDialog) },
+            properties = DialogProperties(dismissOnClickOutside = false)
     ) {
         PickerContainer(
                 modifier = modifier,
@@ -51,10 +55,10 @@ fun HeightPicker(
                 onToggleUnitTwo = { onEvent(ProfileUiEvent.SelectHeightMode(HeightMode.FEET_INCHES)) },
                 onConfirm = { onEvent(ProfileUiEvent.ConfirmHeightDialog) },
                 onCancel = { onEvent(ProfileUiEvent.CancelHeightDialog) },
+                isUnitOneSelected = heightMode == HeightMode.CENTIMETERS,
                 wheelPicker = {
 
                     when (heightMode) {
-
                         HeightMode.CENTIMETERS -> {
                             StandardWheelPicker(
                                     modifier = Modifier,
@@ -101,7 +105,7 @@ fun FeetInchesWheelPicker(
 ) {
 
     val feetInitialIndex = (selectedFeet - feetRange.first)
-            .coerceIn(0, feetRange.toList().lastIndex)
+            .coerceIn(5, feetRange.toList().lastIndex)
 
     val inchesInitialIndex = (selectedInches - inchesRange.first)
             .coerceIn(0, inchesRange.toList().lastIndex)
@@ -120,6 +124,7 @@ fun FeetInchesWheelPicker(
 
             // Feet wheel
             StandardWheelPicker(
+                    modifier = modifier.weight(1f),
                     selectedValue = feetInitialIndex,
                     valuesRange = feetRange,
                     visibleItemsCount = visibleItemsCount,
@@ -127,7 +132,7 @@ fun FeetInchesWheelPicker(
                     onValueSelected = { index ->
                         onFeetSelected(feetRange.first + index)
                     },
-                    )
+            )
 
             // Static "ft" label aligned with selected center row
             Box(
@@ -148,14 +153,14 @@ fun FeetInchesWheelPicker(
 
             // Inches wheel
             StandardWheelPicker(
+                    modifier = modifier.weight(1f),
                     valuesRange = inchesRange,
                     selectedValue = inchesInitialIndex,
                     visibleItemsCount = visibleItemsCount,
                     itemHeight = itemHeight,
                     onValueSelected = { index ->
                         onInchesSelected(inchesRange.first + index)
-                    },
-                    modifier = Modifier.weight(1f)
+                    }
             )
 
             // Static "in" label aligned with selected center row
@@ -220,6 +225,7 @@ private fun FeetInchesWheelPicker_Preview() {
                     onToggleUnitTwo = {},
                     onConfirm = {},
                     onCancel = {},
+                   isUnitOneSelected = true,
                     wheelPicker = {
                         HeightPicker(
                                 selectedCentimeter = 170,

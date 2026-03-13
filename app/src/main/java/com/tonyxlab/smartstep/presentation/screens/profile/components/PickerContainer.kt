@@ -15,6 +15,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,6 +35,7 @@ import com.tonyxlab.smartstep.presentation.theme.EndVerticalRoundedCornerShape10
 import com.tonyxlab.smartstep.presentation.theme.RoundedCornerShape28
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 import com.tonyxlab.smartstep.presentation.theme.StartVerticalRoundedCornerShape100
+import timber.log.Timber
 
 @Composable
 fun PickerContainer(
@@ -39,6 +44,7 @@ fun PickerContainer(
     pickerDescription: String,
     unitOneText: String,
     unitTwoText: String,
+    isUnitOneSelected: Boolean,
     onToggleUnitOne: () -> Unit,
     onToggleUnitTwo: () -> Unit,
     onConfirm: () -> Unit,
@@ -79,8 +85,9 @@ fun PickerContainer(
                     modifier = Modifier,
                     unitOneText = unitOneText,
                     unitTwoText = unitTwoText,
-                    onToggleUnitOne = {},
-                    onToggleUnitTwo = {},
+                    onToggleUnitOne = onToggleUnitOne,
+                    onToggleUnitTwo = onToggleUnitTwo,
+                    isUnitOneSelected = isUnitOneSelected
             )
 
             // Wheel Picker
@@ -106,7 +113,6 @@ fun PickerContainer(
                             color = MaterialTheme.colorScheme.primary
                     )
                 }
-
             }
         }
     }
@@ -118,10 +124,12 @@ fun UnitToggle(
     unitTwoText: String,
     onToggleUnitOne: () -> Unit,
     onToggleUnitTwo: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isUnitOneSelected: Boolean = true
 ) {
 
-    // Unit Toggle
+    Timber.tag("ProfileVM")
+            .i("U1 Selected is: $isUnitOneSelected")    // Unit Toggle
 
     Row(
             modifier = modifier
@@ -135,13 +143,14 @@ fun UnitToggle(
                 labelText = unitOneText,
                 shape = MaterialTheme.shapes.StartVerticalRoundedCornerShape100,
                 onClick = onToggleUnitOne,
-                selected = true
+                selected = isUnitOneSelected
         )
         AppLabel(
                 modifier = Modifier.weight(1f),
                 labelText = unitTwoText,
                 shape = MaterialTheme.shapes.EndVerticalRoundedCornerShape100,
-                onClick = onToggleUnitTwo
+                onClick = onToggleUnitTwo,
+                selected = isUnitOneSelected.not()
         )
     }
 }
@@ -167,6 +176,7 @@ private fun PickerContainerPreviewSingleColumnStandard() {
                     onToggleUnitTwo = {},
                     onCancel = {},
                     onConfirm = {},
+                    isUnitOneSelected = true,
                     wheelPicker = {
                         StandardWheelPicker(
                                 modifier = Modifier,

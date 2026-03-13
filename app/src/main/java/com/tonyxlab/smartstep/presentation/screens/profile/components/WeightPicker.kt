@@ -12,6 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.screens.profile.handling.ProfileUiEvent
 import com.tonyxlab.smartstep.presentation.screens.profile.handling.WeightMode
@@ -29,7 +30,8 @@ fun WeightPicker(
 ) {
 
     Dialog(
-            onDismissRequest = { onEvent(ProfileUiEvent.CancelWeightDialog) }
+            onDismissRequest = { onEvent(ProfileUiEvent.CancelWeightDialog) },
+            properties = DialogProperties(dismissOnClickOutside = false)
     ) {
         PickerContainer(
                 modifier = modifier,
@@ -41,6 +43,7 @@ fun WeightPicker(
                 onToggleUnitTwo = { onEvent(ProfileUiEvent.SelectWeightMode(WeightMode.POUNDS)) },
                 onConfirm = { onEvent(ProfileUiEvent.ConfirmWeightDialog) },
                 onCancel = { onEvent(ProfileUiEvent.CancelHeightDialog) },
+                isUnitOneSelected = weightMode == WeightMode.KILOS,
                 wheelPicker = {
 
                     when (weightMode) {

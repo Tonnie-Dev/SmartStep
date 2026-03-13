@@ -180,6 +180,7 @@ private fun SingleColumnStandardWheelPickerPreview() {
                                 )
                     },
                     onToggleUnitOne = {},
+                   isUnitOneSelected = true,
                     onToggleUnitTwo = {}
             )
         }

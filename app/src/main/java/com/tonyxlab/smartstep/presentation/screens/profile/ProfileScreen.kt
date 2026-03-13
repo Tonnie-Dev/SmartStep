@@ -1,5 +1,6 @@
 package com.tonyxlab.smartstep.presentation.screens.profile
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -114,7 +115,8 @@ fun ProfileScreenContent(
                         if (this.visible) {
                             HeightPicker(
                                     modifier = Modifier,
-                                    onEvent = onEvent
+                                    onEvent = onEvent,
+                                    heightMode = this.heightMode
                             )
                         }
                     }
@@ -130,7 +132,8 @@ fun ProfileScreenContent(
                         if (this.visible) {
                             WeightPicker(
                                     modifier = Modifier,
-                                    onEvent = onEvent
+                                    onEvent = onEvent,
+                                    weightMode = this.weightMode
                             )
                         }
                     }
