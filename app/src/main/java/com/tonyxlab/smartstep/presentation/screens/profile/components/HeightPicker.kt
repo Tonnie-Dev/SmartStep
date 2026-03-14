@@ -1,6 +1,5 @@
 package com.tonyxlab.smartstep.presentation.screens.profile.components
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,16 +25,15 @@ import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.screens.profile.handling.HeightMode
 import com.tonyxlab.smartstep.presentation.screens.profile.handling.ProfileUiEvent
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
-import timber.log.Timber
 
 @Composable
 fun HeightPicker(
     modifier: Modifier = Modifier,
-    selectedCentimeter: Int = 170,
+    selectedCentimeter: Int,
+    selectedFeet: Int,
+    selectedInches: Int,
     centimeterRange: IntRange = 100..250,
-    selectedFeet: Int = 5,
     feetRange: IntRange = 3..8,
-    selectedInches: Int = 9,
     inchesRange: IntRange = 0..11,
     heightMode: HeightMode = HeightMode.CENTIMETERS,
     onEvent: (ProfileUiEvent) -> Unit
@@ -105,7 +103,7 @@ fun FeetInchesWheelPicker(
 ) {
 
     val feetInitialIndex = (selectedFeet - feetRange.first)
-            .coerceIn(5, feetRange.toList().lastIndex)
+            .coerceIn(0, feetRange.toList().lastIndex)
 
     val inchesInitialIndex = (selectedInches - inchesRange.first)
             .coerceIn(0, inchesRange.toList().lastIndex)
@@ -125,13 +123,11 @@ fun FeetInchesWheelPicker(
             // Feet wheel
             StandardWheelPicker(
                     modifier = modifier.weight(1f),
-                    selectedValue = feetInitialIndex,
                     valuesRange = feetRange,
+                    selectedValue = selectedFeet,
                     visibleItemsCount = visibleItemsCount,
                     itemHeight = itemHeight,
-                    onValueSelected = { index ->
-                        onFeetSelected(feetRange.first + index)
-                    },
+                    onValueSelected = onFeetSelected
             )
 
             // Static "ft" label aligned with selected center row
@@ -155,12 +151,10 @@ fun FeetInchesWheelPicker(
             StandardWheelPicker(
                     modifier = modifier.weight(1f),
                     valuesRange = inchesRange,
-                    selectedValue = inchesInitialIndex,
+                    selectedValue = selectedInches,
                     visibleItemsCount = visibleItemsCount,
                     itemHeight = itemHeight,
-                    onValueSelected = { index ->
-                        onInchesSelected(inchesRange.first + index)
-                    }
+                    onValueSelected = onInchesSelected
             )
 
             // Static "in" label aligned with selected center row
@@ -225,7 +219,7 @@ private fun FeetInchesWheelPicker_Preview() {
                     onToggleUnitTwo = {},
                     onConfirm = {},
                     onCancel = {},
-                   isUnitOneSelected = true,
+                    isUnitOneSelected = true,
                     wheelPicker = {
                         HeightPicker(
                                 selectedCentimeter = 170,

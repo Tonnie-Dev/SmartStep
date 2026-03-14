@@ -12,7 +12,7 @@ data class ProfileUiState(
     @Stable
     data class GenderSelectionState(
         val visible: Boolean = false,
-        val selectedGender: Gender = Gender.MALE,
+        val selectedGender: Gender = Gender.FEMALE,
         val genderOptions: List<Gender> = Gender.entries,
     )
 
@@ -23,9 +23,8 @@ data class ProfileUiState(
         val selectedCentimeter: Int = 175,
         val centimeterRange: IntRange = 100..250,
         val selectedFeet: Int = 5,
-        val feetRange: IntRange = 3..8,
         val selectedInches: Int = 9,
-        val inchesRange: IntRange = 0..11
+
     ) {
         val displayHeight: String
             get() = when (heightMode) {
@@ -51,7 +50,7 @@ data class ProfileUiState(
 }
 
 enum class Gender {
-    MALE, FEMALE;
+    FEMALE, MALE;
 
     override fun toString(): String {
         return when (this) {

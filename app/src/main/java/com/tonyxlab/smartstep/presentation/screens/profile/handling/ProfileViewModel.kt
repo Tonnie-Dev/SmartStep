@@ -13,6 +13,7 @@ class ProfileViewModel() : ProfileBaseViewModel() {
     override fun onEvent(event: ProfileUiEvent) {
         when (event) {
 
+            ProfileUiEvent.StartOnboarding -> {}
             ProfileUiEvent.SkipOnboarding -> {}
             ProfileUiEvent.HeightPickerVisibilityChange -> onHeightPickerVisibilityChange()
             ProfileUiEvent.WeightPickerVisibilityChange -> onWeightPickerVisibilityChange()

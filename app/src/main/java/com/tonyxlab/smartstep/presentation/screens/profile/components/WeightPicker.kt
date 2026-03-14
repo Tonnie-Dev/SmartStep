@@ -21,9 +21,9 @@ import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 @Composable
 fun WeightPicker(
     modifier: Modifier = Modifier,
-    selectedKilos: Int = 60,
+    selectedKilos: Int,
     kiloRange: IntRange = 30..200,
-    selectedPounds: Int = 143,
+    selectedPounds: Int,
     poundsRange: IntRange = 66..440,
     weightMode: WeightMode = WeightMode.KILOS,
     onEvent: (ProfileUiEvent) -> Unit
@@ -87,7 +87,11 @@ private fun HeightPicker_Preview() {
                         .padding(16.dp),
                 contentAlignment = Alignment.Center
         ) {
-            WeightPicker(modifier = Modifier) {}
+            WeightPicker(
+                    modifier = Modifier,
+                    selectedKilos = 60,
+                    selectedPounds = 143
+            ) {}
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.tonyxlab.smartstep.presentation.screens.profile
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -12,12 +11,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.base.BaseContentLayout
+import com.tonyxlab.smartstep.presentation.core.components.AppButton
 import com.tonyxlab.smartstep.presentation.core.components.AppTopBar
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.screens.profile.components.GenderSelectionField
@@ -115,6 +116,9 @@ fun ProfileScreenContent(
                         if (this.visible) {
                             HeightPicker(
                                     modifier = Modifier,
+                                    selectedCentimeter = this.selectedCentimeter,
+                                    selectedFeet = this.selectedFeet,
+                                    selectedInches = this.selectedInches,
                                     onEvent = onEvent,
                                     heightMode = this.heightMode
                             )
@@ -132,6 +136,8 @@ fun ProfileScreenContent(
                         if (this.visible) {
                             WeightPicker(
                                     modifier = Modifier,
+                                    selectedKilos = this.selectedKilos,
+                                    selectedPounds = this.selectedPounds,
                                     onEvent = onEvent,
                                     weightMode = this.weightMode
                             )
@@ -142,6 +148,12 @@ fun ProfileScreenContent(
             }
         }
 
+
+        AppButton(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                onClick = { onEvent(ProfileUiEvent.StartOnboarding) },
+                buttonText = stringResource(id = R.string.button_text_start)
+        )
     }
 }
 

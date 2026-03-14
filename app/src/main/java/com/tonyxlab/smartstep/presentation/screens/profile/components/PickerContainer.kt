@@ -1,5 +1,7 @@
 package com.tonyxlab.smartstep.presentation.screens.profile.components
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

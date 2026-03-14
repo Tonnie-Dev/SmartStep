@@ -5,6 +5,7 @@ import com.tonyxlab.smartstep.presentation.core.base.handling.UiEvent
 sealed interface ProfileUiEvent : UiEvent {
 
     data object SkipOnboarding : ProfileUiEvent
+    data object StartOnboarding : ProfileUiEvent
 
     data object HeightPickerVisibilityChange : ProfileUiEvent
     data object WeightPickerVisibilityChange : ProfileUiEvent
