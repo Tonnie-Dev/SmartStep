@@ -1,6 +1,5 @@
 package com.tonyxlab.smartstep.presentation.screens.onboarding
 
-import androidx.lifecycle.viewModelScope
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.Gender
@@ -9,7 +8,7 @@ import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.Onboardin
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.OnboardingUiEvent
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.OnboardingUiState
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.WeightMode
-import kotlinx.coroutines.launch
+import com.tonyxlab.smartstep.utils.UnitConversions
 import timber.log.Timber
 
 typealias OnboardingBaseViewModel = BaseViewModel<OnboardingUiState, OnboardingUiEvent, OnboardingActionEvent>
@@ -44,8 +43,8 @@ class OnboardingViewModel(
     }
 
     private fun onStartOnboarding() {
-       launch {
-          onboardingDataStore.setOnboardingSeen()
+        launch {
+            onboardingDataStore.setOnboardingSeen()
             sendActionEvent(OnboardingActionEvent.NavigateToHome)
         }
     }
@@ -58,12 +57,13 @@ class OnboardingViewModel(
     }
 
     private fun onHeightPickerVisibilityChange() {
-        Timber.tag("OnboardingVM").i("Visibility change")
+        Timber.tag("OnboardingVM")
+                .i("Visibility change")
         updateState {
             it.copy(
-                heightPickerState = it.heightPickerState.copy(
-                    visible = !it.heightPickerState.visible
-                )
+                    heightPickerState = it.heightPickerState.copy(
+                            visible = !it.heightPickerState.visible
+                    )
             )
         }
     }
@@ -71,9 +71,9 @@ class OnboardingViewModel(
     private fun onWeightPickerVisibilityChange() {
         updateState {
             it.copy(
-                weightPickerState = it.weightPickerState.copy(
-                    visible = !it.weightPickerState.visible
-                )
+                    weightPickerState = it.weightPickerState.copy(
+                            visible = !it.weightPickerState.visible
+                    )
             )
         }
     }
@@ -81,18 +81,51 @@ class OnboardingViewModel(
     private fun onSelectGender(gender: Gender) {
         updateState {
             it.copy(
-                genderSelectionState = it.genderSelectionState.copy(
-                    selectedGender = gender,
-                    visible = false
-                )
+                    genderSelectionState = it.genderSelectionState.copy(
+                            selectedGender = gender,
+                            visible = false
+                    )
             )
         }
     }
 
     private fun onSelectHeightMode(heightMode: HeightMode) {
-        Timber.tag("OnboardingVM").i("Height clicked: $heightMode")
-        updateState {
-            it.copy(heightPickerState = it.heightPickerState.copy(heightMode = heightMode))
+
+        updateState { state ->
+
+            val heightState = state.heightPickerState
+
+            when (heightMode) {
+
+                HeightMode.FEET_INCHES -> {
+
+                    val feetInches =
+                        UnitConversions.cmToFeetInches(heightState.selectedCentimeter)
+
+                    state.copy(
+                            heightPickerState = heightState.copy(
+                                    heightMode = heightMode,
+                                    selectedFeet = feetInches.feet,
+                                    selectedInches = feetInches.inches
+                            )
+                    )
+                }
+
+                HeightMode.CENTIMETERS -> {
+
+                    val cm = UnitConversions.feetInchesToCm(
+                            heightState.selectedFeet,
+                            heightState.selectedInches
+                    )
+
+                    state.copy(
+                            heightPickerState = heightState.copy(
+                                    heightMode = heightMode,
+                                    selectedCentimeter = cm
+                            )
+                    )
+                }
+            }
         }
     }
 
@@ -105,7 +138,7 @@ class OnboardingViewModel(
     private fun onFeetSelected(value: Int) {
         updateState {
             it.copy(
-                heightPickerState = it.heightPickerState.copy(selectedFeet = value)
+                    heightPickerState = it.heightPickerState.copy(selectedFeet = value)
             )
         }
     }
@@ -117,8 +150,32 @@ class OnboardingViewModel(
     }
 
     private fun onSelectWeightMode(weightMode: WeightMode) {
-        updateState {
-            it.copy(weightPickerState = it.weightPickerState.copy(weightMode = weightMode))
+        updateState { state ->
+            val weightState = state.weightPickerState
+
+            when (weightMode) {
+                WeightMode.KILOS -> {
+                    val kgs = UnitConversions.lbsToKgs(weightState.selectedPounds)
+
+                    state.copy(
+                            weightPickerState = weightState.copy(
+                                    weightMode = weightMode,
+                                    selectedKilos = kgs
+                            )
+                    )
+                }
+
+                WeightMode.POUNDS -> {
+                    val lbs = UnitConversions.kgsToLbs(weightState.selectedKilos)
+
+                    state.copy(
+                            weightPickerState = weightState.copy(
+                                    weightMode = weightMode,
+                                    selectedPounds = lbs
+                            )
+                    )
+                }
+            }
         }
     }
 
