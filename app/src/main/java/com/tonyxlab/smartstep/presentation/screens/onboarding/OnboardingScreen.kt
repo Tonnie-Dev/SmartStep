@@ -21,10 +21,12 @@ import com.tonyxlab.smartstep.presentation.core.base.BaseContentLayout
 import com.tonyxlab.smartstep.presentation.core.components.AppButton
 import com.tonyxlab.smartstep.presentation.core.components.AppTopBar
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
+import com.tonyxlab.smartstep.presentation.navigation.Navigator
 import com.tonyxlab.smartstep.presentation.screens.onboarding.components.GenderSelectionField
 import com.tonyxlab.smartstep.presentation.screens.onboarding.components.HeightPicker
 import com.tonyxlab.smartstep.presentation.screens.onboarding.components.OnboardingSelectionField
 import com.tonyxlab.smartstep.presentation.screens.onboarding.components.WeightPicker
+import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.OnboardingActionEvent
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.OnboardingUiEvent
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.OnboardingUiState
 import com.tonyxlab.smartstep.presentation.theme.BodyLargeRegular
@@ -34,6 +36,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun OnboardingScreen(
+    navigator: Navigator,
     viewModel: OnboardingViewModel = koinViewModel()
 ) {
 
@@ -45,6 +48,11 @@ fun OnboardingScreen(
                         actionText = stringResource(id = R.string.text_button_skip),
                         onActionClick = { viewModel.onEvent(OnboardingUiEvent.SkipOnboarding) }
                 )
+            },
+            actionEventHandler = { _, event ->
+                when (event) {
+                    OnboardingActionEvent.NavigateToHome -> navigator.navigateToHome()
+                }
             }
     ) { uiState ->
 

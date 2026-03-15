@@ -4,34 +4,46 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.tonyxlab.smartstep.presentation.screens.onboarding.OnboardingScreen
+import androidx.lifecycle.lifecycleScope
+import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
+import com.tonyxlab.smartstep.presentation.navigation.HomeDestination
+import com.tonyxlab.smartstep.presentation.navigation.NavDestination
+import com.tonyxlab.smartstep.presentation.navigation.OnboardingDestination
+import com.tonyxlab.smartstep.presentation.navigation.SmartStepNavHost
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
+
+    val onboardingDataStore: OnboardingDataStore by inject()
+
+    var isAppReady = false
+    var startDestination: NavDestination = OnboardingDestination
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        lifecycleScope.launch {
+            startDestination = resolveStartDestination()
+            isAppReady = true
+        }
+        
         installSplashScreen().apply {
-            setKeepOnScreenCondition { false }
+            setKeepOnScreenCondition { !isAppReady }
         }
         enableEdgeToEdge()
         setContent {
             SmartStepTheme {
-
-                Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                ) {
-
-                    OnboardingScreen()
-                }
-
+                SmartStepNavHost(startDestination = startDestination)
             }
         }
     }
 
+    private suspend fun resolveStartDestination(): NavDestination {
+        val onboardingSeen = onboardingDataStore.onboardingSeen.first()
+        return if (onboardingSeen) HomeDestination else OnboardingDestination
+    }
 }

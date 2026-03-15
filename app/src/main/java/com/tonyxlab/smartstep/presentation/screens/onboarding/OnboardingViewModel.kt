@@ -40,21 +40,20 @@ class OnboardingViewModel(
             OnboardingUiEvent.CancelHeightDialog -> onCancelHeightDialog()
             OnboardingUiEvent.ConfirmWeightDialog -> onConfirmWeightDialog()
             OnboardingUiEvent.CancelWeightDialog -> onCancelWeightDialog()
-
         }
     }
 
     private fun onStartOnboarding() {
-        viewModelScope.launch {
-            onboardingDataStore.saveOnboardingCompleted(true)
-            onboardingDataStore.saveOnboardingSkipped(false)
+       launch {
+          onboardingDataStore.setOnboardingSeen()
+            sendActionEvent(OnboardingActionEvent.NavigateToHome)
         }
     }
 
     private fun onSkipOnboarding() {
-        viewModelScope.launch {
-            onboardingDataStore.saveOnboardingCompleted(false)
-            onboardingDataStore.saveOnboardingSkipped(true)
+        launch {
+            onboardingDataStore.setOnboardingSeen()
+            sendActionEvent(OnboardingActionEvent.NavigateToHome)
         }
     }
 
