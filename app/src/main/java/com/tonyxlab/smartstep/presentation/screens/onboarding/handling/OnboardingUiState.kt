@@ -25,7 +25,7 @@ data class OnboardingUiState(
         val selectedFeet: Int = 5,
         val selectedInches: Int = 9,
 
-    ) {
+        ) {
         val displayHeight: String
             get() = when (heightMode) {
                 HeightMode.CENTIMETERS -> "$selectedCentimeter cm"
@@ -63,3 +63,14 @@ enum class Gender {
 
 enum class HeightMode { CENTIMETERS, FEET_INCHES }
 enum class WeightMode { KILOS, POUNDS }
+
+data class OnboardingValues(
+    val selectedGender: Gender,
+    val heightMode: HeightMode,
+    val weightMode: WeightMode,
+    val selectedHeight: Int,
+    val selectedFeet: Int,
+    val selectedInches: Int,
+    val selectedKilos: Int,
+    val selectedPounds: Int
+)

@@ -1,4 +1,4 @@
-package com.tonyxlab.smartstep
+package com.tonyxlab.smartstep.presentation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
             startDestination = resolveStartDestination()
             isAppReady = true
         }
-        
+
         installSplashScreen().apply {
             setKeepOnScreenCondition { !isAppReady }
         }
