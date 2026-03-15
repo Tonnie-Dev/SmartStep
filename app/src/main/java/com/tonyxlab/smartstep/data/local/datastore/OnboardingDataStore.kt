@@ -11,44 +11,25 @@ import java.io.IOException
 
 class OnboardingDataStore(private val context: Context) {
 
-    private object PreferencesKeys {
-        val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
-        val ONBOARDING_SKIPPED = booleanPreferencesKey("onboarding_skipped")
+    private object OnboardingKeyPreferences {
+        val ONBOARDING_SEEN = booleanPreferencesKey("onboarding_seen")
     }
 
-    val onboardingCompleted: Flow<Boolean> = context.dataStore.data
-            .catch { exception ->
-                if (exception is IOException) {
-                    emit(emptyPreferences())
-                } else {
-                    throw exception
-                }
-            }
-            .map { preferences ->
-                preferences[PreferencesKeys.ONBOARDING_COMPLETED] ?: false
-            }
+    val onboardingSeen: Flow<Boolean> =
+        context.dataStore.data.catch { e ->
 
-    val onboardingSkipped: Flow<Boolean> = context.dataStore.data
-            .catch { exception ->
-                if (exception is IOException) {
-                    emit(emptyPreferences())
-                } else {
-                    throw exception
-                }
-            }
-            .map { preferences ->
-                preferences[PreferencesKeys.ONBOARDING_SKIPPED] ?: false
-            }
-
-    suspend fun saveOnboardingCompleted(completed: Boolean) {
-        context.dataStore.edit { preferences ->
-            preferences[PreferencesKeys.ONBOARDING_COMPLETED] = completed
+            if (e is IOException) {
+                emit(emptyPreferences())
+            } else throw e
         }
-    }
+                .map { prefs ->
 
-    suspend fun saveOnboardingSkipped(skipped: Boolean) {
-        context.dataStore.edit { preferences ->
-            preferences[PreferencesKeys.ONBOARDING_SKIPPED] = skipped
+                    prefs[OnboardingKeyPreferences.ONBOARDING_SEEN] ?: false
+                }
+
+    suspend fun setOnboardingSeen() {
+        context.dataStore.edit { prefs ->
+            prefs[OnboardingKeyPreferences.ONBOARDING_SEEN] = true
         }
     }
 }
