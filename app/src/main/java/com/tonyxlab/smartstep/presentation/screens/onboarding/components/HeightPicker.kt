@@ -1,4 +1,4 @@
-package com.tonyxlab.smartstep.presentation.screens.profile.components
+package com.tonyxlab.smartstep.presentation.screens.onboarding.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,8 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.tonyxlab.smartstep.R
-import com.tonyxlab.smartstep.presentation.screens.profile.handling.HeightMode
-import com.tonyxlab.smartstep.presentation.screens.profile.handling.ProfileUiEvent
+import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.HeightMode
+import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.OnboardingUiEvent
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 
 @Composable
@@ -36,11 +36,11 @@ fun HeightPicker(
     feetRange: IntRange = 3..8,
     inchesRange: IntRange = 0..11,
     heightMode: HeightMode = HeightMode.CENTIMETERS,
-    onEvent: (ProfileUiEvent) -> Unit
+    onEvent: (OnboardingUiEvent) -> Unit
 ) {
 
     Dialog(
-            onDismissRequest = { onEvent(ProfileUiEvent.CancelHeightDialog) },
+            onDismissRequest = { onEvent(OnboardingUiEvent.CancelHeightDialog) },
             properties = DialogProperties(dismissOnClickOutside = false)
     ) {
         PickerContainer(
@@ -49,10 +49,10 @@ fun HeightPicker(
                 pickerDescription = stringResource(id = R.string.caption_text_calculate_distance),
                 unitOneText = stringResource(id = R.string.label_text_cm),
                 unitTwoText = stringResource(id = R.string.label_text_ft_in),
-                onToggleUnitOne = { onEvent(ProfileUiEvent.SelectHeightMode(HeightMode.CENTIMETERS)) },
-                onToggleUnitTwo = { onEvent(ProfileUiEvent.SelectHeightMode(HeightMode.FEET_INCHES)) },
-                onConfirm = { onEvent(ProfileUiEvent.ConfirmHeightDialog) },
-                onCancel = { onEvent(ProfileUiEvent.CancelHeightDialog) },
+                onToggleUnitOne = { onEvent(OnboardingUiEvent.SelectHeightMode(HeightMode.CENTIMETERS)) },
+                onToggleUnitTwo = { onEvent(OnboardingUiEvent.SelectHeightMode(HeightMode.FEET_INCHES)) },
+                onConfirm = { onEvent(OnboardingUiEvent.ConfirmHeightDialog) },
+                onCancel = { onEvent(OnboardingUiEvent.CancelHeightDialog) },
                 isUnitOneSelected = heightMode == HeightMode.CENTIMETERS,
                 wheelPicker = {
 
@@ -63,7 +63,7 @@ fun HeightPicker(
                                     selectedValue = selectedCentimeter,
                                     valuesRange = centimeterRange,
                                     onValueSelected = {
-                                        onEvent(ProfileUiEvent.OnCentimetersSelected(value = it))
+                                        onEvent(OnboardingUiEvent.OnCentimetersSelected(value = it))
                                     },
                             )
                         }
@@ -74,10 +74,10 @@ fun HeightPicker(
                                     selectedFeet = selectedFeet,
                                     selectedInches = selectedInches,
                                     onFeetSelected = {
-                                        onEvent(ProfileUiEvent.OnFeetSelected(value = it))
+                                        onEvent(OnboardingUiEvent.OnFeetSelected(value = it))
                                     },
                                     onInchesSelected = {
-                                        onEvent(ProfileUiEvent.OnInchesSelected(value = it))
+                                        onEvent(OnboardingUiEvent.OnInchesSelected(value = it))
                                     },
                                     feetRange = feetRange,
                                     inchesRange = inchesRange
@@ -198,40 +198,3 @@ private fun HeightPicker_Preview() {
         }
     }
 }
-
-@Preview(showBackground = true, backgroundColor = 0xFFEAF3FF)
-@Composable
-private fun FeetInchesWheelPicker_Preview() {
-    SmartStepTheme {
-        Box(
-                modifier = Modifier
-                        .background(MaterialTheme.colorScheme.background)
-                        .fillMaxSize()
-                        .padding(16.dp),
-                contentAlignment = Alignment.Center
-        ) {
-            PickerContainer(
-                    pickerTitle = stringResource(id = R.string.label_text_height),
-                    pickerDescription = stringResource(id = R.string.caption_text_calculate_distance),
-                    unitOneText = stringResource(id = R.string.label_text_cm),
-                    unitTwoText = stringResource(id = R.string.label_text_ft_in),
-                    onToggleUnitOne = {},
-                    onToggleUnitTwo = {},
-                    onConfirm = {},
-                    onCancel = {},
-                    isUnitOneSelected = true,
-                    wheelPicker = {
-                        HeightPicker(
-                                selectedCentimeter = 170,
-                                selectedFeet = 5,
-                                selectedInches = 9,
-                                heightMode = HeightMode.FEET_INCHES,
-                                onEvent = {}
-                        )
-                    }
-            )
-        }
-    }
-}
-
-

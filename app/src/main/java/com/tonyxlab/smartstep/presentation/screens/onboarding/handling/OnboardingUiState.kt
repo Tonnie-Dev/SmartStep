@@ -1,9 +1,9 @@
-package com.tonyxlab.smartstep.presentation.screens.profile.handling
+package com.tonyxlab.smartstep.presentation.screens.onboarding.handling
 
 import androidx.compose.runtime.Stable
 import com.tonyxlab.smartstep.presentation.core.base.handling.UiState
 
-data class ProfileUiState(
+data class OnboardingUiState(
     val genderSelectionState: GenderSelectionState = GenderSelectionState(),
     val heightPickerState: HeightPickerState = HeightPickerState(),
     val weightPickerState: WeightPickerState = WeightPickerState()

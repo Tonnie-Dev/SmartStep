@@ -1,14 +1,13 @@
 package com.tonyxlab.smartstep.di
 
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
-import com.tonyxlab.smartstep.presentation.screens.profile.handling.ProfileViewModel
-import org.koin.android.ext.koin.androidContext
+import com.tonyxlab.smartstep.presentation.screens.onboarding.OnboardingViewModel
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val viewModelModule = module {
-    viewModelOf(::ProfileViewModel)
+    viewModelOf(::OnboardingViewModel)
 }
 
 val dataStoreModule = module {

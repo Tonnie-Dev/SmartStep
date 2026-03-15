@@ -1,4 +1,4 @@
-package com.tonyxlab.smartstep.presentation.screens.profile
+package com.tonyxlab.smartstep.presentation.screens.onboarding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,21 +21,20 @@ import com.tonyxlab.smartstep.presentation.core.base.BaseContentLayout
 import com.tonyxlab.smartstep.presentation.core.components.AppButton
 import com.tonyxlab.smartstep.presentation.core.components.AppTopBar
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
-import com.tonyxlab.smartstep.presentation.screens.profile.components.GenderSelectionField
-import com.tonyxlab.smartstep.presentation.screens.profile.components.HeightPicker
-import com.tonyxlab.smartstep.presentation.screens.profile.components.ProfileSelectionField
-import com.tonyxlab.smartstep.presentation.screens.profile.components.WeightPicker
-import com.tonyxlab.smartstep.presentation.screens.profile.handling.ProfileUiEvent
-import com.tonyxlab.smartstep.presentation.screens.profile.handling.ProfileUiState
-import com.tonyxlab.smartstep.presentation.screens.profile.handling.ProfileViewModel
+import com.tonyxlab.smartstep.presentation.screens.onboarding.components.GenderSelectionField
+import com.tonyxlab.smartstep.presentation.screens.onboarding.components.HeightPicker
+import com.tonyxlab.smartstep.presentation.screens.onboarding.components.OnboardingSelectionField
+import com.tonyxlab.smartstep.presentation.screens.onboarding.components.WeightPicker
+import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.OnboardingUiEvent
+import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.OnboardingUiState
 import com.tonyxlab.smartstep.presentation.theme.BodyLargeRegular
 import com.tonyxlab.smartstep.presentation.theme.RoundedCornerShape14
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun ProfileScreen(
-    viewModel: ProfileViewModel = koinViewModel()
+fun OnboardingScreen(
+    viewModel: OnboardingViewModel = koinViewModel()
 ) {
 
     BaseContentLayout(
@@ -44,12 +43,12 @@ fun ProfileScreen(
                 AppTopBar(
                         titleText = stringResource(id = R.string.topbar_text_my_profile),
                         actionText = stringResource(id = R.string.text_button_skip),
-                        onActionClick = { viewModel.onEvent(ProfileUiEvent.SkipOnboarding) }
+                        onActionClick = { viewModel.onEvent(OnboardingUiEvent.SkipOnboarding) }
                 )
             }
     ) { uiState ->
 
-        ProfileScreenContent(
+        OnboardingScreenContent(
                 uiState = uiState,
                 onEvent = viewModel::onEvent
         )
@@ -57,9 +56,9 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileScreenContent(
-    uiState: ProfileUiState,
-    onEvent: (ProfileUiEvent) -> Unit,
+fun OnboardingScreenContent(
+    uiState: OnboardingUiState,
+    onEvent: (OnboardingUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -101,17 +100,17 @@ fun ProfileScreenContent(
                                 label = stringResource(id = R.string.label_text_gender),
                                 selectedGender = this.selectedGender,
                                 options = this.genderOptions,
-                                onSelectOption = { onEvent(ProfileUiEvent.SelectGender(it)) },
+                                onSelectOption = { onEvent(OnboardingUiEvent.SelectGender(it)) },
                         )
                     }
 
                     // Height Picker
                     with(uiState.heightPickerState) {
 
-                        ProfileSelectionField(
+                        OnboardingSelectionField(
                                 label = stringResource(id = R.string.label_text_height),
                                 value = displayHeight,
-                                onClick = { onEvent(ProfileUiEvent.HeightPickerVisibilityChange) }
+                                onClick = { onEvent(OnboardingUiEvent.HeightPickerVisibilityChange) }
                         )
                         if (this.visible) {
                             HeightPicker(
@@ -128,10 +127,10 @@ fun ProfileScreenContent(
                     // Weight Picker
                     with(uiState.weightPickerState) {
 
-                        ProfileSelectionField(
+                        OnboardingSelectionField(
                                 label = stringResource(id = R.string.label_text_weight),
                                 value = displayWeight,
-                                onClick = { onEvent(ProfileUiEvent.WeightPickerVisibilityChange) }
+                                onClick = { onEvent(OnboardingUiEvent.WeightPickerVisibilityChange) }
                         )
                         if (this.visible) {
                             WeightPicker(
@@ -151,7 +150,7 @@ fun ProfileScreenContent(
 
         AppButton(
                 modifier = Modifier.align(Alignment.BottomCenter),
-                onClick = { onEvent(ProfileUiEvent.StartOnboarding) },
+                onClick = { onEvent(OnboardingUiEvent.StartOnboarding) },
                 buttonText = stringResource(id = R.string.button_text_start)
         )
     }
@@ -159,10 +158,10 @@ fun ProfileScreenContent(
 
 @Preview(showBackground = true)
 @Composable
-private fun ProfileScreenPreview() {
+private fun OnboardingScreenPreview() {
     SmartStepTheme {
-        ProfileScreenContent(
-                uiState = ProfileUiState(),
+        OnboardingScreenContent(
+                uiState = OnboardingUiState(),
                 onEvent = {},
                 modifier = Modifier.fillMaxSize()
         )

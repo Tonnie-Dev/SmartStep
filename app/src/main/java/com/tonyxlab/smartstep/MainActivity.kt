@@ -6,12 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.tonyxlab.smartstep.presentation.screens.profile.ProfileScreen
-import com.tonyxlab.smartstep.presentation.screens.profile.ProfileScreenContent
+import com.tonyxlab.smartstep.presentation.screens.onboarding.OnboardingScreen
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 
 class MainActivity : ComponentActivity() {
@@ -29,7 +27,7 @@ class MainActivity : ComponentActivity() {
                         contentAlignment = Alignment.Center
                 ) {
 
-                    ProfileScreen()
+                    OnboardingScreen()
                 }
 
             }

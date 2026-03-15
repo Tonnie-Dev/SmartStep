@@ -1,4 +1,4 @@
-package com.tonyxlab.smartstep.presentation.screens.profile.components
+package com.tonyxlab.smartstep.presentation.screens.onboarding.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
-import com.tonyxlab.smartstep.presentation.screens.profile.handling.Gender
+import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.Gender
 import com.tonyxlab.smartstep.presentation.theme.RoundedCornerShape10
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 
@@ -53,7 +53,7 @@ fun GenderSelectionField(
             onExpandedChange = { expanded = !expanded }
     ) {
 
-        ProfileSelectionField(
+        OnboardingSelectionField(
                 modifier = Modifier
                         .menuAnchor(
                                 type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,

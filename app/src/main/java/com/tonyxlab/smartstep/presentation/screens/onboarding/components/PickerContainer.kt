@@ -1,7 +1,5 @@
-package com.tonyxlab.smartstep.presentation.screens.profile.components
+package com.tonyxlab.smartstep.presentation.screens.onboarding.components
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,10 +15,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -130,7 +124,7 @@ fun UnitToggle(
     isUnitOneSelected: Boolean = true
 ) {
 
-    Timber.tag("ProfileVM")
+    Timber.tag("OnboardingVM")
             .i("U1 Selected is: $isUnitOneSelected")    // Unit Toggle
 
     Row(
