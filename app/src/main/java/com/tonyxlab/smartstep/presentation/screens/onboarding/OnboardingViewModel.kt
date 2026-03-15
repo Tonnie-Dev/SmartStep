@@ -8,7 +8,7 @@ import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.Onboardin
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.OnboardingUiEvent
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.OnboardingUiState
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.WeightMode
-import com.tonyxlab.smartstep.utils.UnitConversions
+import com.tonyxlab.smartstep.utils.UnitConverter
 import timber.log.Timber
 
 typealias OnboardingBaseViewModel = BaseViewModel<OnboardingUiState, OnboardingUiEvent, OnboardingActionEvent>
@@ -23,7 +23,7 @@ class OnboardingViewModel(
     override fun onEvent(event: OnboardingUiEvent) {
         when (event) {
 
-            OnboardingUiEvent.StartOnboarding -> onStartOnboarding()
+            OnboardingUiEvent.CompleteOnBoarding -> onCompleteOnboarding()
             OnboardingUiEvent.SkipOnboarding -> onSkipOnboarding()
             OnboardingUiEvent.HeightPickerVisibilityChange -> onHeightPickerVisibilityChange()
             OnboardingUiEvent.WeightPickerVisibilityChange -> onWeightPickerVisibilityChange()
@@ -33,7 +33,7 @@ class OnboardingViewModel(
             is OnboardingUiEvent.OnFeetSelected -> onFeetSelected(event.value)
             is OnboardingUiEvent.OnInchesSelected -> onInchesSelected(event.value)
             is OnboardingUiEvent.SelectWeightMode -> onSelectWeightMode(event.weightMode)
-            is OnboardingUiEvent.OnKilosSelected -> onKilosSelected(event.value)
+            is OnboardingUiEvent.OnKilosSelected -> onKgsSelected(event.value)
             is OnboardingUiEvent.OnPoundsSelected -> onPoundsSelected(event.value)
             OnboardingUiEvent.ConfirmHeightDialog -> onConfirmHeightDialog()
             OnboardingUiEvent.CancelHeightDialog -> onCancelHeightDialog()
@@ -42,9 +42,26 @@ class OnboardingViewModel(
         }
     }
 
-    private fun onStartOnboarding() {
+    private fun onCompleteOnboarding() {
         launch {
+
             onboardingDataStore.setOnboardingSeen()
+
+            onboardingDataStore.setSelectedGender(
+                    gender = currentState.genderSelectionState.selectedGender
+            )
+            onboardingDataStore.setHeightMode(
+                    heightMode = currentState.heightPickerState.heightMode
+            )
+            onboardingDataStore.setHeightInCm(
+                    heightInCm = currentState.heightPickerState.selectedCentimeter
+            )
+            onboardingDataStore.setWeightMode(
+                    weightMode = currentState.weightPickerState.weightMode
+            )
+            onboardingDataStore.setWeightInKg(
+                    weightInKg = currentState.weightPickerState.selectedKgs
+            )
             sendActionEvent(OnboardingActionEvent.NavigateToHome)
         }
     }
@@ -100,7 +117,7 @@ class OnboardingViewModel(
                 HeightMode.FEET_INCHES -> {
 
                     val feetInches =
-                        UnitConversions.cmToFeetInches(heightState.selectedCentimeter)
+                        UnitConverter.cmToFeetInches(heightState.selectedCentimeter)
 
                     state.copy(
                             heightPickerState = heightState.copy(
@@ -113,7 +130,7 @@ class OnboardingViewModel(
 
                 HeightMode.CENTIMETERS -> {
 
-                    val cm = UnitConversions.feetInchesToCm(
+                    val cm = UnitConverter.feetInchesToCm(
                             heightState.selectedFeet,
                             heightState.selectedInches
                     )
@@ -129,23 +146,46 @@ class OnboardingViewModel(
         }
     }
 
-    private fun onCentimetersSelected(value: Int) {
-        updateState {
-            it.copy(heightPickerState = it.heightPickerState.copy(selectedCentimeter = value))
+    private fun onCentimetersSelected(cms: Int) {
+        updateState { state ->
+            val current = state.heightPickerState
+            val updatedFeetInches = UnitConverter.cmToFeetInches(cms)
+            state.copy(
+                    heightPickerState = current.copy(
+                            selectedCentimeter = cms,
+                            selectedFeet = updatedFeetInches.feet,
+                            selectedInches = updatedFeetInches.inches
+                    )
+            )
         }
     }
 
     private fun onFeetSelected(value: Int) {
-        updateState {
-            it.copy(
-                    heightPickerState = it.heightPickerState.copy(selectedFeet = value)
+        updateState { state ->
+
+            val current = state.heightPickerState
+            val updatedCm =
+                UnitConverter.feetInchesToCm(feet = value, inches = current.selectedInches)
+            state.copy(
+                    heightPickerState = current.copy(
+                            selectedFeet = value,
+                            selectedCentimeter = updatedCm
+                    )
             )
         }
     }
 
     private fun onInchesSelected(value: Int) {
-        updateState {
-            it.copy(heightPickerState = it.heightPickerState.copy(selectedInches = value))
+        updateState { state ->
+            val current = state.heightPickerState
+            val updatedCm = UnitConverter.feetInchesToCm(current.selectedFeet, value)
+
+            state.copy(
+                    heightPickerState = current.copy(
+                            selectedInches = value,
+                            selectedCentimeter = updatedCm
+                    )
+            )
         }
     }
 
@@ -154,24 +194,23 @@ class OnboardingViewModel(
             val weightState = state.weightPickerState
 
             when (weightMode) {
-                WeightMode.KILOS -> {
-                    val kgs = UnitConversions.lbsToKgs(weightState.selectedPounds)
-
+                WeightMode.KGS -> {
+                    val kgs = UnitConverter.lbsToKgs(weightState.selectedLbs)
                     state.copy(
                             weightPickerState = weightState.copy(
                                     weightMode = weightMode,
-                                    selectedKilos = kgs
+                                    selectedKgs = kgs
                             )
                     )
                 }
 
-                WeightMode.POUNDS -> {
-                    val lbs = UnitConversions.kgsToLbs(weightState.selectedKilos)
+                WeightMode.LBS -> {
+                    val lbs = UnitConverter.kgsToLbs(weightState.selectedKgs)
 
                     state.copy(
                             weightPickerState = weightState.copy(
                                     weightMode = weightMode,
-                                    selectedPounds = lbs
+                                    selectedLbs = lbs
                             )
                     )
                 }
@@ -179,15 +218,30 @@ class OnboardingViewModel(
         }
     }
 
-    private fun onKilosSelected(value: Int) {
-        updateState {
-            it.copy(weightPickerState = it.weightPickerState.copy(selectedKilos = value))
+    private fun onKgsSelected(kgs: Int) {
+        updateState { state ->
+            val current = state.weightPickerState
+            val updatedLbs = UnitConverter.kgsToLbs(kgs)
+            state.copy(
+                    weightPickerState = current.copy(
+                            selectedKgs = kgs,
+                            selectedLbs = updatedLbs
+                    )
+            )
         }
     }
 
     private fun onPoundsSelected(value: Int) {
-        updateState {
-            it.copy(weightPickerState = it.weightPickerState.copy(selectedPounds = value))
+        updateState { state ->
+            val current = state.weightPickerState
+            val updatedKgs = UnitConverter.lbsToKgs(value)
+
+            state.copy(
+                    weightPickerState = current.copy(
+                            selectedLbs = value,
+                            selectedKgs = updatedKgs
+                    )
+            )
         }
     }
 

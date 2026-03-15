@@ -143,8 +143,8 @@ fun OnboardingScreenContent(
                         if (this.visible) {
                             WeightPicker(
                                     modifier = Modifier,
-                                    selectedKilos = this.selectedKilos,
-                                    selectedPounds = this.selectedPounds,
+                                    selectedKilos = this.selectedKgs,
+                                    selectedPounds = this.selectedLbs,
                                     onEvent = onEvent,
                                     weightMode = this.weightMode
                             )
@@ -158,7 +158,7 @@ fun OnboardingScreenContent(
 
         AppButton(
                 modifier = Modifier.align(Alignment.BottomCenter),
-                onClick = { onEvent(OnboardingUiEvent.StartOnboarding) },
+                onClick = { onEvent(OnboardingUiEvent.CompleteOnBoarding) },
                 buttonText = stringResource(id = R.string.button_text_start)
         )
     }

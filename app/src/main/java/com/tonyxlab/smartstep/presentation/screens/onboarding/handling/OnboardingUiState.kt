@@ -2,6 +2,10 @@ package com.tonyxlab.smartstep.presentation.screens.onboarding.handling
 
 import androidx.compose.runtime.Stable
 import com.tonyxlab.smartstep.presentation.core.base.handling.UiState
+import com.tonyxlab.smartstep.utils.Constants
+import com.tonyxlab.smartstep.utils.Constants.DEFAULT_HEIGHT_CM
+import com.tonyxlab.smartstep.utils.Constants.DEFAULT_WEIGHT_KG
+import com.tonyxlab.smartstep.utils.Constants.DEFAULT_WEIGHT_LB
 
 data class OnboardingUiState(
     val genderSelectionState: GenderSelectionState = GenderSelectionState(),
@@ -20,10 +24,9 @@ data class OnboardingUiState(
     data class HeightPickerState(
         val visible: Boolean = false,
         val heightMode: HeightMode = HeightMode.CENTIMETERS,
-        val selectedCentimeter: Int = 175,
-        val centimeterRange: IntRange = 100..250,
-        val selectedFeet: Int = 5,
-        val selectedInches: Int = 9,
+        val selectedCentimeter: Int = DEFAULT_HEIGHT_CM,
+        val selectedFeet: Int = Constants.DEFAULT_HEIGHT_FT,
+        val selectedInches: Int = Constants.DEFAULT_HEIGHT_IN,
 
         ) {
         val displayHeight: String
@@ -36,14 +39,14 @@ data class OnboardingUiState(
     @Stable
     data class WeightPickerState(
         val visible: Boolean = false,
-        val weightMode: WeightMode = WeightMode.KILOS,
-        val selectedKilos: Int = 60,
-        val selectedPounds: Int = 143
+        val weightMode: WeightMode = WeightMode.KGS,
+        val selectedKgs: Int = DEFAULT_WEIGHT_KG,
+        val selectedLbs: Int = DEFAULT_WEIGHT_LB
     ) {
         val displayWeight: String
             get() = when (weightMode) {
-                WeightMode.KILOS -> "$selectedKilos kg"
-                WeightMode.POUNDS -> "$selectedPounds lbs"
+                WeightMode.KGS -> "$selectedKgs kg"
+                WeightMode.LBS -> "$selectedLbs lbs"
             }
     }
 
@@ -62,15 +65,7 @@ enum class Gender {
 }
 
 enum class HeightMode { CENTIMETERS, FEET_INCHES }
-enum class WeightMode { KILOS, POUNDS }
+enum class WeightMode { KGS, LBS }
 
-data class OnboardingValues(
-    val selectedGender: Gender,
-    val heightMode: HeightMode,
-    val weightMode: WeightMode,
-    val selectedHeight: Int,
-    val selectedFeet: Int,
-    val selectedInches: Int,
-    val selectedKilos: Int,
-    val selectedPounds: Int
-)
+
+

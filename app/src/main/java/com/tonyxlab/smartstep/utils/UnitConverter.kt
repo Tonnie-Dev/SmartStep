@@ -6,7 +6,7 @@ import com.tonyxlab.smartstep.utils.Constants.INCH_PER_FOOT
 import com.tonyxlab.smartstep.utils.Constants.KG_PER_LBS
 import kotlin.math.roundToInt
 
-object UnitConversions {
+object UnitConverter {
     data class FeetInches(
         val feet: Int,
         val inches: Int

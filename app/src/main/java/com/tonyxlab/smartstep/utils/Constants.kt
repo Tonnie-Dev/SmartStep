@@ -2,7 +2,11 @@ package com.tonyxlab.smartstep.utils
 
 object Constants {
 
-    const val DATASTORE_NAME = "smart_step_datastore"
+    const val DEFAULT_HEIGHT_CM = 175
+    const val DEFAULT_HEIGHT_FT = 5
+    const val DEFAULT_HEIGHT_IN =6
+    const val DEFAULT_WEIGHT_KG =60
+    const val DEFAULT_WEIGHT_LB =60
     const val CM_PER_INCH = 2.54
     const val CM_PER_FOOT = 30.48
     const val INCH_PER_FOOT = 12

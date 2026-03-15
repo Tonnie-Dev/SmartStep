@@ -25,7 +25,7 @@ fun WeightPicker(
     selectedPounds: Int,
     kilosRange: IntRange = 30..200,
     poundsRange: IntRange = 66..440,
-    weightMode: WeightMode = WeightMode.KILOS,
+    weightMode: WeightMode = WeightMode.KGS,
     onEvent: (OnboardingUiEvent) -> Unit
 ) {
 
@@ -39,15 +39,15 @@ fun WeightPicker(
                 pickerDescription = stringResource(id = R.string.caption_text_calculate_distance),
                 unitOneText = stringResource(id = R.string.label_text_kg),
                 unitTwoText = stringResource(id = R.string.label_text_lbs),
-                onToggleUnitOne = { onEvent(OnboardingUiEvent.SelectWeightMode(WeightMode.KILOS)) },
-                onToggleUnitTwo = { onEvent(OnboardingUiEvent.SelectWeightMode(WeightMode.POUNDS)) },
+                onToggleUnitOne = { onEvent(OnboardingUiEvent.SelectWeightMode(WeightMode.KGS)) },
+                onToggleUnitTwo = { onEvent(OnboardingUiEvent.SelectWeightMode(WeightMode.LBS)) },
                 onConfirm = { onEvent(OnboardingUiEvent.ConfirmWeightDialog) },
                 onCancel = { onEvent(OnboardingUiEvent.CancelWeightDialog) },
-                isUnitOneSelected = weightMode == WeightMode.KILOS,
+                isUnitOneSelected = weightMode == WeightMode.KGS,
                 wheelPicker = {
 
                     when (weightMode) {
-                        WeightMode.KILOS -> {
+                        WeightMode.KGS -> {
                             StandardWheelPicker(
                                     modifier = Modifier,
                                     selectedValue = selectedKilos,
@@ -58,7 +58,7 @@ fun WeightPicker(
                             )
                         }
 
-                        WeightMode.POUNDS -> {
+                        WeightMode.LBS -> {
                             StandardWheelPicker(
                                     modifier = Modifier,
                                     selectedValue = selectedPounds,
@@ -88,7 +88,7 @@ private fun WeightPicker_Preview() {
             WeightPicker(
                     selectedKilos = 70,
                     selectedPounds = 154,
-                    weightMode = WeightMode.KILOS,
+                    weightMode = WeightMode.KGS,
                     onEvent = {}
             )
         }
