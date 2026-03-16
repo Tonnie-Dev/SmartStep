@@ -1,5 +1,6 @@
 package com.tonyxlab.smartstep.presentation.screens.onboarding
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -16,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.base.BaseContentLayout
 import com.tonyxlab.smartstep.presentation.core.components.AppButton
@@ -32,6 +36,7 @@ import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.Onboardin
 import com.tonyxlab.smartstep.presentation.theme.BodyLargeRegular
 import com.tonyxlab.smartstep.presentation.theme.RoundedCornerShape14
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
+import com.tonyxlab.smartstep.utils.rememberIsDeviceWide
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -70,14 +75,20 @@ fun OnboardingScreenContent(
     modifier: Modifier = Modifier
 ) {
 
+    val isDeviceWide = rememberIsDeviceWide()
+
+    val maxWidth = if (isDeviceWide) 394.dp else Dp.Unspecified
     Box(
             modifier = modifier
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .fillMaxSize()
                     .padding(horizontal = MaterialTheme.spacing.spaceMedium)
-                    .padding(vertical = MaterialTheme.spacing.spaceLarge)
+                    .padding(vertical = MaterialTheme.spacing.spaceLarge),
+            contentAlignment = Alignment.TopCenter
     ) {
         Column(
+                modifier = Modifier.widthIn(max = maxWidth),
+                horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceMedium)
         ) {
 
@@ -157,7 +168,7 @@ fun OnboardingScreenContent(
 
 
         AppButton(
-                modifier = Modifier.align(Alignment.BottomCenter),
+                modifier = Modifier.align(Alignment.BottomCenter).widthIn(max= maxWidth),
                 onClick = { onEvent(OnboardingUiEvent.CompleteOnBoarding) },
                 buttonText = stringResource(id = R.string.button_text_start)
         )
