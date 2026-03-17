@@ -39,7 +39,7 @@
     <string name="label_text_in">in</string>
     <string name="label_text_kg">kg</string>
     <string name="label_text_lbs">lbs</string>
-
+    <string name="label_steps">Steps</string>
     <!--Menu Texts-->
     <string name="menu_text_male">Male</string>
     <string name="menu_text_female">Female</string>
@@ -55,6 +55,7 @@
 
     <!--Content Description Texts-->
     <string name="cds_text_check_mark">Check Mark</string>
+    <string name="cds_shoe_icon">Shoe Icon</string>
 
     <!--Snackbar Texts-->
     <string name="snack_text_item_added_to_cart">Item Added to Cart</string>
@@ -76,5 +77,10 @@
 
     <!--Meta Data Texts-->
     <string name="dollar_price_tag">$%.2f</string>
+
+
+
+    <!--String Templates-->
+    <string name="template_steps_goal">/%1$d %2$s</string>
 
 </resources>
