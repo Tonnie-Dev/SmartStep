@@ -27,7 +27,14 @@
     <string name="caption_text_profile_desc">This information helps calculate your activity more accurately.</string>
     <string name="caption_text_calculate_distance">Used to calculate distance</string>
     <string name="caption_text_calculate_calories">Used to calculate calories</string>
-
+    <string name="caption_text_motion_sensors">To count your steps,Smart Step needs access to you motion sensors</string>
+    <string name="caption_text_enable_access">Enable access manually</string>
+    <string name="caption_text_track_step">To track your steps, please enable the permission in your device settings</string>
+    <string name="caption_text_instruction_1">1. Open Permissions</string>
+    <string name="caption_text_instruction_2">2. Tap Physical activity</string>
+    <string name="caption_text_instruction_3">3. Select Allow</string>
+    <string name="caption_text_background_access">Background access recommended</string>
+    <string name="caption_text_background_access_desc">Background access helps Smart Step track your activity more reliably</string>
 
     <!--Label Texts-->
     <string name="label_text_gender">Gender</string>
@@ -48,6 +55,9 @@
     <string name="button_text_start">Start</string>
     <string name="button_text_ok">Ok</string>
     <string name="button_text_cancel">Cancel</string>
+    <string name="button_text_allow_access">Allow access</string>
+    <string name="button_text_open_settings">Open Settings</string>
+    <string name="button_text_continue">Continue</string>
 
     <!--Text Button Texts-->
     <string name="text_button_skip">Skip</string>
@@ -77,8 +87,6 @@
 
     <!--Meta Data Texts-->
     <string name="dollar_price_tag">$%.2f</string>
-
-
 
     <!--String Templates-->
     <string name="template_steps_goal">/%1$d %2$s</string>

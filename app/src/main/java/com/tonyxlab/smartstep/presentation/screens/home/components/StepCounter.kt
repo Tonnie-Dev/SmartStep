@@ -25,6 +25,7 @@ import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.theme.BackgroundWhite20
 import com.tonyxlab.smartstep.presentation.theme.RoundedCornerShape24
+import com.tonyxlab.smartstep.presentation.theme.RoundedCornerShape4
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 import com.tonyxlab.smartstep.presentation.theme.TittleAccent
 import com.tonyxlab.smartstep.utils.formatWithCommas
@@ -92,7 +93,7 @@ fun CustomProgressBar(
 ) {
     Box(
             modifier = modifier
-                    .clip(RoundedCornerShape(MaterialTheme.spacing.spaceExtraSmall))
+                    .clip(MaterialTheme.shapes.RoundedCornerShape4)
                     .background(BackgroundWhite20)
                     .fillMaxWidth()
     ) {
@@ -100,7 +101,7 @@ fun CustomProgressBar(
                 modifier = Modifier
                         .fillMaxWidth(progress.coerceIn(0f, 1f))
                         .height(MaterialTheme.spacing.spaceSmall)
-                        .clip(RoundedCornerShape(MaterialTheme.spacing.spaceExtraSmall))
+                        .clip(MaterialTheme.shapes.RoundedCornerShape4)
                         .background(MaterialTheme.colorScheme.surface)
         )
     }
