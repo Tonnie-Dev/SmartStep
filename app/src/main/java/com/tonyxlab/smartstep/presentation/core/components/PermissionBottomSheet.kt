@@ -1,5 +1,9 @@
+@file:RequiresApi(Build.VERSION_CODES.Q)
+
 package com.tonyxlab.smartstep.presentation.core.components
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +30,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
+import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
+import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.theme.BodyLargeMedium
 import com.tonyxlab.smartstep.presentation.theme.BodyLargeRegular
 import com.tonyxlab.smartstep.presentation.theme.HorizontalRoundedCornerShape28
@@ -34,25 +40,53 @@ import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PermissionBottomSheet(
-    onDismissRequest: () -> Unit,
+    isSheetVisible: Boolean,
+    permissionSheetType: PermissionSheetType?,
     modifier: Modifier = Modifier,
     hasHandle: Boolean = false,
     sheetState: SheetState = rememberModalBottomSheetState(),
-    sheetContent: @Composable () -> Unit
+    onEvent: (HomeUiEvent) -> Unit
 ) {
-    ModalBottomSheet(
-            onDismissRequest = onDismissRequest,
-            sheetState = sheetState,
-            shape = MaterialTheme.shapes.HorizontalRoundedCornerShape28,
-            containerColor = MaterialTheme.colorScheme.surface,
-            dragHandle = {
-                if (hasHandle){
-                    BottomSheetDefaults.DragHandle()
-                }else null
-            },
-            modifier = modifier
-    ) {
-        sheetContent()
+
+    if (isSheetVisible) {
+        ModalBottomSheet(
+                onDismissRequest = { onEvent(HomeUiEvent.DismissPermissionDialog) },
+                sheetState = sheetState,
+                shape = MaterialTheme.shapes.HorizontalRoundedCornerShape28,
+                containerColor = MaterialTheme.colorScheme.surface,
+                dragHandle = {
+                    if (hasHandle) {
+                        BottomSheetDefaults.DragHandle()
+                    }
+                },
+                modifier = modifier
+        ) {
+
+            when (permissionSheetType) {
+                PermissionSheetType.INITIAL_DENIAL -> {
+                    BottomSheetContentOne(
+                            onAllowAccessClick = { onEvent(HomeUiEvent.AllowAccess) }
+                    )
+
+                }
+
+                PermissionSheetType.PERMANENT_DENIAL -> {
+
+                    BottomSheetContentTwo(
+                            onOpenSettings = { onEvent(HomeUiEvent.OpenPermissionsSettings) }
+                    )
+                }
+
+                PermissionSheetType.BACKGROUND_ACCESS -> {
+
+                    BottomSheetContentThree(
+                            onContinue = { onEvent(HomeUiEvent.Continue) }
+                    )
+                }
+
+                else -> {}
+            }
+        }
     }
 }
 
@@ -140,7 +174,7 @@ fun BottomSheetContentTwo(
                     text = stringResource(id = R.string.caption_text_instruction_1),
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.BodyLargeMedium,
-                    )
+            )
 
             Text(
                     modifier = Modifier.fillMaxWidth(),
@@ -211,6 +245,7 @@ fun BottomSheetContentThree(
 
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
@@ -225,9 +260,10 @@ private fun BottomSheetContentOnePreview() {
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceMedium)
         ) {
             PermissionBottomSheet(
-                    onDismissRequest = {},
+                    isSheetVisible = true,
                     hasHandle = true,
-                    sheetContent = { BottomSheetContentThree( onContinue = {})}
+                    permissionSheetType = PermissionSheetType.INITIAL_DENIAL,
+                    onEvent = {}
             )
         }
     }

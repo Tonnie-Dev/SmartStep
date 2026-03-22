@@ -1,7 +1,9 @@
 package com.tonyxlab.smartstep.presentation.screens.home.handling
 
 import com.tonyxlab.smartstep.presentation.core.base.handling.UiState
+import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
 
 data class HomeUiState(
-    val isLoading: Boolean = false
+    val isSheetVisible: Boolean = false,
+    val permissionSheetType: PermissionSheetType? = null
 ) : UiState

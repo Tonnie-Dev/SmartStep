@@ -10,8 +10,8 @@ import androidx.compose.ui.unit.sp
 import com.tonyxlab.smartstep.R
 
 private val InterFontFamily = FontFamily(
-    Font(R.font.inter_variable_font, weight = FontWeight.Normal),
-    Font(R.font.inter_variable_font, weight = FontWeight.Medium),
+    Font(R.font.inter_18_regular, weight = FontWeight.Normal),
+    Font(R.font.inter_18_medium, weight = FontWeight.Medium),
     Font(R.font.inter_variable_font, weight = FontWeight.SemiBold)
 )
 

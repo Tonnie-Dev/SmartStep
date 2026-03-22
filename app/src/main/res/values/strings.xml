@@ -91,4 +91,10 @@
     <!--String Templates-->
     <string name="template_steps_goal">/%1$d %2$s</string>
 
+    <!-- Navigation Drawer Strings -->
+    <string name="nav_drawer_fix_stop_counting">Fix the “Stop Counting Steps” issue</string>
+    <string name="nav_drawer_step_goal">Step Goal</string>
+    <string name="nav_drawer_personal_settings">Personal Settings</string>
+    <string name="nav_drawer_exit">Exit</string>
+
 </resources>

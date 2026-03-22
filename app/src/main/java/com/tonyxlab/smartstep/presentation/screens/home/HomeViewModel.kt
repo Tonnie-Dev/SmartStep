@@ -13,6 +13,39 @@ class HomeViewModel : HomeBaseViewModel() {
         get() = HomeUiState()
 
     override fun onEvent(event: HomeUiEvent) {
-        // Handle events here
+        when (event) {
+
+            is HomeUiEvent.ShowPermissionSheet -> {
+                updateState {
+                    it.copy(
+                            isSheetVisible = true,
+                            permissionSheetType = event.type
+                    )
+                }
+            }
+
+            HomeUiEvent.DismissPermissionDialog -> {
+                updateState {
+                    it.copy(
+                            isSheetVisible = false,
+                            permissionSheetType = null
+                    )
+                }
+            }
+
+            HomeUiEvent.OpenPermissionsSettings,
+            HomeUiEvent.Continue -> {
+                updateState {
+                    it.copy(isSheetVisible = false)
+                }
+            }
+
+            HomeUiEvent.AllowAccess -> Unit
+        }
+    }
+
+    private fun dismissDialog() {
+
+        updateState { it.copy(isSheetVisible = false) }
     }
 }
