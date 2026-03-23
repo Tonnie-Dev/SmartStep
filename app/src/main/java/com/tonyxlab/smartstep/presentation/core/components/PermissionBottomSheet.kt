@@ -48,7 +48,7 @@ fun PermissionBottomSheet(
     onEvent: (HomeUiEvent) -> Unit
 ) {
 
-    if (isSheetVisible) {
+    if (isSheetVisible && permissionSheetType != null) {
         ModalBottomSheet(
                 onDismissRequest = { onEvent(HomeUiEvent.DismissPermissionDialog) },
                 sheetState = sheetState,
@@ -84,7 +84,7 @@ fun PermissionBottomSheet(
                     )
                 }
 
-                else -> {}
+
             }
         }
     }
