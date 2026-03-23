@@ -19,6 +19,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.tonyxlab.smartstep.presentation.core.components.PermissionBottomSheet
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
+import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
 import timber.log.Timber
 
 enum class PermissionSheetType {
@@ -30,7 +31,7 @@ enum class PermissionSheetType {
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun PermissionHandler(
-
+    uiState: HomeUiState,
     onEvent: (HomeUiEvent) -> Unit,
 ) {
     val permissionState = rememberPermissionState(
@@ -57,13 +58,14 @@ fun PermissionHandler(
             permissionStatus.isGranted -> {
                 if (!hasShownBackgroundSheet) {
                     hasShownBackgroundSheet = true
-Timber.tag("PermHandler").i("Inside isGranted Block")
+
 
 
                     onEvent(
                             HomeUiEvent.ShowPermissionSheet(
                                     PermissionSheetType.BACKGROUND_ACCESS
-                            ))
+                            )
+                    )
                 }
             }
 
@@ -71,22 +73,18 @@ Timber.tag("PermHandler").i("Inside isGranted Block")
                 denialCount = 1
 
 
-                Timber.tag("PermHandler").i("should show rationale")
+
                 onEvent(
                         HomeUiEvent.ShowPermissionSheet(
                                 PermissionSheetType.INITIAL_DENIAL
                         )
                 )
-           /*     if (hasRequestedPermission){
 
-
-
-                }*/
             }
 
-            hasRequestedPermission && denialCount >= 1 -> {
+            hasRequestedPermission || denialCount >= 1 -> {
                 denialCount = 2
-                Timber.tag("PermHandler").i("has Requested Permission")
+
 
                 onEvent(
                         HomeUiEvent.ShowPermissionSheet(
@@ -95,12 +93,30 @@ Timber.tag("PermHandler").i("Inside isGranted Block")
                 )
             }
 
-            else -> Unit
+
         }
     }
 
 
+    PermissionBottomSheet(
+            isSheetVisible = uiState.isSheetVisible,
+            permissionSheetType = uiState.permissionSheetType,
+            onEvent = { event ->
 
+                when (event) {
+                    HomeUiEvent.AllowAccess -> {
+
+                        onEvent(HomeUiEvent.DismissPermissionDialog)
+
+                        permissionState.launchPermissionRequest()
+                    }
+
+                    else -> {
+                        onEvent(event)
+                    }
+                }
+            }
+    )
 }
 
 

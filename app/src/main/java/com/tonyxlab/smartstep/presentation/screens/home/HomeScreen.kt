@@ -3,6 +3,7 @@
 package com.tonyxlab.smartstep.presentation.screens.home
 
 import android.os.Build
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -26,9 +27,13 @@ import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.navigation.Navigator
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionHandler
 import com.tonyxlab.smartstep.presentation.screens.home.components.StepCounterCard
+import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
+import com.tonyxlab.smartstep.utils.isIgnoringBatteryOptimizations
+import com.tonyxlab.smartstep.utils.openAppSettings
+import com.tonyxlab.smartstep.utils.requestIgnoreBatteryOptimizations
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -36,6 +41,8 @@ fun HomeScreen(
     navigator: Navigator,
     viewModel: HomeViewModel = koinViewModel()
 ) {
+
+    val activity = LocalActivity.current ?: return
     BaseContentLayout(
             viewModel = viewModel,
             topBar = {
@@ -50,6 +57,23 @@ fun HomeScreen(
                             }
                         }
                 )
+            },
+            actionEventHandler = { _, action ->
+                when (action) {
+                    HomeActionEvent.OpenAppSettings -> {
+                        activity.openAppSettings()
+
+                    }
+
+                    HomeActionEvent.RequestBatteryOptimization -> {
+
+                        if (!activity.isIgnoringBatteryOptimizations()){
+
+                            activity.requestIgnoreBatteryOptimizations()
+                        }
+                    }
+                }
+
             }
     ) { uiState ->
         HomeScreenContent(
@@ -79,14 +103,11 @@ fun HomeScreenContent(
         )
 
         PermissionHandler(
+                uiState = uiState,
                 onEvent = onEvent
         )
 
-        PermissionBottomSheet(
-                isSheetVisible = uiState.isSheetVisible,
-                permissionSheetType = uiState.permissionSheetType,
-                onEvent = onEvent
-        )
+
     }
 }
 
