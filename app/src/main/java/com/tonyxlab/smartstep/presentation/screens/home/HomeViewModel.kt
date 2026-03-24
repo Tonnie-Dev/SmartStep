@@ -52,6 +52,8 @@ class HomeViewModel(
             }
 
             HomeUiEvent.DismissPermissionDialog -> {
+
+                
                 updateState {
                     it.copy(
                             isSheetVisible = false,

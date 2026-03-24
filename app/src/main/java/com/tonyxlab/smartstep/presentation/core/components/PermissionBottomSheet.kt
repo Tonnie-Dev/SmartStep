@@ -19,6 +19,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -44,13 +45,30 @@ fun PermissionBottomSheet(
     permissionSheetType: PermissionSheetType?,
     modifier: Modifier = Modifier,
     hasHandle: Boolean = false,
-    sheetState: SheetState = rememberModalBottomSheetState(),
     onEvent: (HomeUiEvent) -> Unit
 ) {
 
+    val isLockedSheet = permissionSheetType == PermissionSheetType.INITIAL_DENIAL ||
+            permissionSheetType == PermissionSheetType.PERMANENT_DENIAL
+
+    val sheetState = rememberModalBottomSheetState (
+            skipPartiallyExpanded = true,
+            confirmValueChange = { targetValue ->
+                if (isLockedSheet){
+                    targetValue != SheetValue.Hidden
+                }else {
+                    true
+                }
+
+            }
+    )
     if (isSheetVisible && permissionSheetType != null) {
         ModalBottomSheet(
-                onDismissRequest = { onEvent(HomeUiEvent.DismissPermissionDialog) },
+                onDismissRequest = {
+                   if (isLockedSheet.not()){
+                       onEvent(HomeUiEvent.DismissPermissionDialog)
+                   }
+                     },
                 sheetState = sheetState,
                 shape = MaterialTheme.shapes.HorizontalRoundedCornerShape28,
                 containerColor = MaterialTheme.colorScheme.surface,
@@ -83,7 +101,6 @@ fun PermissionBottomSheet(
                             onContinue = { onEvent(HomeUiEvent.Continue) }
                     )
                 }
-
 
             }
         }
