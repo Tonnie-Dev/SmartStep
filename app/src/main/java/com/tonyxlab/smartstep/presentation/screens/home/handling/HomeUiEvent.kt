@@ -3,13 +3,14 @@ package com.tonyxlab.smartstep.presentation.screens.home.handling
 import com.tonyxlab.smartstep.presentation.core.base.handling.UiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
 
-sealed interface HomeUiEvent : UiEvent{
-data object DismissPermissionDialog: HomeUiEvent
-data object AllowAccess: HomeUiEvent
-data object OpenPermissionsSettings: HomeUiEvent
-data object Continue: HomeUiEvent
+sealed interface HomeUiEvent : UiEvent {
+    data object DismissPermissionDialog : HomeUiEvent
+    data object AllowAccess : HomeUiEvent
+    data object OpenPermissionsSettings : HomeUiEvent
+    data object Continue : HomeUiEvent
+    data object PhysicalActivityPermissionRequested : HomeUiEvent
+    data object BackgroundPermissionSheetShown : HomeUiEvent
 
-    // 👇 NEW
     data class ShowPermissionSheet(
         val type: PermissionSheetType
     ) : HomeUiEvent

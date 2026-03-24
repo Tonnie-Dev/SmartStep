@@ -5,5 +5,7 @@ import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionShe
 
 data class HomeUiState(
     val isSheetVisible: Boolean = false,
-    val permissionSheetType: PermissionSheetType? = null
+    val permissionSheetType: PermissionSheetType? = null,
+    val physicalActivityPermissionRequested: Boolean = false,
+    val backgroundPermissionSheetShown: Boolean = false
 ) : UiState

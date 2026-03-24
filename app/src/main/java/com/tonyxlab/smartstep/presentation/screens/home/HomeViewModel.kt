@@ -1,22 +1,48 @@
 package com.tonyxlab.smartstep.presentation.screens.home
 
+import androidx.lifecycle.viewModelScope
+import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 
 typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeActionEvent>
 
-class HomeViewModel : HomeBaseViewModel() {
+class HomeViewModel(
+    private val onboardingDataStore: OnboardingDataStore
+) : HomeBaseViewModel() {
 
     override val initialState: HomeUiState
         get() = HomeUiState()
 
+    init {
+        observePermissionStates()
+    }
+
+    private fun observePermissionStates() {
+        viewModelScope.launch {
+            combine(
+                    onboardingDataStore.physicalActivityPermissionRequested,
+                    onboardingDataStore.backgroundPermissionSheetShown
+            ) { requested, shown ->
+                Pair(requested, shown)
+            }.collect { (requested, shown) ->
+                updateState {
+                    it.copy(
+                            physicalActivityPermissionRequested = requested,
+                            backgroundPermissionSheetShown = shown
+                    )
+                }
+            }
+        }
+    }
+
     override fun onEvent(event: HomeUiEvent) {
         when (event) {
-
             is HomeUiEvent.ShowPermissionSheet -> {
-
                 updateState {
                     it.copy(
                             isSheetVisible = true,
@@ -47,16 +73,22 @@ class HomeViewModel : HomeBaseViewModel() {
                 updateState {
                     it.copy(isSheetVisible = false)
                 }
-
                 sendActionEvent(HomeActionEvent.RequestBatteryOptimization)
+            }
+
+            HomeUiEvent.PhysicalActivityPermissionRequested -> {
+                viewModelScope.launch {
+                    onboardingDataStore.setPhysicalActivityPermissionRequested(true)
+                }
+            }
+
+            HomeUiEvent.BackgroundPermissionSheetShown -> {
+                viewModelScope.launch {
+                    onboardingDataStore.setBackgroundPermissionSheetShown(true)
+                }
             }
 
             HomeUiEvent.AllowAccess -> Unit
         }
-    }
-
-    private fun dismissDialog() {
-
-        updateState { it.copy(isSheetVisible = false) }
     }
 }

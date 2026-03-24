@@ -8,11 +8,6 @@ import androidx.annotation.RequiresApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -20,7 +15,6 @@ import com.google.accompanist.permissions.shouldShowRationale
 import com.tonyxlab.smartstep.presentation.core.components.PermissionBottomSheet
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
-import timber.log.Timber
 
 enum class PermissionSheetType {
     INITIAL_DENIAL,
@@ -40,27 +34,19 @@ fun PermissionHandler(
 
     val permissionStatus = permissionState.status
 
-    var hasRequestedPermission by rememberSaveable { mutableStateOf(false) }
-    var denialCount by rememberSaveable { mutableIntStateOf(0) }
-    var hasShownBackgroundSheet by rememberSaveable { mutableStateOf(false) }
-
-    // Launch the permission request only once when entering the screen
+    // Launch the permission request only once when entering the screen for the first time
     LaunchedEffect(Unit) {
-        if (!permissionStatus.isGranted && !hasRequestedPermission) {
-            hasRequestedPermission = true
+        if (!permissionStatus.isGranted && !uiState.physicalActivityPermissionRequested) {
+            onEvent(HomeUiEvent.PhysicalActivityPermissionRequested)
             permissionState.launchPermissionRequest()
         }
     }
 
-    // React to permission result changes
-    LaunchedEffect(permissionStatus) {
+    // React to permission result changes or app launch
+    LaunchedEffect(permissionStatus.isGranted, permissionStatus.shouldShowRationale) {
         when {
             permissionStatus.isGranted -> {
-                if (!hasShownBackgroundSheet) {
-                    hasShownBackgroundSheet = true
-
-
-
+                if (!uiState.backgroundPermissionSheetShown) {
                     onEvent(
                             HomeUiEvent.ShowPermissionSheet(
                                     PermissionSheetType.BACKGROUND_ACCESS
@@ -70,45 +56,37 @@ fun PermissionHandler(
             }
 
             permissionStatus.shouldShowRationale -> {
-                denialCount = 1
-
-
-
                 onEvent(
                         HomeUiEvent.ShowPermissionSheet(
                                 PermissionSheetType.INITIAL_DENIAL
                         )
                 )
-
             }
 
-            hasRequestedPermission || denialCount >= 1 -> {
-                denialCount = 2
-
-
+            uiState.physicalActivityPermissionRequested -> {
+                // Not granted, no rationale, and we've requested before -> Permanent denial
                 onEvent(
                         HomeUiEvent.ShowPermissionSheet(
                                 PermissionSheetType.PERMANENT_DENIAL
                         )
                 )
             }
-
-
         }
     }
-
 
     PermissionBottomSheet(
             isSheetVisible = uiState.isSheetVisible,
             permissionSheetType = uiState.permissionSheetType,
             onEvent = { event ->
-
                 when (event) {
                     HomeUiEvent.AllowAccess -> {
-
                         onEvent(HomeUiEvent.DismissPermissionDialog)
-
                         permissionState.launchPermissionRequest()
+                    }
+
+                    HomeUiEvent.Continue -> {
+                        onEvent(HomeUiEvent.BackgroundPermissionSheetShown)
+                        onEvent(event)
                     }
 
                     else -> {
@@ -118,5 +96,3 @@ fun PermissionHandler(
             }
     )
 }
-
-
