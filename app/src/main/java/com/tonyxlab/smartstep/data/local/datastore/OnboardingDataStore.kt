@@ -28,16 +28,16 @@ class OnboardingDataStore(private val context: Context) {
 
     }
 
-    val onboardingSeen: Flow<Boolean> =
-        context.dataStore.data.catch { e ->
+    val onboardingSeen: Flow<Boolean> = context.dataStore
+            .data.catch { e ->
 
-            if (e is IOException) {
-                emit(emptyPreferences())
-            } else throw e
-        }
-                .map { prefs ->
-                    prefs[OnboardingKeyPreferences.ONBOARDING_SEEN] ?: false
-                }
+                if (e is IOException) {
+                    emit(emptyPreferences())
+                } else throw e
+            }
+            .map { prefs ->
+                prefs[OnboardingKeyPreferences.ONBOARDING_SEEN] ?: false
+            }
 
     suspend fun setOnboardingSeen() {
         context.dataStore.edit { prefs ->
@@ -130,6 +130,5 @@ class OnboardingDataStore(private val context: Context) {
             prefs[OnboardingKeyPreferences.WEIGHT_IN_KG] = weightInKg
         }
     }
-
 
 }
