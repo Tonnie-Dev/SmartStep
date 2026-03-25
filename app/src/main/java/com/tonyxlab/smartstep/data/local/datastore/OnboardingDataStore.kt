@@ -25,10 +25,7 @@ class OnboardingDataStore(private val context: Context) {
         val HEIGHT_IN_CM = intPreferencesKey("height_in_cm")
         val WEIGHT_MODE = stringPreferencesKey("weight_mode")
         val WEIGHT_IN_KG = intPreferencesKey("weight_in_kg")
-        val PHYSICAL_ACTIVITY_PERMISSION_REQUESTED =
-            booleanPreferencesKey("physical_activity_permission_requested")
-        val BACKGROUND_PERMISSION_SHEET_SHOWN =
-            booleanPreferencesKey("background_permission_sheet_shown")
+
     }
 
     val onboardingSeen: Flow<Boolean> =
@@ -134,31 +131,5 @@ class OnboardingDataStore(private val context: Context) {
         }
     }
 
-    val physicalActivityPermissionRequested: Flow<Boolean> = context.dataStore.data
-            .catch { e ->
-                if (e is IOException) emit(emptyPreferences()) else throw e
-            }
-            .map {
-                it[OnboardingKeyPreferences.PHYSICAL_ACTIVITY_PERMISSION_REQUESTED] ?: false
-            }
 
-    suspend fun setPhysicalActivityPermissionRequested(requested: Boolean) {
-        context.dataStore.edit {
-            it[OnboardingKeyPreferences.PHYSICAL_ACTIVITY_PERMISSION_REQUESTED] = requested
-        }
-    }
-
-    val backgroundPermissionSheetShown: Flow<Boolean> = context.dataStore.data
-            .catch { e ->
-                if (e is IOException) emit(emptyPreferences()) else throw e
-            }
-            .map {
-                it[OnboardingKeyPreferences.BACKGROUND_PERMISSION_SHEET_SHOWN] ?: false
-            }
-
-    suspend fun setBackgroundPermissionSheetShown(shown: Boolean) {
-        context.dataStore.edit {
-            it[OnboardingKeyPreferences.BACKGROUND_PERMISSION_SHEET_SHOWN] = shown
-        }
-    }
 }

@@ -2,6 +2,7 @@ package com.tonyxlab.smartstep.presentation.screens.home
 
 import androidx.lifecycle.viewModelScope
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
+import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
@@ -12,7 +13,8 @@ import kotlinx.coroutines.launch
 typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeActionEvent>
 
 class HomeViewModel(
-    private val onboardingDataStore: OnboardingDataStore
+    private val onboardingDataStore: OnboardingDataStore,
+    private val permPrefsDataStore: PermPrefsDataStore
 ) : HomeBaseViewModel() {
 
     override val initialState: HomeUiState
@@ -25,8 +27,8 @@ class HomeViewModel(
     private fun observePermissionStates() {
         viewModelScope.launch {
             combine(
-                    onboardingDataStore.physicalActivityPermissionRequested,
-                    onboardingDataStore.backgroundPermissionSheetShown
+                    permPrefsDataStore.physicalActivityPermissionRequested,
+                    permPrefsDataStore.backgroundPermissionSheetShown
             ) { requested, shown ->
                 Pair(requested, shown)
             }.collect { (requested, shown) ->
@@ -53,7 +55,6 @@ class HomeViewModel(
 
             HomeUiEvent.DismissPermissionDialog -> {
 
-                
                 updateState {
                     it.copy(
                             isSheetVisible = false,
@@ -80,13 +81,13 @@ class HomeViewModel(
 
             HomeUiEvent.PhysicalActivityPermissionRequested -> {
                 viewModelScope.launch {
-                    onboardingDataStore.setPhysicalActivityPermissionRequested(true)
+                    permPrefsDataStore.setPhysicalActivityPermissionRequested(true)
                 }
             }
 
             HomeUiEvent.BackgroundPermissionSheetShown -> {
                 viewModelScope.launch {
-                    onboardingDataStore.setBackgroundPermissionSheetShown(true)
+                    permPrefsDataStore.setBackgroundPermissionSheetShown(true)
                 }
             }
 

@@ -1,6 +1,7 @@
 package com.tonyxlab.smartstep.di
 
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
+import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
 import com.tonyxlab.smartstep.presentation.screens.home.HomeViewModel
 import com.tonyxlab.smartstep.presentation.screens.onboarding.OnboardingViewModel
 import org.koin.core.module.dsl.singleOf
@@ -14,6 +15,7 @@ val viewModelModule = module {
 
 val dataStoreModule = module {
     singleOf(::OnboardingDataStore)
+    singleOf(::PermPrefsDataStore)
 }
 
 val appModule = listOf(viewModelModule, dataStoreModule)

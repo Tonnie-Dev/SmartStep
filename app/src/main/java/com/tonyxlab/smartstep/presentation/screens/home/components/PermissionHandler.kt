@@ -19,6 +19,7 @@ import com.google.accompanist.permissions.shouldShowRationale
 import com.tonyxlab.smartstep.presentation.core.components.PermissionBottomSheet
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
+import com.tonyxlab.smartstep.utils.OnResumeEffect
 
 enum class PermissionSheetType {
     INITIAL_DENIAL,
@@ -38,25 +39,12 @@ fun PermissionHandler(
             permission = Manifest.permission.ACTIVITY_RECOGNITION
     )
 
-    DisposableEffect(lifecycleOwner, permissionState.status) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                val isGranted = permissionState.status.isGranted
 
-                if (!isGranted) {
-                    onEvent(
-                            HomeUiEvent.ShowPermissionSheet(
-                                    PermissionSheetType.PERMANENT_DENIAL
-                            )
-                    )
-                }
-            }
-        }
 
-        lifecycleOwner.lifecycle.addObserver(observer)
+    OnResumeEffect {
 
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
+        if (!permissionState.status.isGranted){
+            onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.PERMANENT_DENIAL))
         }
     }
 
