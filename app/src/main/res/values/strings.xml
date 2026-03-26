@@ -66,6 +66,7 @@
     <!--Content Description Texts-->
     <string name="cds_text_check_mark">Check Mark</string>
     <string name="cds_shoe_icon">Shoe Icon</string>
+    <string name="cds_open_drawer">Open Drawer</string>
 
     <!--Snackbar Texts-->
     <string name="snack_text_item_added_to_cart">Item Added to Cart</string>

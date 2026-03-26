@@ -49,6 +49,11 @@ class HomeViewModel(private val permPrefsDataStore: PermPrefsDataStore)
             HomeUiEvent.PhysicalActivityPermissionRequested -> physicalActivityPermissionRequested()
             HomeUiEvent.BackgroundPermissionSheetShown -> backgroundPermissionSheetShown()
             HomeUiEvent.AllowAccess -> Unit
+            HomeUiEvent.ExitApp -> Unit
+            HomeUiEvent.FixCountIssue -> Unit
+            HomeUiEvent.OpenNavigationDrawer -> Unit
+            HomeUiEvent.OpenPersonalSettings -> Unit
+            HomeUiEvent.SetStepGoal -> Unit
         }
     }
 

@@ -34,15 +34,12 @@ fun PermissionHandler(
     onEvent: (HomeUiEvent) -> Unit,
 ) {
 
-    val lifecycleOwner = LocalLifecycleOwner.current
     val permissionState = rememberPermissionState(
             permission = Manifest.permission.ACTIVITY_RECOGNITION
     )
 
-
-
+    // Disposable Effect to Observe
     OnResumeEffect {
-
         if (!permissionState.status.isGranted){
             onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.PERMANENT_DENIAL))
         }
@@ -89,6 +86,7 @@ fun PermissionHandler(
     PermissionBottomSheet(
             isSheetVisible = uiState.isSheetVisible,
             permissionSheetType = uiState.permissionSheetType,
+            hasHandle = uiState.permissionSheetType== PermissionSheetType.BACKGROUND_ACCESS,
             onEvent = { event ->
                 when (event) {
                     HomeUiEvent.AllowAccess -> {

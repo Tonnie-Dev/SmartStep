@@ -14,4 +14,11 @@ sealed interface HomeUiEvent : UiEvent {
     data class ShowPermissionSheet(
         val type: PermissionSheetType
     ) : HomeUiEvent
+
+    data object OpenNavigationDrawer : HomeUiEvent
+    data object FixCountIssue : HomeUiEvent
+    data object SetStepGoal : HomeUiEvent
+    data object OpenPersonalSettings : HomeUiEvent
+    data object ExitApp : HomeUiEvent
+
 }

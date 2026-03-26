@@ -18,7 +18,6 @@ import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -51,12 +50,12 @@ fun PermissionBottomSheet(
     val isLockedSheet = permissionSheetType == PermissionSheetType.INITIAL_DENIAL ||
             permissionSheetType == PermissionSheetType.PERMANENT_DENIAL
 
-    val sheetState = rememberModalBottomSheetState (
+    val sheetState = rememberModalBottomSheetState(
             skipPartiallyExpanded = true,
             confirmValueChange = { targetValue ->
-                if (isLockedSheet){
+                if (isLockedSheet) {
                     targetValue != SheetValue.Hidden
-                }else {
+                } else {
                     true
                 }
 
@@ -65,10 +64,10 @@ fun PermissionBottomSheet(
     if (isSheetVisible && permissionSheetType != null) {
         ModalBottomSheet(
                 onDismissRequest = {
-                   if (isLockedSheet.not()){
-                       onEvent(HomeUiEvent.DismissPermissionDialog)
-                   }
-                     },
+                    if (isLockedSheet.not()) {
+                        onEvent(HomeUiEvent.DismissPermissionDialog)
+                    }
+                },
                 sheetState = sheetState,
                 shape = MaterialTheme.shapes.HorizontalRoundedCornerShape28,
                 containerColor = MaterialTheme.colorScheme.surface,
@@ -227,31 +226,31 @@ fun BottomSheetContentThree(
 ) {
     Column(
             modifier = modifier
-
                     .fillMaxWidth()
-                    .padding(top = MaterialTheme.spacing.spaceMedium)
                     .background(MaterialTheme.colorScheme.surface),
             horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Text(
-                modifier = Modifier.padding(horizontal = MaterialTheme.spacing.spaceLarge),
-                text = stringResource(id = R.string.caption_text_background_access),
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceSmall))
+        Column(modifier = Modifier.padding(horizontal = MaterialTheme.spacing.spaceSmall)) {
+            Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(id = R.string.caption_text_background_access),
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceSmall))
 
-        Text(
-                modifier = Modifier.padding(horizontal = MaterialTheme.spacing.spaceDoubleDp * 22),
-                text = stringResource(id = R.string.caption_text_background_access_desc),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.BodyLargeRegular,
-                textAlign = TextAlign.Center
-        )
-
+            Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(id = R.string.caption_text_background_access_desc),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.BodyLargeRegular,
+                    textAlign = TextAlign.Center
+            )
+        }
 
         Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceLarge))
+
         AppButton(
                 modifier = Modifier
                         .padding(horizontal = MaterialTheme.spacing.spaceMedium)
@@ -259,7 +258,6 @@ fun BottomSheetContentThree(
                 onClick = onContinue,
                 buttonText = stringResource(id = R.string.button_text_continue),
         )
-
     }
 }
 
