@@ -18,12 +18,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -44,11 +40,11 @@ import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
+import com.tonyxlab.smartstep.utils.OnResumeEffect
 import com.tonyxlab.smartstep.utils.isIgnoringBatteryOptimizations
 import com.tonyxlab.smartstep.utils.openAppSettings
 import com.tonyxlab.smartstep.utils.rememberIsDeviceWide
 import com.tonyxlab.smartstep.utils.requestIgnoreBatteryOptimizations
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -63,25 +59,19 @@ fun HomeScreen(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    var shouldOpenDrawer by remember { mutableStateOf(false) }
-
-    LaunchedEffect(uiState.isSheetVisible, shouldOpenDrawer) {
-        if (shouldOpenDrawer && !uiState.isSheetVisible) {
-            drawerState.open()
-            shouldOpenDrawer = false
-        }
-    }
-
     ModalNavigationDrawer(
             drawerState = drawerState,
             drawerContent = {
                 AppNavigationDrawer(
+                        uiState = uiState,
                         onEvent = { event ->
                             scope.launch { drawerState.close() }
 
                             when (event) {
                                 HomeUiEvent.FixCountIssue -> {
-                                    // TODO navigate or show screen
+
+                                    viewModel.onEvent(event)
+
                                 }
 
                                 HomeUiEvent.SetStepGoal -> {
@@ -110,17 +100,10 @@ fun HomeScreen(
                             navigationIcon = {
                                 IconButton(
                                         onClick = {
-
                                             scope.launch {
-
-                                                if (uiState.isSheetVisible) {
-                                                    shouldOpenDrawer = true
-                                                    viewModel.onEvent(HomeUiEvent.DismissPermissionDialog)
-                                                } else {
-                                                    scope.launch { drawerState.open() }
-                                                }
+                                                drawerState.open()
                                             }
-                                             }
+                                        }
                                 ) {
                                     Icon(
                                             painter = painterResource(id = R.drawable.ic_menu),
@@ -144,7 +127,6 @@ fun HomeScreen(
                     }
                 }
         ) { uiState ->
-
             HomeScreenContent(
                     uiState = uiState,
                     onEvent = viewModel::onEvent
@@ -161,8 +143,16 @@ fun HomeScreenContent(
     modifier: Modifier = Modifier
 ) {
 
+    val activity = LocalActivity.current ?: return
     val isDeviceWide = rememberIsDeviceWide()
     val maxWidth = if (isDeviceWide) 394.dp else Dp.Unspecified
+
+    OnResumeEffect {
+        val isBackgroundAccessGranted = activity.isIgnoringBatteryOptimizations()
+        onEvent(HomeUiEvent.BackgroundAccessChanged(isBackgroundAccessGranted))
+
+    }
+
     Box(
             modifier = modifier
                     .fillMaxSize()
@@ -181,7 +171,6 @@ fun HomeScreenContent(
                 uiState = uiState,
                 onEvent = onEvent
         )
-
     }
 }
 

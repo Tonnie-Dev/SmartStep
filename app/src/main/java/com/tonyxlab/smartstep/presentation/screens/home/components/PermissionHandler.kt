@@ -4,6 +4,7 @@ package com.tonyxlab.smartstep.presentation.screens.home.components
 
 import android.Manifest
 import android.os.Build
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -16,6 +17,7 @@ import com.tonyxlab.smartstep.presentation.core.components.PermissionPrompt
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
 import com.tonyxlab.smartstep.utils.OnResumeEffect
+import com.tonyxlab.smartstep.utils.isIgnoringBatteryOptimizations
 
 enum class PermissionSheetType {
     INITIAL_DENIAL,
@@ -34,10 +36,12 @@ fun PermissionHandler(
     val permissionState = rememberPermissionState(
             permission = Manifest.permission.ACTIVITY_RECOGNITION
     )
+    val activity = LocalActivity.current ?: return
+    val isBackgroundAccessGranted = activity.isIgnoringBatteryOptimizations()
 
     // Disposable Effect to Observe
     OnResumeEffect {
-        if (!permissionState.status.isGranted){
+        if (!permissionState.status.isGranted) {
             onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.PERMANENT_DENIAL))
         }
     }
@@ -57,7 +61,10 @@ fun PermissionHandler(
     LaunchedEffect(permissionStatus.isGranted, permissionStatus.shouldShowRationale) {
         when {
             permissionStatus.isGranted -> {
-                if (!uiState.backgroundPermissionSheetShown) {
+                if (
+                    !isBackgroundAccessGranted &&
+                    !uiState.backgroundPermissionSheetShown
+                ) {
                     onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.BACKGROUND_ACCESS))
                 }
             }
@@ -84,7 +91,7 @@ fun PermissionHandler(
             isDeviceWide = isDeviceWide,
             isSheetVisible = uiState.isSheetVisible,
             permissionSheetType = uiState.permissionSheetType,
-            hasHandle = uiState.permissionSheetType== PermissionSheetType.BACKGROUND_ACCESS,
+            hasHandle = uiState.permissionSheetType == PermissionSheetType.BACKGROUND_ACCESS,
             onEvent = { event ->
                 when (event) {
                     HomeUiEvent.AllowAccess -> {
@@ -93,7 +100,7 @@ fun PermissionHandler(
                     }
 
                     HomeUiEvent.Continue -> {
-                        onEvent(HomeUiEvent.BackgroundPermissionSheetShown)
+                        onEvent(HomeUiEvent.ShowBackgroundPermissionSheet)
                         onEvent(event)
                     }
 

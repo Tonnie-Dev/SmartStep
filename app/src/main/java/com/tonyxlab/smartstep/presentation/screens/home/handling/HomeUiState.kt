@@ -7,5 +7,6 @@ data class HomeUiState(
     val isSheetVisible: Boolean = false,
     val permissionSheetType: PermissionSheetType? = null,
     val physicalActivityPermissionRequested: Boolean = false,
-    val backgroundPermissionSheetShown: Boolean = false
+    val backgroundPermissionSheetShown: Boolean = false,
+    val isBackgroundAccessGranted: Boolean? = null
 ) : UiState

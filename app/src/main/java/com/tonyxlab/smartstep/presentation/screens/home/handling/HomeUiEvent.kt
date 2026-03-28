@@ -9,7 +9,9 @@ sealed interface HomeUiEvent : UiEvent {
     data object OpenPermissionsSettings : HomeUiEvent
     data object Continue : HomeUiEvent
     data object PhysicalActivityPermissionRequested : HomeUiEvent
-    data object BackgroundPermissionSheetShown : HomeUiEvent
+
+    data class BackgroundAccessChanged(val granted: Boolean): HomeUiEvent
+    data object ShowBackgroundPermissionSheet : HomeUiEvent
 
     data class ShowPermissionSheet(
         val type: PermissionSheetType

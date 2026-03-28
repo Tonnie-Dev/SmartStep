@@ -1,5 +1,9 @@
+@file:RequiresApi(Build.VERSION_CODES.Q)
+
 package com.tonyxlab.smartstep.presentation.screens.home
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
 import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
@@ -9,11 +13,11 @@ import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeActionEvent>
 
-class HomeViewModel(private val permPrefsDataStore: PermPrefsDataStore)
-    : HomeBaseViewModel() {
+class HomeViewModel(private val permPrefsDataStore: PermPrefsDataStore) : HomeBaseViewModel() {
 
     override val initialState: HomeUiState
         get() = HomeUiState()
@@ -47,13 +51,14 @@ class HomeViewModel(private val permPrefsDataStore: PermPrefsDataStore)
             HomeUiEvent.OpenPermissionsSettings -> openPermissionsSettings()
             HomeUiEvent.Continue -> handleContinue()
             HomeUiEvent.PhysicalActivityPermissionRequested -> physicalActivityPermissionRequested()
-            HomeUiEvent.BackgroundPermissionSheetShown -> backgroundPermissionSheetShown()
+            HomeUiEvent.ShowBackgroundPermissionSheet -> showBackgroundPermissionSheet()
             HomeUiEvent.AllowAccess -> Unit
             HomeUiEvent.ExitApp -> Unit
-            HomeUiEvent.FixCountIssue -> Unit
+            HomeUiEvent.FixCountIssue -> showPermissionSheet(PermissionSheetType.BACKGROUND_ACCESS)
             HomeUiEvent.OpenNavigationDrawer -> Unit
             HomeUiEvent.OpenPersonalSettings -> Unit
             HomeUiEvent.SetStepGoal -> Unit
+            is HomeUiEvent.BackgroundAccessChanged -> updateBackgroundAccessState(event.granted)
         }
     }
 
@@ -93,9 +98,16 @@ class HomeViewModel(private val permPrefsDataStore: PermPrefsDataStore)
         }
     }
 
-    private fun backgroundPermissionSheetShown() {
+    private fun updateBackgroundAccessState(granted: Boolean) {
+        updateState { it.copy(isBackgroundAccessGranted = granted) }
+    }
+
+    private fun showBackgroundPermissionSheet() {
+        Timber.tag("PermHandler")
+                .i("showed dialog at vm")
         viewModelScope.launch {
             permPrefsDataStore.setBackgroundPermissionSheetShown(true)
         }
     }
+
 }

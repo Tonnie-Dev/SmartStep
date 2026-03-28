@@ -1,5 +1,7 @@
 package com.tonyxlab.smartstep.presentation.screens.home.components
 
+import android.R.attr.onClick
+import android.R.attr.text
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,14 +24,18 @@ import androidx.compose.ui.unit.dp
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
+import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
 import com.tonyxlab.smartstep.presentation.theme.EndVerticalRoundedCornerShape16
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
+import timber.log.Timber
 
 @Composable
 fun AppNavigationDrawer(
+    uiState: HomeUiState,
     onEvent: (HomeUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+
     ModalDrawerSheet(
             modifier = modifier
                     .width(352.dp)
@@ -42,14 +48,16 @@ fun AppNavigationDrawer(
                         .fillMaxWidth()
                         .padding(vertical = MaterialTheme.spacing.spaceSmall)
         ) {
-            DrawerItem(
-                    text = stringResource(id = R.string.nav_drawer_fix_stop_counting),
-                    onClick = { onEvent(HomeUiEvent.FixCountIssue) }
-            )
-            HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = MaterialTheme.spacing.spaceMedium),
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-            )
+            if (uiState.isBackgroundAccessGranted==false) {
+                DrawerItem(
+                        text = stringResource(id = R.string.nav_drawer_fix_stop_counting),
+                        onClick = { onEvent(HomeUiEvent.FixCountIssue) }
+                )
+                HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = MaterialTheme.spacing.spaceMedium),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                )
+            }
             DrawerItem(
                     text = stringResource(id = R.string.nav_drawer_step_goal),
                     onClick = { onEvent(HomeUiEvent.SetStepGoal) }
@@ -104,8 +112,10 @@ private fun AppNavigationDrawerPreview() {
                         .fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceMedium)
         ) {
-            AppNavigationDrawer(onEvent = {})
-
+            AppNavigationDrawer(
+                    uiState = HomeUiState(),
+                    onEvent = {}
+            )
         }
     }
 }
