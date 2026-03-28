@@ -39,7 +39,8 @@ import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PermissionBottomSheet(
+fun PermissionPrompt(
+    isDeviceWide: Boolean,
     isSheetVisible: Boolean,
     permissionSheetType: PermissionSheetType?,
     modifier: Modifier = Modifier,
@@ -58,52 +59,76 @@ fun PermissionBottomSheet(
                 } else {
                     true
                 }
-
             }
     )
     if (isSheetVisible && permissionSheetType != null) {
-        ModalBottomSheet(
-                onDismissRequest = {
-                    if (isLockedSheet.not()) {
-                        onEvent(HomeUiEvent.DismissPermissionDialog)
-                    }
-                },
-                sheetState = sheetState,
-                shape = MaterialTheme.shapes.HorizontalRoundedCornerShape28,
-                containerColor = MaterialTheme.colorScheme.surface,
-                dragHandle = {
-                    if (hasHandle) {
-                        BottomSheetDefaults.DragHandle()
-                    }
-                },
-                modifier = modifier
-        ) {
+        if (isDeviceWide) {
+            LargeScreenDialog(
+                    isLocked = isLockedSheet,
+                    onEvent = onEvent
+            ) {
+                ResolveSheetContent(
+                        permissionSheetType = permissionSheetType,
+                        onEvent = onEvent
+                )
+            }
+        } else {
+            ModalBottomSheet(
+                    onDismissRequest = {
+                        if (isLockedSheet.not()) {
+                            onEvent(HomeUiEvent.DismissPermissionDialog)
+                        }
+                    },
+                    sheetState = sheetState,
+                    shape = MaterialTheme.shapes.HorizontalRoundedCornerShape28,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    dragHandle = {
+                        if (hasHandle) {
+                            BottomSheetDefaults.DragHandle()
+                        }
+                    },
+                    modifier = modifier
+            ) {
 
-            when (permissionSheetType) {
-                PermissionSheetType.INITIAL_DENIAL -> {
-                    BottomSheetContentOne(
-                            onAllowAccessClick = { onEvent(HomeUiEvent.AllowAccess) }
-                    )
-
-                }
-
-                PermissionSheetType.PERMANENT_DENIAL -> {
-
-                    BottomSheetContentTwo(
-                            onOpenSettings = { onEvent(HomeUiEvent.OpenPermissionsSettings) }
-                    )
-                }
-
-                PermissionSheetType.BACKGROUND_ACCESS -> {
-
-                    BottomSheetContentThree(
-                            onContinue = { onEvent(HomeUiEvent.Continue) }
-                    )
-                }
+                ResolveSheetContent(
+                        permissionSheetType = permissionSheetType,
+                        onEvent = onEvent
+                )
 
             }
         }
     }
+}
+
+@Composable
+fun ResolveSheetContent(
+    permissionSheetType: PermissionSheetType,
+    onEvent: (HomeUiEvent) -> Unit
+) {
+    when (permissionSheetType) {
+        PermissionSheetType.INITIAL_DENIAL -> {
+            BottomSheetContentOne(
+                    onAllowAccessClick = { onEvent(HomeUiEvent.AllowAccess) }
+            )
+
+        }
+
+        PermissionSheetType.PERMANENT_DENIAL -> {
+
+            BottomSheetContentTwo(
+                    onOpenSettings = { onEvent(HomeUiEvent.OpenPermissionsSettings) }
+            )
+        }
+
+        PermissionSheetType.BACKGROUND_ACCESS -> {
+
+            BottomSheetContentThree(
+                    onContinue = { onEvent(HomeUiEvent.Continue) }
+            )
+        }
+
+    }
+
 }
 
 @Composable
@@ -154,7 +179,6 @@ fun BottomSheetContentTwo(
 ) {
     Column(
             modifier = modifier
-
                     .fillMaxWidth()
                     .padding(top = MaterialTheme.spacing.spaceMedium)
                     .background(MaterialTheme.colorScheme.surface),
@@ -264,7 +288,7 @@ fun BottomSheetContentThree(
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
-private fun BottomSheetContentOnePreview() {
+private fun PromptContentOnePreview() {
 
     SmartStepTheme {
         Column(
@@ -274,11 +298,12 @@ private fun BottomSheetContentOnePreview() {
                         .padding(MaterialTheme.spacing.spaceMedium),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceMedium)
         ) {
-            PermissionBottomSheet(
+            PermissionPrompt(
                     isSheetVisible = true,
                     hasHandle = true,
                     permissionSheetType = PermissionSheetType.INITIAL_DENIAL,
-                    onEvent = {}
+                    onEvent = {},
+                    isDeviceWide = false
             )
         }
     }

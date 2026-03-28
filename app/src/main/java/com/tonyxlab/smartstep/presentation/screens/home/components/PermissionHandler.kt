@@ -7,16 +7,12 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
-import com.tonyxlab.smartstep.presentation.core.components.PermissionBottomSheet
+import com.tonyxlab.smartstep.presentation.core.components.PermissionPrompt
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
 import com.tonyxlab.smartstep.utils.OnResumeEffect
@@ -30,6 +26,7 @@ enum class PermissionSheetType {
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun PermissionHandler(
+    isDeviceWide: Boolean,
     uiState: HomeUiState,
     onEvent: (HomeUiEvent) -> Unit,
 ) {
@@ -83,7 +80,8 @@ fun PermissionHandler(
         }
     }
 
-    PermissionBottomSheet(
+    PermissionPrompt(
+            isDeviceWide = isDeviceWide,
             isSheetVisible = uiState.isSheetVisible,
             permissionSheetType = uiState.permissionSheetType,
             hasHandle = uiState.permissionSheetType== PermissionSheetType.BACKGROUND_ACCESS,

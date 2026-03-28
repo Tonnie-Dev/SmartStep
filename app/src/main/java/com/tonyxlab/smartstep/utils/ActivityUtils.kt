@@ -50,9 +50,7 @@ fun OnResumeEffect( onResume:()-> Unit){
 
     DisposableEffect(lifeCycleOwner) {
 
-        val observer = LifecycleEventObserver {
-
-           _,event ->
+        val observer = LifecycleEventObserver { _,event ->
             if (event == Lifecycle.Event.ON_RESUME){
                 onResume()
             }

@@ -177,6 +177,7 @@ fun HomeScreenContent(
         )
 
         PermissionHandler(
+                isDeviceWide = isDeviceWide,
                 uiState = uiState,
                 onEvent = onEvent
         )
