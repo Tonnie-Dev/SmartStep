@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -28,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.base.BaseContentLayout
@@ -43,6 +46,7 @@ import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 import com.tonyxlab.smartstep.utils.isIgnoringBatteryOptimizations
 import com.tonyxlab.smartstep.utils.openAppSettings
+import com.tonyxlab.smartstep.utils.rememberIsDeviceWide
 import com.tonyxlab.smartstep.utils.requestIgnoreBatteryOptimizations
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -156,6 +160,9 @@ fun HomeScreenContent(
     onEvent: (HomeUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+    val isDeviceWide = rememberIsDeviceWide()
+    val maxWidth = if (isDeviceWide) 394.dp else Dp.Unspecified
     Box(
             modifier = modifier
                     .fillMaxSize()
@@ -164,6 +171,7 @@ fun HomeScreenContent(
             contentAlignment = Alignment.Center
     ) {
         StepCounterCard(
+                modifier = Modifier.widthIn(max = maxWidth),
                 currentSteps = 7000,
                 stepsGoal = 10000
         )

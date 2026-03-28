@@ -1,12 +1,12 @@
 package com.tonyxlab.smartstep.presentation.screens.onboarding
 
-import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
@@ -44,7 +44,6 @@ fun OnboardingScreen(
     navigator: Navigator,
     viewModel: OnboardingViewModel = koinViewModel()
 ) {
-
     BaseContentLayout(
             viewModel = viewModel,
             topBar = {
@@ -76,14 +75,14 @@ fun OnboardingScreenContent(
 ) {
 
     val isDeviceWide = rememberIsDeviceWide()
-
     val maxWidth = if (isDeviceWide) 394.dp else Dp.Unspecified
+
     Box(
             modifier = modifier
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .fillMaxSize()
                     .padding(horizontal = MaterialTheme.spacing.spaceMedium)
-                    .padding(vertical = MaterialTheme.spacing.spaceLarge),
+                    .padding(top = MaterialTheme.spacing.spaceLarge),
             contentAlignment = Alignment.TopCenter
     ) {
         Column(
@@ -165,10 +164,10 @@ fun OnboardingScreenContent(
                 }
             }
         }
-
-
         AppButton(
-                modifier = Modifier.align(Alignment.BottomCenter).widthIn(max= maxWidth),
+                modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .widthIn(max = maxWidth),
                 onClick = { onEvent(OnboardingUiEvent.CompleteOnBoarding) },
                 buttonText = stringResource(id = R.string.button_text_start)
         )

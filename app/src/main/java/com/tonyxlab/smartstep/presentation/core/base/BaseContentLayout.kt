@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
@@ -83,7 +84,7 @@ fun <S : UiState, E : UiEvent, A : ActionEvent> BaseContentLayout(
             Box(
                     modifier = modifier
                             .padding(paddingValues)
-                    //    .navigationBarsPadding()
+                            .navigationBarsPadding()
             ) {
                 content(uiState)
             }
