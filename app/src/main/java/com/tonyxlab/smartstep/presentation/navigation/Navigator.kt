@@ -14,6 +14,11 @@ class Navigator(private val backStack: SnapshotStateList<NavDestination>) {
         push(HomeDestination)
     }
 
+    fun navigateToOnboarding(){
+       push(OnboardingDestination)
+
+    }
+
     fun popBackStack() {
         if (backStack.size > 1) {
             backStack.removeLastOrNull()

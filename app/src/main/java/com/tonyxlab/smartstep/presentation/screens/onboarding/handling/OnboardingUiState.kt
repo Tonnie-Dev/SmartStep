@@ -8,6 +8,7 @@ import com.tonyxlab.smartstep.utils.Constants.DEFAULT_WEIGHT_KG
 import com.tonyxlab.smartstep.utils.Constants.DEFAULT_WEIGHT_LB
 
 data class OnboardingUiState(
+    val onboardingSeen: Boolean = false,
     val genderSelectionState: GenderSelectionState = GenderSelectionState(),
     val heightPickerState: HeightPickerState = HeightPickerState(),
     val weightPickerState: WeightPickerState = WeightPickerState()

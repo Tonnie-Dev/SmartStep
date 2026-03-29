@@ -6,13 +6,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.base.BaseContentLayout
 import com.tonyxlab.smartstep.presentation.core.components.AppButton
@@ -33,6 +34,7 @@ import com.tonyxlab.smartstep.presentation.screens.onboarding.components.WeightP
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.OnboardingActionEvent
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.OnboardingUiEvent
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.OnboardingUiState
+import com.tonyxlab.smartstep.presentation.theme.BodyLargeMedium
 import com.tonyxlab.smartstep.presentation.theme.BodyLargeRegular
 import com.tonyxlab.smartstep.presentation.theme.RoundedCornerShape14
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
@@ -44,12 +46,15 @@ fun OnboardingScreen(
     navigator: Navigator,
     viewModel: OnboardingViewModel = koinViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     BaseContentLayout(
             viewModel = viewModel,
             topBar = {
                 AppTopBar(
                         titleText = stringResource(id = R.string.topbar_text_my_profile),
-                        actionText = stringResource(id = R.string.text_button_skip),
+                        actionText = if (uiState.onboardingSeen) null
+                        else
+                            stringResource(id = R.string.text_button_skip),
                         onActionClick = { viewModel.onEvent(OnboardingUiEvent.SkipOnboarding) }
                 )
             },
@@ -76,6 +81,12 @@ fun OnboardingScreenContent(
 
     val isDeviceWide = rememberIsDeviceWide()
     val maxWidth = if (isDeviceWide) 394.dp else Dp.Unspecified
+    val onboardingSeen = uiState.onboardingSeen
+
+    val (text, style) = if (onboardingSeen)
+        R.string.caption_text_personal_settings to MaterialTheme.typography.BodyLargeMedium
+    else
+        R.string.caption_text_profile_desc to MaterialTheme.typography.BodyLargeRegular
 
     Box(
             modifier = modifier
@@ -87,13 +98,12 @@ fun OnboardingScreenContent(
     ) {
         Column(
                 modifier = Modifier.widthIn(max = maxWidth),
-                horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceMedium)
         ) {
 
             Text(
-                    text = stringResource(id = R.string.caption_text_profile_desc),
-                    style = MaterialTheme.typography.BodyLargeRegular,
+                    text = stringResource(id = text),
+                    style = style,
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center
             )
@@ -168,8 +178,14 @@ fun OnboardingScreenContent(
                 modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .widthIn(max = maxWidth),
-                onClick = { onEvent(OnboardingUiEvent.CompleteOnBoarding) },
-                buttonText = stringResource(id = R.string.button_text_start)
+                buttonText = stringResource(
+                        id =
+                            if (onboardingSeen)
+                                R.string.button_text_save
+                            else
+                                R.string.button_text_start
+                ),
+                onClick = { onEvent(OnboardingUiEvent.CompleteOnBoarding) }
         )
     }
 }

@@ -76,11 +76,11 @@ fun HomeScreen(
                                 }
 
                                 HomeUiEvent.ShowStepGoalPicker -> {
-                                  viewModel.onEvent(HomeUiEvent.ShowStepGoalPicker)
+                                    viewModel.onEvent(HomeUiEvent.ShowStepGoalPicker)
                                 }
 
                                 HomeUiEvent.OpenPersonalSettings -> {
-                                    // TODO navigate
+                                    navigator.navigateToOnboarding()
                                 }
 
                                 HomeUiEvent.ExitApp -> {
@@ -173,7 +173,7 @@ fun HomeScreenContent(
                 onEvent = onEvent
         )
 
-        if (uiState.stepGoalPickerState.pickerSheetVisible){
+        if (uiState.stepGoalPickerState.pickerSheetVisible) {
             StepGoalPicker(
                     modifier = Modifier.widthIn(max = maxWidth2),
                     isDeviceWide = isDeviceWide,

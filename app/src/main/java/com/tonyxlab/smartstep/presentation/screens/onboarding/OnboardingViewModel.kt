@@ -1,5 +1,7 @@
 package com.tonyxlab.smartstep.presentation.screens.onboarding
 
+import android.R.attr.height
+import androidx.compose.ui.text.font.FontVariation.weight
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.Gender
@@ -9,6 +11,8 @@ import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.Onboardin
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.OnboardingUiState
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.WeightMode
 import com.tonyxlab.smartstep.utils.UnitConverter
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import timber.log.Timber
 
 typealias OnboardingBaseViewModel = BaseViewModel<OnboardingUiState, OnboardingUiEvent, OnboardingActionEvent>
@@ -20,9 +24,13 @@ class OnboardingViewModel(
     override val initialState: OnboardingUiState
         get() = OnboardingUiState()
 
+    init {
+        readOnboardingStatus()
+        loadPersonalSettings()
+    }
+
     override fun onEvent(event: OnboardingUiEvent) {
         when (event) {
-
             OnboardingUiEvent.CompleteOnBoarding -> onCompleteOnboarding()
             OnboardingUiEvent.SkipOnboarding -> onSkipOnboarding()
             OnboardingUiEvent.HeightPickerVisibilityChange -> onHeightPickerVisibilityChange()
@@ -39,6 +47,17 @@ class OnboardingViewModel(
             OnboardingUiEvent.CancelHeightDialog -> onCancelHeightDialog()
             OnboardingUiEvent.ConfirmWeightDialog -> onConfirmWeightDialog()
             OnboardingUiEvent.CancelWeightDialog -> onCancelWeightDialog()
+        }
+    }
+
+    private fun readOnboardingStatus() {
+        launch {
+
+            onboardingDataStore.onboardingSeen.collect { seen ->
+
+                updateState { it.copy(onboardingSeen = seen) }
+            }
+
         }
     }
 
@@ -64,6 +83,41 @@ class OnboardingViewModel(
             )
             sendActionEvent(OnboardingActionEvent.NavigateToHome)
         }
+    }
+
+    private fun loadPersonalSettings() {
+        launch {
+
+            combine(
+                    onboardingDataStore.selectedGender,
+                    onboardingDataStore.heightInCm,
+                    onboardingDataStore.heightMode,
+                    onboardingDataStore.weightInKg,
+                    onboardingDataStore.weightMode,
+
+            ) { gender, height, heightMode, weight, weightMode ->
+
+                updateState {
+                    it.copy(
+
+                            genderSelectionState = currentState.genderSelectionState.copy(
+                                    selectedGender = gender
+                            ),
+                            heightPickerState = currentState.heightPickerState.copy(
+                                    selectedCentimeter = height,
+                                    heightMode = heightMode
+                            ),
+                            weightPickerState = currentState.weightPickerState.copy(
+                                    selectedKgs = weight,
+                                    weightMode = weightMode
+                            ),
+                    )
+                }
+
+            }.collect()
+
+        }
+
     }
 
     private fun onSkipOnboarding() {
