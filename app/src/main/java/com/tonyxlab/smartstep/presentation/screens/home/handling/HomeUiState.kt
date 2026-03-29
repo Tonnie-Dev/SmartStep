@@ -1,11 +1,25 @@
 package com.tonyxlab.smartstep.presentation.screens.home.handling
 
+import androidx.compose.runtime.Stable
 import com.tonyxlab.smartstep.presentation.core.base.handling.UiState
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
 
 data class HomeUiState(
-    val isSheetVisible: Boolean = false,
-    val permissionSheetType: PermissionSheetType? = null,
-    val physicalActivityPermissionRequested: Boolean = false,
-    val isBackgroundAccessGranted: Boolean? = null
-) : UiState
+    val permissionUiState: PermissionUiState = PermissionUiState(),
+    val stepGoalPickerState: StepGoalPickerState = StepGoalPickerState()
+) : UiState {
+
+    @Stable
+    data class PermissionUiState(
+        val permissionSheetVisible: Boolean = false,
+        val permissionSheetType: PermissionSheetType? = null,
+        val physicalActivityPermissionRequested: Boolean = false,
+        val isBackgroundAccessGranted: Boolean? = null
+    )
+
+    @Stable
+    data class StepGoalPickerState(
+        val pickerSheetVisible: Boolean = false,
+        val selectedSteps: Int = 2000
+    )
+}

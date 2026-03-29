@@ -14,7 +14,6 @@ class PermPrefsDataStore(val context: Context) {
     private data object PermissionPrefs {
         val PHYSICAL_ACTIVITY_PERMISSION_REQUESTED =
             booleanPreferencesKey("physical_activity_permission_requested")
-
     }
 
     val physicalActivityPermissionRequested: Flow<Boolean> = context.dataStore.data

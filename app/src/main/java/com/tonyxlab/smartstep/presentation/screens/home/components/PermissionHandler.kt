@@ -47,10 +47,13 @@ fun PermissionHandler(
     }
 
     val permissionStatus = permissionState.status
+    val permissionUiState = uiState.permissionUiState
+    val physicalActivityPermissionRequested = permissionUiState
+            .physicalActivityPermissionRequested
 
     // Launch the permission request only once when entering the screen for the first time
     LaunchedEffect(Unit) {
-        if (!permissionStatus.isGranted && !uiState.physicalActivityPermissionRequested) {
+        if (!permissionStatus.isGranted && !physicalActivityPermissionRequested) {
 
             onEvent(HomeUiEvent.PhysicalActivityPermissionRequested)
             permissionState.launchPermissionRequest()
@@ -72,7 +75,7 @@ fun PermissionHandler(
                 onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.INITIAL_DENIAL))
             }
 
-            uiState.physicalActivityPermissionRequested -> {
+            physicalActivityPermissionRequested -> {
 
                 // Not granted, no rationale, and we've requested before -> Permanent denial
                 onEvent(
@@ -86,9 +89,9 @@ fun PermissionHandler(
 
     PermissionPrompt(
             isDeviceWide = isDeviceWide,
-            isSheetVisible = uiState.isSheetVisible,
-            permissionSheetType = uiState.permissionSheetType,
-            hasHandle = uiState.permissionSheetType == PermissionSheetType.BACKGROUND_ACCESS,
+            isSheetVisible = permissionUiState.permissionSheetVisible,
+            permissionSheetType = permissionUiState.permissionSheetType,
+            hasHandle = permissionUiState.permissionSheetType == PermissionSheetType.BACKGROUND_ACCESS,
             onEvent = { event ->
                 when (event) {
                     HomeUiEvent.AllowAccess -> {

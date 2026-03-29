@@ -1,7 +1,5 @@
 package com.tonyxlab.smartstep.presentation.screens.home.components
 
-import android.R.attr.onClick
-import android.R.attr.text
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,7 +25,6 @@ import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
 import com.tonyxlab.smartstep.presentation.theme.EndVerticalRoundedCornerShape16
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
-import timber.log.Timber
 
 @Composable
 fun AppNavigationDrawer(
@@ -36,6 +33,7 @@ fun AppNavigationDrawer(
     modifier: Modifier = Modifier,
 ) {
 
+    val isBackgroundAccessGranted = uiState.permissionUiState.isBackgroundAccessGranted
     ModalDrawerSheet(
             modifier = modifier
                     .width(352.dp)
@@ -48,7 +46,7 @@ fun AppNavigationDrawer(
                         .fillMaxWidth()
                         .padding(vertical = MaterialTheme.spacing.spaceSmall)
         ) {
-            if (uiState.isBackgroundAccessGranted==false) {
+            if (isBackgroundAccessGranted == false) {
                 DrawerItem(
                         text = stringResource(id = R.string.nav_drawer_fix_stop_counting),
                         onClick = { onEvent(HomeUiEvent.FixCountIssue) }
