@@ -61,16 +61,14 @@ fun PermissionHandler(
     LaunchedEffect(permissionStatus.isGranted, permissionStatus.shouldShowRationale) {
         when {
             permissionStatus.isGranted -> {
-                if (
-                    !isBackgroundAccessGranted &&
-                    !uiState.backgroundPermissionSheetShown
+                if (!isBackgroundAccessGranted
+
                 ) {
                     onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.BACKGROUND_ACCESS))
                 }
             }
 
             permissionStatus.shouldShowRationale -> {
-
                 onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.INITIAL_DENIAL))
             }
 
@@ -83,7 +81,6 @@ fun PermissionHandler(
                         )
                 )
             }
-
         }
     }
 

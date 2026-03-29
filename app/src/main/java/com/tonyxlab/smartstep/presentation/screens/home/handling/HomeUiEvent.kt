@@ -17,10 +17,17 @@ sealed interface HomeUiEvent : UiEvent {
         val type: PermissionSheetType
     ) : HomeUiEvent
 
+    // Navigation Drawer Events
     data object OpenNavigationDrawer : HomeUiEvent
     data object FixCountIssue : HomeUiEvent
     data object SetStepGoal : HomeUiEvent
     data object OpenPersonalSettings : HomeUiEvent
     data object ExitApp : HomeUiEvent
+
+    //Steps Goal
+    data class SelectStepGoal(val selectedSteps: Int): HomeUiEvent
+    data object DismissStepGoalPicker: HomeUiEvent
+    data object SaveStepGoal: HomeUiEvent
+    data object CancelStepsGoal: HomeUiEvent
 
 }

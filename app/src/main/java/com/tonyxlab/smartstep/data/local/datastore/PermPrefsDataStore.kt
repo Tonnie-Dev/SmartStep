@@ -14,8 +14,7 @@ class PermPrefsDataStore(val context: Context) {
     private data object PermissionPrefs {
         val PHYSICAL_ACTIVITY_PERMISSION_REQUESTED =
             booleanPreferencesKey("physical_activity_permission_requested")
-        val BACKGROUND_PERMISSION_SHEET_SHOWN =
-            booleanPreferencesKey("background_permission_sheet_shown")
+
     }
 
     val physicalActivityPermissionRequested: Flow<Boolean> = context.dataStore.data
@@ -29,20 +28,6 @@ class PermPrefsDataStore(val context: Context) {
     suspend fun setPhysicalActivityPermissionRequested(requested: Boolean) {
         context.dataStore.edit {
             it[PermissionPrefs.PHYSICAL_ACTIVITY_PERMISSION_REQUESTED] = requested
-        }
-    }
-
-    val backgroundPermissionSheetShown: Flow<Boolean> = context.dataStore.data
-            .catch { e ->
-                if (e is IOException) emit(emptyPreferences()) else throw e
-            }
-            .map {
-                it[PermissionPrefs.BACKGROUND_PERMISSION_SHEET_SHOWN] ?: false
-            }
-
-    suspend fun setBackgroundPermissionSheetShown(shown: Boolean) {
-        context.dataStore.edit {
-            it[PermissionPrefs.BACKGROUND_PERMISSION_SHEET_SHOWN] = shown
         }
     }
 }
