@@ -51,7 +51,7 @@ fun WeightPicker(
                             StandardWheelPicker(
                                     modifier = Modifier,
                                     selectedValue = selectedKilos,
-                                    valuesRange = kilosRange,
+                                    values = kilosRange.toList(),
                                     onValueSelected = {
                                         onEvent(OnboardingUiEvent.OnKilosSelected(value = it))
                                     },
@@ -62,7 +62,7 @@ fun WeightPicker(
                             StandardWheelPicker(
                                     modifier = Modifier,
                                     selectedValue = selectedPounds,
-                                    valuesRange = poundsRange,
+                                    values = poundsRange.toList(),
                                     onValueSelected = {
                                         onEvent(OnboardingUiEvent.OnPoundsSelected(value = it))
                                     },

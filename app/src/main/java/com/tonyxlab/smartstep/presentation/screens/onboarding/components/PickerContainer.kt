@@ -177,7 +177,7 @@ private fun PickerContainerPreviewSingleColumnStandard() {
                         StandardWheelPicker(
                                 modifier = Modifier,
                                 selectedValue = 170,
-                                valuesRange = 100..250,
+                                values = (100..250).toList(),
                                 onValueSelected = {}
                         )
                     }

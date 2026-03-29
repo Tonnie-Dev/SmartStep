@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.tonyxlab.smartstep.R
+import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.HeightMode
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.OnboardingUiEvent
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
@@ -61,7 +63,7 @@ fun HeightPicker(
                             StandardWheelPicker(
                                     modifier = Modifier,
                                     selectedValue = selectedCentimeter,
-                                    valuesRange = centimeterRange,
+                                   values = centimeterRange.toList(),
                                     onValueSelected = {
                                         onEvent(OnboardingUiEvent.OnCentimetersSelected(value = it))
                                     },
@@ -102,12 +104,6 @@ fun FeetInchesWheelPicker(
     itemHeight: Dp = 48.dp,
 ) {
 
-    val feetInitialIndex = (selectedFeet - feetRange.first)
-            .coerceIn(0, feetRange.toList().lastIndex)
-
-    val inchesInitialIndex = (selectedInches - inchesRange.first)
-            .coerceIn(0, inchesRange.toList().lastIndex)
-
     Box(
             modifier = modifier
                     .fillMaxWidth()
@@ -123,7 +119,7 @@ fun FeetInchesWheelPicker(
             // Feet wheel
             StandardWheelPicker(
                     modifier = modifier.weight(1f),
-                    valuesRange = feetRange,
+                    values = feetRange.toList(),
                     selectedValue = selectedFeet,
                     visibleItemsCount = visibleItemsCount,
                     itemHeight = itemHeight,
@@ -150,7 +146,7 @@ fun FeetInchesWheelPicker(
             // Inches wheel
             StandardWheelPicker(
                     modifier = modifier.weight(1f),
-                    valuesRange = inchesRange,
+                    values = inchesRange.toList(),
                     selectedValue = selectedInches,
                     visibleItemsCount = visibleItemsCount,
                     itemHeight = itemHeight,
@@ -185,11 +181,12 @@ private fun HeightPicker_Preview() {
                 modifier = Modifier
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                         .fillMaxSize()
-                        .padding(16.dp),
+                        .padding(MaterialTheme.spacing.spaceMedium),
                 contentAlignment = Alignment.Center
         ) {
+            val stepOptions = remember { (1000..20000 step 1000).toList().reversed() }
             HeightPicker(
-                    selectedCentimeter = 175,
+                    selectedCentimeter = 105,
                     selectedFeet = 5,
                     selectedInches = 9,
                     heightMode = HeightMode.CENTIMETERS,
