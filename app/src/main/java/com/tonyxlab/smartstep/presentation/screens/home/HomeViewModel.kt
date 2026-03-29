@@ -4,7 +4,6 @@ package com.tonyxlab.smartstep.presentation.screens.home
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.viewModelScope
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
@@ -12,8 +11,6 @@ import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionShe
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.launchIn
 
 typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeActionEvent>
 
@@ -36,17 +33,22 @@ class HomeViewModel(
             HomeUiEvent.OpenPermissionsSettings -> openPermissionsSettings()
             HomeUiEvent.Continue -> handleContinue()
             HomeUiEvent.PhysicalActivityPermissionRequested -> physicalActivityPermissionRequested()
-            HomeUiEvent.ShowBackgroundPermissionSheet -> Unit
-            HomeUiEvent.AllowAccess -> Unit
-            HomeUiEvent.ExitApp -> Unit
+            HomeUiEvent.ShowExitDialog -> showExitDialog()
             HomeUiEvent.FixCountIssue -> showPermissionSheet(PermissionSheetType.BACKGROUND_ACCESS)
-            HomeUiEvent.OpenNavigationDrawer -> Unit
             HomeUiEvent.OpenPersonalSettings -> openPersonalSettings()
             HomeUiEvent.ShowStepGoalPicker -> showStepGoalPicker()
             is HomeUiEvent.BackgroundAccessChanged -> updateBackgroundAccessState(event.granted)
             HomeUiEvent.DismissStepGoalPicker -> dismissStepGoalPicker()
             HomeUiEvent.SaveStepGoal -> saveStepGoalPicker()
             is HomeUiEvent.SelectStepGoal -> onSelectStepGoal(event.selectedSteps)
+
+            HomeUiEvent.ConfirmExitDialog -> confirmExitDialog()
+            HomeUiEvent.DismissExitDialog ->dismissExitDialog()
+
+            HomeUiEvent.OpenNavigationDrawer -> Unit
+            HomeUiEvent.ShowBackgroundPermissionSheet -> Unit
+            HomeUiEvent.AllowAccess -> Unit
+
         }
     }
 
@@ -168,6 +170,25 @@ class HomeViewModel(
                     stepGoalPickerState = currentState.stepGoalPickerState
                             .copy(pickerSheetVisible = false)
             )
+        }
+    }
+
+    private fun showExitDialog() {
+        updateState {
+            it.copy(showExitDialog = true)
+        }
+    }
+
+    private fun confirmExitDialog() {
+        updateState {
+            it.copy(showExitDialog = false)
+
+        }
+        sendActionEvent(HomeActionEvent.CloseApp)
+    }
+    private fun dismissExitDialog() {
+        updateState {
+            it.copy(showExitDialog = false)
         }
     }
 }

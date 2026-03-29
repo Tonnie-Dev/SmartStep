@@ -22,12 +22,15 @@ sealed interface HomeUiEvent : UiEvent {
     data object FixCountIssue : HomeUiEvent
     data object ShowStepGoalPicker : HomeUiEvent
     data object OpenPersonalSettings : HomeUiEvent
-    data object ExitApp : HomeUiEvent
+    data object ShowExitDialog : HomeUiEvent
 
-    //Steps Goal
+    // Steps Goal
     data class SelectStepGoal(val selectedSteps: Int): HomeUiEvent
     data object DismissStepGoalPicker: HomeUiEvent
     data object SaveStepGoal: HomeUiEvent
 
+    // Exit Dialog
+    data object ConfirmExitDialog : HomeUiEvent
+    data object DismissExitDialog : HomeUiEvent
 
 }

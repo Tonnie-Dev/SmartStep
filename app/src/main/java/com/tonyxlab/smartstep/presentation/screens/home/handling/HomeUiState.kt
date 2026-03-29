@@ -5,6 +5,7 @@ import com.tonyxlab.smartstep.presentation.core.base.handling.UiState
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
 
 data class HomeUiState(
+    val showExitDialog: Boolean = false,
     val permissionUiState: PermissionUiState = PermissionUiState(),
     val stepGoalPickerState: StepGoalPickerState = StepGoalPickerState()
 ) : UiState {

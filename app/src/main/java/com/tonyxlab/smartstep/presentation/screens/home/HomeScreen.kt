@@ -2,6 +2,7 @@
 
 package com.tonyxlab.smartstep.presentation.screens.home
 
+import android.app.Activity
 import android.os.Build
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
@@ -34,6 +35,7 @@ import com.tonyxlab.smartstep.presentation.core.components.AppTopBar
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.navigation.Navigator
 import com.tonyxlab.smartstep.presentation.screens.home.components.AppNavigationDrawer
+import com.tonyxlab.smartstep.presentation.screens.home.components.CloseAppDialog
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionHandler
 import com.tonyxlab.smartstep.presentation.screens.home.components.StepCounterCard
 import com.tonyxlab.smartstep.presentation.screens.home.components.StepGoalPicker
@@ -70,9 +72,7 @@ fun HomeScreen(
 
                             when (event) {
                                 HomeUiEvent.FixCountIssue -> {
-
                                     viewModel.onEvent(event)
-
                                 }
 
                                 HomeUiEvent.ShowStepGoalPicker -> {
@@ -83,8 +83,8 @@ fun HomeScreen(
                                     navigator.navigateToOnboarding()
                                 }
 
-                                HomeUiEvent.ExitApp -> {
-                                    activity.finish()
+                                HomeUiEvent.ShowExitDialog -> {
+                                    viewModel.onEvent(HomeUiEvent.ShowExitDialog)
                                 }
 
                                 else -> Unit
@@ -125,6 +125,10 @@ fun HomeScreen(
                                 activity.requestIgnoreBatteryOptimizations()
                             }
                         }
+
+                        HomeActionEvent.CloseApp -> {
+                            activity.exitSmartStep()
+                        }
                     }
                 }
         ) { uiState ->
@@ -147,7 +151,7 @@ fun HomeScreenContent(
     val activity = LocalActivity.current ?: return
     val isDeviceWide = rememberIsDeviceWide()
     val maxWidth1 = if (isDeviceWide) 394.dp else Dp.Unspecified
-    val maxWidth2 = if (isDeviceWide) 394.dp else Dp.Unspecified
+    val maxWidth2 = if (isDeviceWide) 312.dp else Dp.Unspecified
 
     OnResumeEffect {
         val isBackgroundAccessGranted = activity.isIgnoringBatteryOptimizations()
@@ -181,7 +185,24 @@ fun HomeScreenContent(
                     onEvent = onEvent
             )
         }
+
+        if (uiState.showExitDialog) {
+            CloseAppDialog(
+                    modifier = Modifier.widthIn(max = maxWidth2),
+                    onConfirm = { onEvent(HomeUiEvent.ConfirmExitDialog) },
+                    onDismiss = { onEvent(HomeUiEvent.DismissExitDialog) }
+            )
+        }
     }
+}
+
+private fun Activity.exitSmartStep() {
+    /*    stopService(Intent(this, StepCounterService::class.java))
+
+        WorkManager.getInstance(applicationContext)
+                .cancelAllWorkByTag("step_tracking")*/
+
+    finishAndRemoveTask()
 }
 
 @Preview(showBackground = true)

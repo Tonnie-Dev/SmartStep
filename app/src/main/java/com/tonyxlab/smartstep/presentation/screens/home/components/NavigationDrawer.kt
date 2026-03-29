@@ -76,7 +76,7 @@ fun AppNavigationDrawer(
             DrawerItem(
                     text = stringResource(id = R.string.nav_drawer_exit),
                     textColor = MaterialTheme.colorScheme.primary,
-                    onClick = { onEvent(HomeUiEvent.ExitApp) }
+                    onClick = { onEvent(HomeUiEvent.ShowExitDialog) }
             )
         }
     }
