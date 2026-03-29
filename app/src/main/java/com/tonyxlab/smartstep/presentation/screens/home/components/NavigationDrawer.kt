@@ -34,6 +34,7 @@ fun AppNavigationDrawer(
 ) {
 
     val isBackgroundAccessGranted = uiState.permissionUiState.isBackgroundAccessGranted
+
     ModalDrawerSheet(
             modifier = modifier
                     .width(352.dp)
@@ -58,7 +59,7 @@ fun AppNavigationDrawer(
             }
             DrawerItem(
                     text = stringResource(id = R.string.nav_drawer_step_goal),
-                    onClick = { onEvent(HomeUiEvent.SetStepGoal) }
+                    onClick = { onEvent(HomeUiEvent.ShowStepGoalPicker) }
             )
             HorizontalDivider(
                     modifier = Modifier.padding(horizontal = MaterialTheme.spacing.spaceMedium),

@@ -4,6 +4,7 @@ package com.tonyxlab.smartstep.presentation.screens.home
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
@@ -13,7 +14,10 @@ import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
 
 typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeActionEvent>
 
-class HomeViewModel(private val permPrefsDataStore: PermPrefsDataStore) : HomeBaseViewModel() {
+class HomeViewModel(
+    private val permPrefsDataStore: PermPrefsDataStore,
+    private val onboardingDataStore: OnboardingDataStore
+) : HomeBaseViewModel() {
 
     override val initialState: HomeUiState
         get() = HomeUiState()
@@ -49,12 +53,20 @@ class HomeViewModel(private val permPrefsDataStore: PermPrefsDataStore) : HomeBa
             HomeUiEvent.FixCountIssue -> showPermissionSheet(PermissionSheetType.BACKGROUND_ACCESS)
             HomeUiEvent.OpenNavigationDrawer -> Unit
             HomeUiEvent.OpenPersonalSettings -> Unit
-            HomeUiEvent.SetStepGoal -> Unit
+            HomeUiEvent.ShowStepGoalPicker -> showStepGoalPicker()
             is HomeUiEvent.BackgroundAccessChanged -> updateBackgroundAccessState(event.granted)
-            HomeUiEvent.CancelStepsGoal -> Unit
-            HomeUiEvent.DismissStepGoalPicker -> Unit
-            HomeUiEvent.SaveStepGoal -> Unit
-            is HomeUiEvent.SelectStepGoal -> Unit
+            HomeUiEvent.DismissStepGoalPicker -> dismissStepGoalPicker()
+            HomeUiEvent.SaveStepGoal -> saveStepGoalPicker()
+            is HomeUiEvent.SelectStepGoal -> onSelectStepGoal(event.selectedSteps)
+        }
+    }
+
+    private fun onSelectStepGoal(selectedSteps: Int) {
+        updateState {
+            it.copy(
+                    stepGoalPickerState = currentState.stepGoalPickerState
+                            .copy(selectedStepsGoal = selectedSteps)
+            )
         }
     }
 
@@ -117,5 +129,37 @@ class HomeViewModel(private val permPrefsDataStore: PermPrefsDataStore) : HomeBa
             )
         }
 
+    }
+
+    private fun showStepGoalPicker() {
+        updateState {
+            it.copy(
+                    stepGoalPickerState = currentState.stepGoalPickerState
+                            .copy(pickerSheetVisible = true)
+            )
+        }
+    }
+
+    private fun saveStepGoalPicker() {
+        launch {
+            val selectedSteps = currentState.stepGoalPickerState.selectedStepsGoal
+            onboardingDataStore.setDailyStepGoal(stepGoal = selectedSteps)
+
+            updateState {
+                it.copy(
+                        stepGoalPickerState = currentState.stepGoalPickerState
+                                .copy(pickerSheetVisible = false)
+                )
+            }
+        }
+    }
+
+    private fun dismissStepGoalPicker() {
+        updateState {
+            it.copy(
+                    stepGoalPickerState = currentState.stepGoalPickerState
+                            .copy(pickerSheetVisible = false)
+            )
+        }
     }
 }

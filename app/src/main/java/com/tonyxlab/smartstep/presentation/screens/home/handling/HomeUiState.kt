@@ -20,6 +20,6 @@ data class HomeUiState(
     @Stable
     data class StepGoalPickerState(
         val pickerSheetVisible: Boolean = false,
-        val selectedSteps: Int = 2000
+        val selectedStepsGoal: Int = 2000
     )
 }

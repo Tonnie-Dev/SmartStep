@@ -47,12 +47,15 @@
     <string name="label_text_kg">kg</string>
     <string name="label_text_lbs">lbs</string>
     <string name="label_steps">Steps</string>
+    <string name="label_step_goal">Step Goal</string>
+
     <!--Menu Texts-->
     <string name="menu_text_male">Male</string>
     <string name="menu_text_female">Female</string>
 
     <!--Button Texts-->
     <string name="button_text_start">Start</string>
+    <string name="button_text_save">Save</string>
     <string name="button_text_ok">Ok</string>
     <string name="button_text_cancel">Cancel</string>
     <string name="button_text_allow_access">Allow access</string>

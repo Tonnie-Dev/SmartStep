@@ -36,6 +36,7 @@ import com.tonyxlab.smartstep.presentation.navigation.Navigator
 import com.tonyxlab.smartstep.presentation.screens.home.components.AppNavigationDrawer
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionHandler
 import com.tonyxlab.smartstep.presentation.screens.home.components.StepCounterCard
+import com.tonyxlab.smartstep.presentation.screens.home.components.StepGoalPicker
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
@@ -74,8 +75,8 @@ fun HomeScreen(
 
                                 }
 
-                                HomeUiEvent.SetStepGoal -> {
-                                    // TODO navigate or show dialog
+                                HomeUiEvent.ShowStepGoalPicker -> {
+                                  viewModel.onEvent(HomeUiEvent.ShowStepGoalPicker)
                                 }
 
                                 HomeUiEvent.OpenPersonalSettings -> {
@@ -145,12 +146,12 @@ fun HomeScreenContent(
 
     val activity = LocalActivity.current ?: return
     val isDeviceWide = rememberIsDeviceWide()
-    val maxWidth = if (isDeviceWide) 394.dp else Dp.Unspecified
+    val maxWidth1 = if (isDeviceWide) 394.dp else Dp.Unspecified
+    val maxWidth2 = if (isDeviceWide) 394.dp else Dp.Unspecified
 
     OnResumeEffect {
         val isBackgroundAccessGranted = activity.isIgnoringBatteryOptimizations()
         onEvent(HomeUiEvent.BackgroundAccessChanged(isBackgroundAccessGranted))
-
     }
 
     Box(
@@ -161,9 +162,9 @@ fun HomeScreenContent(
             contentAlignment = Alignment.Center
     ) {
         StepCounterCard(
-                modifier = Modifier.widthIn(max = maxWidth),
+                modifier = Modifier.widthIn(max = maxWidth1),
                 currentSteps = 7000,
-                stepsGoal = 10000
+                stepsGoal = uiState.stepGoalPickerState.selectedStepsGoal
         )
 
         PermissionHandler(
@@ -171,6 +172,15 @@ fun HomeScreenContent(
                 uiState = uiState,
                 onEvent = onEvent
         )
+
+        if (uiState.stepGoalPickerState.pickerSheetVisible){
+            StepGoalPicker(
+                    modifier = Modifier.widthIn(max = maxWidth2),
+                    isDeviceWide = isDeviceWide,
+                    selectedStep = uiState.stepGoalPickerState.selectedStepsGoal,
+                    onEvent = onEvent
+            )
+        }
     }
 }
 

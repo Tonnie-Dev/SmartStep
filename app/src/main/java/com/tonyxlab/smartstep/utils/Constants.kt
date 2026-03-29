@@ -11,4 +11,5 @@ object Constants {
     const val CM_PER_FOOT = 30.48
     const val INCH_PER_FOOT = 12
     const val KG_PER_LBS = 2.20462
+    const val DEFAULT_DAILY_STEP_GOAL = 2000
 }

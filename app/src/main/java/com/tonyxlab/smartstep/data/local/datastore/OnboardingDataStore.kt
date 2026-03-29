@@ -10,6 +10,7 @@ import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.Gender
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.HeightMode
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.WeightMode
 import com.tonyxlab.smartstep.utils.Constants
+import com.tonyxlab.smartstep.utils.Constants.DEFAULT_DAILY_STEP_GOAL
 import com.tonyxlab.smartstep.utils.Constants.DEFAULT_WEIGHT_KG
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -25,7 +26,7 @@ class OnboardingDataStore(private val context: Context) {
         val HEIGHT_IN_CM = intPreferencesKey("height_in_cm")
         val WEIGHT_MODE = stringPreferencesKey("weight_mode")
         val WEIGHT_IN_KG = intPreferencesKey("weight_in_kg")
-
+        val DAILY_STEP_GOAL = intPreferencesKey("daily_step_goal")
     }
 
     val onboardingSeen: Flow<Boolean> = context.dataStore
@@ -131,4 +132,15 @@ class OnboardingDataStore(private val context: Context) {
         }
     }
 
+    val dailyStepGoal: Flow<Int> = context.dataStore.data
+            .catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
+            .map { prefs ->
+                prefs[OnboardingKeyPreferences.DAILY_STEP_GOAL] ?: DEFAULT_DAILY_STEP_GOAL
+            }
+
+    suspend fun setDailyStepGoal(stepGoal: Int) {
+        context.dataStore.edit { prefs ->
+            prefs[OnboardingKeyPreferences.DAILY_STEP_GOAL] = stepGoal
+        }
+    }
 }

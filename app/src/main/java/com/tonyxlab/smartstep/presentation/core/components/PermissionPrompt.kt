@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -75,8 +74,7 @@ fun PermissionPrompt(
             }
         } else {
 
-
-           ModalBottomSheet (
+            ModalBottomSheet(
                     onDismissRequest = {
                         if (isLockedSheet.not()) {
                             onEvent(HomeUiEvent.DismissPermissionDialog)
@@ -97,7 +95,6 @@ fun PermissionPrompt(
                         permissionSheetType = permissionSheetType,
                         onEvent = onEvent
                 )
-
             }
         }
     }
@@ -129,9 +126,7 @@ fun ResolveSheetContent(
                     onContinue = { onEvent(HomeUiEvent.Continue) }
             )
         }
-
     }
-
 }
 
 @Composable
@@ -171,7 +166,6 @@ fun BottomSheetContentOne(
                 onClick = onAllowAccessClick,
                 buttonText = stringResource(id = R.string.button_text_allow_access),
         )
-
     }
 }
 
@@ -195,7 +189,6 @@ fun BottomSheetContentTwo(
                 textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceSmall))
-
         Text(
                 modifier = Modifier.padding(horizontal = MaterialTheme.spacing.spaceDoubleDp * 22),
                 text = stringResource(id = R.string.caption_text_track_step),
@@ -203,9 +196,7 @@ fun BottomSheetContentTwo(
                 style = MaterialTheme.typography.BodyLargeRegular,
                 textAlign = TextAlign.Center
         )
-
         Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceTwelve * 2))
-
         Column(
                 modifier = Modifier.padding(horizontal = MaterialTheme.spacing.spaceMedium),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall),
@@ -225,8 +216,6 @@ fun BottomSheetContentTwo(
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.BodyLargeMedium,
             )
-
-
             Text(
                     modifier = Modifier.fillMaxWidth(),
                     text = stringResource(id = R.string.caption_text_instruction_3),
@@ -242,7 +231,6 @@ fun BottomSheetContentTwo(
                 onClick = onOpenSettings,
                 buttonText = stringResource(id = R.string.button_text_open_settings),
         )
-
     }
 }
 
