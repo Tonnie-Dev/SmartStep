@@ -7,7 +7,7 @@ sealed interface NavDestination {
 }
 
 @Serializable
-data object OnboardingDestination : NavDestination
+data class OnboardingDestination(val instanceId: Long = System.currentTimeMillis()) : NavDestination
 
 @Serializable
 data object HomeDestination : NavDestination

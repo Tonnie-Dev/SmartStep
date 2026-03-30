@@ -48,10 +48,14 @@ class HomeViewModel(
             HomeUiEvent.OpenNavigationDrawer -> Unit
             HomeUiEvent.ShowBackgroundPermissionSheet -> Unit
             HomeUiEvent.AllowAccess -> Unit
-
+            HomeUiEvent.OnMovementDetected -> incrementSteps()
         }
     }
-
+    private fun incrementSteps() {
+        updateState {
+            it.copy(currentSteps = it.currentSteps + 1)
+        }
+    }
     private fun observePermissionStates() {
         launch {
             permPrefsDataStore.physicalActivityPermissionRequested.collect { requested ->

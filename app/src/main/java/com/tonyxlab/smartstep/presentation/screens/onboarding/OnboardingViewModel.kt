@@ -2,6 +2,7 @@ package com.tonyxlab.smartstep.presentation.screens.onboarding
 
 import android.R.attr.height
 import androidx.compose.ui.text.font.FontVariation.weight
+import androidx.lifecycle.viewModelScope
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.Gender
@@ -13,6 +14,7 @@ import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.WeightMod
 import com.tonyxlab.smartstep.utils.UnitConverter
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
 import timber.log.Timber
 
 typealias OnboardingBaseViewModel = BaseViewModel<OnboardingUiState, OnboardingUiEvent, OnboardingActionEvent>
@@ -25,6 +27,7 @@ class OnboardingViewModel(
         get() = OnboardingUiState()
 
     init {
+        Timber.tag("OnboardingVM").i("Init Called")
         readOnboardingStatus()
         loadPersonalSettings()
     }
@@ -86,37 +89,41 @@ class OnboardingViewModel(
     }
 
     private fun loadPersonalSettings() {
-        launch {
 
-            combine(
-                    onboardingDataStore.selectedGender,
-                    onboardingDataStore.heightInCm,
-                    onboardingDataStore.heightMode,
-                    onboardingDataStore.weightInKg,
-                    onboardingDataStore.weightMode,
+launch {
+
+    combine(
+            onboardingDataStore.selectedGender,
+            onboardingDataStore.heightInCm,
+            onboardingDataStore.heightMode,
+            onboardingDataStore.weightInKg,
+            onboardingDataStore.weightMode,
 
             ) { gender, height, heightMode, weight, weightMode ->
 
-                updateState {
-                    it.copy(
+        updateState { state ->
+            state.copy(
 
-                            genderSelectionState = currentState.genderSelectionState.copy(
-                                    selectedGender = gender
-                            ),
-                            heightPickerState = currentState.heightPickerState.copy(
-                                    selectedCentimeter = height,
-                                    heightMode = heightMode
-                            ),
-                            weightPickerState = currentState.weightPickerState.copy(
-                                    selectedKgs = weight,
-                                    weightMode = weightMode
-                            ),
-                    )
-                }
-
-            }.collect()
-
+                    genderSelectionState = state.genderSelectionState.copy(
+                            selectedGender = gender
+                    ),
+                    heightPickerState = state.heightPickerState.copy(
+                            selectedCentimeter = height,
+                            heightMode = heightMode
+                    ),
+                    weightPickerState = state.weightPickerState.copy(
+                            selectedKgs = weight,
+                            weightMode = weightMode
+                    ),
+            )
         }
+
+    }.collect()
+
+
+}
+
+
 
     }
 
@@ -128,8 +135,6 @@ class OnboardingViewModel(
     }
 
     private fun onHeightPickerVisibilityChange() {
-        Timber.tag("OnboardingVM")
-                .i("Visibility change")
         updateState {
             it.copy(
                     heightPickerState = it.heightPickerState.copy(
@@ -313,5 +318,9 @@ class OnboardingViewModel(
 
     private fun onCancelWeightDialog() {
         updateState { it.copy(weightPickerState = it.weightPickerState.copy(visible = false)) }
+    }
+
+    override fun onCleared() {
+        Timber.tag("OnboardingVM").i("VM Cleared")
     }
 }

@@ -1,11 +1,14 @@
 package com.tonyxlab.smartstep.presentation
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.toArgb
@@ -29,6 +32,7 @@ class MainActivity : ComponentActivity() {
     var isAppReady by mutableStateOf(false)
     var startDestination by mutableStateOf<NavDestination?>(null)
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -58,6 +62,6 @@ class MainActivity : ComponentActivity() {
 
     private suspend fun resolveStartDestination(): NavDestination {
         val onboardingSeen = onboardingDataStore.onboardingSeen.first()
-        return if (onboardingSeen) HomeDestination else OnboardingDestination
+        return if (onboardingSeen) HomeDestination else OnboardingDestination()
     }
 }

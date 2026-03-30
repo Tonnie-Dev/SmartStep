@@ -19,10 +19,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,6 +32,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonyxlab.smartstep.R
+import com.tonyxlab.smartstep.data.local.motion.MotionStepDetector
 import com.tonyxlab.smartstep.presentation.core.base.BaseContentLayout
 import com.tonyxlab.smartstep.presentation.core.components.AppTopBar
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
@@ -157,7 +160,19 @@ fun HomeScreenContent(
         val isBackgroundAccessGranted = activity.isIgnoringBatteryOptimizations()
         onEvent(HomeUiEvent.BackgroundAccessChanged(isBackgroundAccessGranted))
     }
+    val context = LocalContext.current
 
+    DisposableEffect(Unit) {
+        val detector = MotionStepDetector(context) {
+            onEvent(HomeUiEvent.OnMovementDetected)
+        }
+
+        detector.start()
+
+        onDispose {
+            detector.stop()
+        }
+    }
     Box(
             modifier = modifier
                     .fillMaxSize()
@@ -167,7 +182,7 @@ fun HomeScreenContent(
     ) {
         StepCounterCard(
                 modifier = Modifier.widthIn(max = maxWidth1),
-                currentSteps = 7000,
+                currentSteps = uiState.currentSteps,
                 stepsGoal = uiState.stepGoalPickerState.selectedStepsGoal
         )
 

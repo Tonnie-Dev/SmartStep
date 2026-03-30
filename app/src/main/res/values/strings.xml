@@ -25,6 +25,7 @@
 
     <!--Caption Texts-->
     <string name="caption_text_profile_desc">This information helps calculate your activity more accurately.</string>
+    <string name="caption_text_personal_settings">Personal Settings</string>
     <string name="caption_text_calculate_distance">Used to calculate distance</string>
     <string name="caption_text_calculate_calories">Used to calculate calories</string>
     <string name="caption_text_motion_sensors">To count your steps,Smart Step needs access to you motion sensors</string>
@@ -35,6 +36,7 @@
     <string name="caption_text_instruction_3">3. Select Allow</string>
     <string name="caption_text_background_access">Background access recommended</string>
     <string name="caption_text_background_access_desc">Background access helps Smart Step track your activity more reliably</string>
+    <string name="caption_text_fully_close_app">The app will fully close and will not run in the background.</string>
 
     <!--Label Texts-->
     <string name="label_text_gender">Gender</string>

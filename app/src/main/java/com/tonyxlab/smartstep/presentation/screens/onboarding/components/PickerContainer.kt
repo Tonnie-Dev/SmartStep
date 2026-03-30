@@ -31,7 +31,6 @@ import com.tonyxlab.smartstep.presentation.theme.EndVerticalRoundedCornerShape10
 import com.tonyxlab.smartstep.presentation.theme.RoundedCornerShape28
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 import com.tonyxlab.smartstep.presentation.theme.StartVerticalRoundedCornerShape100
-import timber.log.Timber
 
 @Composable
 fun PickerContainer(
@@ -123,9 +122,6 @@ fun UnitToggle(
     modifier: Modifier = Modifier,
     isUnitOneSelected: Boolean = true
 ) {
-
-    Timber.tag("OnboardingVM")
-            .i("U1 Selected is: $isUnitOneSelected")    // Unit Toggle
 
     Row(
             modifier = modifier

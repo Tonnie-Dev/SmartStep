@@ -15,7 +15,7 @@ class Navigator(private val backStack: SnapshotStateList<NavDestination>) {
     }
 
     fun navigateToOnboarding(){
-       push(OnboardingDestination)
+       push(OnboardingDestination())
 
     }
 
@@ -24,5 +24,4 @@ class Navigator(private val backStack: SnapshotStateList<NavDestination>) {
             backStack.removeLastOrNull()
         }
     }
-
 }

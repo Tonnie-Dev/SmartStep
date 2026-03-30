@@ -33,4 +33,6 @@ sealed interface HomeUiEvent : UiEvent {
     data object ConfirmExitDialog : HomeUiEvent
     data object DismissExitDialog : HomeUiEvent
 
+    data object OnMovementDetected : HomeUiEvent
+
 }
