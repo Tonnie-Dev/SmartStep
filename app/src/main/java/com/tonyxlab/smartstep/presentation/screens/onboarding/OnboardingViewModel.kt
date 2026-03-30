@@ -25,9 +25,9 @@ class OnboardingViewModel(
 
     override val initialState: OnboardingUiState
         get() = OnboardingUiState()
-
+    private var isSaving = false
     init {
-        Timber.tag("OnboardingVM").i("Init Called")
+
         readOnboardingStatus()
         loadPersonalSettings()
     }
@@ -64,31 +64,76 @@ class OnboardingViewModel(
         }
     }
 
+
+
     private fun onCompleteOnboarding() {
         launch {
+            isSaving = true  // guard against re-emission overwriting state
+
+            // Snapshot current state BEFORE any writes
+            val snapshot = currentState
 
             onboardingDataStore.setOnboardingSeen()
-
             onboardingDataStore.setSelectedGender(
-                    gender = currentState.genderSelectionState.selectedGender
+                    gender = snapshot.genderSelectionState.selectedGender
             )
             onboardingDataStore.setHeightMode(
-                    heightMode = currentState.heightPickerState.heightMode
+                    heightMode = snapshot.heightPickerState.heightMode
             )
             onboardingDataStore.setHeightInCm(
-                    heightInCm = currentState.heightPickerState.selectedCentimeter
+                    heightInCm = snapshot.heightPickerState.selectedCentimeter
             )
             onboardingDataStore.setWeightMode(
-                    weightMode = currentState.weightPickerState.weightMode
+                    weightMode = snapshot.weightPickerState.weightMode
             )
             onboardingDataStore.setWeightInKg(
-                    weightInKg = currentState.weightPickerState.selectedKgs
+                    weightInKg = snapshot.weightPickerState.selectedKgs
             )
+
+            isSaving = false
             sendActionEvent(OnboardingActionEvent.NavigateToHome)
         }
     }
-
     private fun loadPersonalSettings() {
+        launch {
+            combine(
+                    onboardingDataStore.selectedGender,
+                    onboardingDataStore.heightInCm,
+                    onboardingDataStore.heightMode,
+                    onboardingDataStore.weightInKg,
+                    onboardingDataStore.weightMode,
+            ) { values ->
+                // Just map to a plain data holder — no state mutation here
+                PersonalSettings(
+                        gender    = values[0] as Gender,
+                        height    = values[1] as Int,
+                        heightMode = values[2] as HeightMode,
+                        weight    = values[3] as Int,
+                        weightMode = values[4] as WeightMode,
+                )
+            }
+                    .collect { settings ->
+                        if (isSaving) return@collect
+                        // Single atomic update, in collect where it belongs
+                        updateState { state ->
+                            state.copy(
+                                    genderSelectionState = state.genderSelectionState.copy(
+                                            selectedGender = settings.gender
+                                    ),
+                                    heightPickerState = state.heightPickerState.copy(
+                                            selectedCentimeter = settings.height,
+                                            heightMode = settings.heightMode
+                                    ),
+                                    weightPickerState = state.weightPickerState.copy(
+                                            selectedKgs = settings.weight,
+                                            weightMode = settings.weightMode
+                                    ),
+                            )
+                        }
+                    }
+        }
+    }
+/*    private fun loadPersonalSettings() {
 
 launch {
 
@@ -125,7 +170,7 @@ launch {
 
 
 
-    }
+    }*/
 
     private fun onSkipOnboarding() {
         launch {
@@ -320,7 +365,14 @@ launch {
         updateState { it.copy(weightPickerState = it.weightPickerState.copy(visible = false)) }
     }
 
-    override fun onCleared() {
-        Timber.tag("OnboardingVM").i("VM Cleared")
-    }
+
 }
+
+
+private data class PersonalSettings(
+    val gender: Gender,
+    val height: Int,
+    val heightMode: HeightMode,
+    val weight: Int,
+    val weightMode: WeightMode,
+)
