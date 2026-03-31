@@ -21,7 +21,8 @@
     <string name="topbar_text_smart_step">Smart Step</string>
 
     <!--Header Texts-->
-    <string name="header_text_add_toppings">ADD EXTRA TOPPINGS</string>
+    <string name="header_text_edit_steps">Edit steps</string>
+    <string name="header_text_date">Date</string>
 
     <!--Caption Texts-->
     <string name="caption_text_profile_desc">This information helps calculate your activity more accurately.</string>
@@ -37,6 +38,7 @@
     <string name="caption_text_background_access">Background access recommended</string>
     <string name="caption_text_background_access_desc">Background access helps Smart Step track your activity more reliably</string>
     <string name="caption_text_fully_close_app">The app will fully close and will not run in the background.</string>
+    <string name="caption_text_recalculation">Calories, distance &amp; duration will be recalculated accordingly</string>
 
     <!--Label Texts-->
     <string name="label_text_gender">Gender</string>
@@ -49,6 +51,7 @@
     <string name="label_text_kg">kg</string>
     <string name="label_text_lbs">lbs</string>
     <string name="label_steps">Steps</string>
+    <string name="label_text_date">Date</string>
     <string name="label_step_goal">Step Goal</string>
 
     <!--Menu Texts-->
@@ -66,6 +69,7 @@
 
     <!--Text Button Texts-->
     <string name="text_button_skip">Skip</string>
+    <string name="text_button_save">Save</string>
     <string name="text_button_cancel">Cancel</string>
 
     <!--Content Description Texts-->

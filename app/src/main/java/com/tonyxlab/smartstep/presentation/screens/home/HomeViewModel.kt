@@ -34,9 +34,13 @@ class HomeViewModel(
             HomeUiEvent.Continue -> handleContinue()
             HomeUiEvent.PhysicalActivityPermissionRequested -> physicalActivityPermissionRequested()
             HomeUiEvent.ShowExitDialog -> showExitDialog()
+
+            // Navigation Drawer
+            HomeUiEvent.OpenNavigationDrawer -> Unit
             HomeUiEvent.FixCountIssue -> showPermissionSheet(PermissionSheetType.BACKGROUND_ACCESS)
             HomeUiEvent.OpenPersonalSettings -> openPersonalSettings()
             HomeUiEvent.ShowStepGoalPicker -> showStepGoalPicker()
+
             is HomeUiEvent.BackgroundAccessChanged -> updateBackgroundAccessState(event.granted)
             HomeUiEvent.DismissStepGoalPicker -> dismissStepGoalPicker()
             HomeUiEvent.SaveStepGoal -> saveStepGoalPicker()
@@ -45,10 +49,20 @@ class HomeViewModel(
             HomeUiEvent.ConfirmExitDialog -> confirmExitDialog()
             HomeUiEvent.DismissExitDialog ->dismissExitDialog()
 
-            HomeUiEvent.OpenNavigationDrawer -> Unit
             HomeUiEvent.ShowBackgroundPermissionSheet -> Unit
             HomeUiEvent.AllowAccess -> Unit
-            HomeUiEvent.OnMovementDetected -> incrementSteps()
+
+            // Motion
+            HomeUiEvent.OnMotionDetected -> incrementSteps()
+
+            // Steps Editor
+            HomeUiEvent.DismissStepEditor -> TODO()
+            is HomeUiEvent.OnDaySelected -> TODO()
+            is HomeUiEvent.OnEditSteps -> TODO()
+            is HomeUiEvent.OnMonthSelected -> TODO()
+            is HomeUiEvent.OnYearSelected -> TODO()
+            HomeUiEvent.SaveStepEditorValues -> TODO()
+            HomeUiEvent.ShowDateSelector -> TODO()
         }
     }
     private fun incrementSteps() {

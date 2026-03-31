@@ -164,7 +164,7 @@ fun HomeScreenContent(
 
     DisposableEffect(Unit) {
         val detector = MotionStepDetector(context) {
-            onEvent(HomeUiEvent.OnMovementDetected)
+            onEvent(HomeUiEvent.OnMotionDetected)
         }
 
         detector.start()

@@ -184,7 +184,6 @@ private fun HeightPicker_Preview() {
                         .padding(MaterialTheme.spacing.spaceMedium),
                 contentAlignment = Alignment.Center
         ) {
-            val stepOptions = remember { (1000..20000 step 1000).toList().reversed() }
             HeightPicker(
                     selectedCentimeter = 105,
                     selectedFeet = 5,

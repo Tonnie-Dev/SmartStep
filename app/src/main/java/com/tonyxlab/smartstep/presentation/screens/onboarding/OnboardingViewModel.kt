@@ -1,8 +1,5 @@
 package com.tonyxlab.smartstep.presentation.screens.onboarding
 
-import android.R.attr.height
-import androidx.compose.ui.text.font.FontVariation.weight
-import androidx.lifecycle.viewModelScope
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.Gender
@@ -12,10 +9,7 @@ import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.Onboardin
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.OnboardingUiState
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.WeightMode
 import com.tonyxlab.smartstep.utils.UnitConverter
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.launchIn
-import timber.log.Timber
 
 typealias OnboardingBaseViewModel = BaseViewModel<OnboardingUiState, OnboardingUiEvent, OnboardingActionEvent>
 
@@ -26,6 +20,7 @@ class OnboardingViewModel(
     override val initialState: OnboardingUiState
         get() = OnboardingUiState()
     private var isSaving = false
+
     init {
 
         readOnboardingStatus()
@@ -60,11 +55,8 @@ class OnboardingViewModel(
 
                 updateState { it.copy(onboardingSeen = seen) }
             }
-
         }
     }
-
-
 
     private fun onCompleteOnboarding() {
         launch {
@@ -94,6 +86,7 @@ class OnboardingViewModel(
             sendActionEvent(OnboardingActionEvent.NavigateToHome)
         }
     }
+
     private fun loadPersonalSettings() {
         launch {
             combine(
@@ -102,75 +95,38 @@ class OnboardingViewModel(
                     onboardingDataStore.heightMode,
                     onboardingDataStore.weightInKg,
                     onboardingDataStore.weightMode,
-            ) { values ->
-                // Just map to a plain data holder — no state mutation here
+            ) { gender, height, heightMode, weight, weightMode ->
+
                 PersonalSettings(
-                        gender    = values[0] as Gender,
-                        height    = values[1] as Int,
-                        heightMode = values[2] as HeightMode,
-                        weight    = values[3] as Int,
-                        weightMode = values[4] as WeightMode,
+                        gender = gender,
+                        height = height,
+                        heightMode = heightMode,
+                        weight = weight,
+                        weightMode = weightMode
+
                 )
             }
-                    .collect { settings ->
+                    .collect { personalSettings ->
                         if (isSaving) return@collect
                         // Single atomic update, in collect where it belongs
                         updateState { state ->
                             state.copy(
                                     genderSelectionState = state.genderSelectionState.copy(
-                                            selectedGender = settings.gender
+                                            selectedGender = personalSettings.gender
                                     ),
                                     heightPickerState = state.heightPickerState.copy(
-                                            selectedCentimeter = settings.height,
-                                            heightMode = settings.heightMode
+                                            selectedCentimeter = personalSettings.height,
+                                            heightMode = personalSettings.heightMode
                                     ),
                                     weightPickerState = state.weightPickerState.copy(
-                                            selectedKgs = settings.weight,
-                                            weightMode = settings.weightMode
+                                            selectedKgs = personalSettings.weight,
+                                            weightMode = personalSettings.weightMode
                                     ),
                             )
                         }
                     }
         }
     }
-/*    private fun loadPersonalSettings() {
-
-launch {
-
-    combine(
-            onboardingDataStore.selectedGender,
-            onboardingDataStore.heightInCm,
-            onboardingDataStore.heightMode,
-            onboardingDataStore.weightInKg,
-            onboardingDataStore.weightMode,
-
-            ) { gender, height, heightMode, weight, weightMode ->
-
-        updateState { state ->
-            state.copy(
-
-                    genderSelectionState = state.genderSelectionState.copy(
-                            selectedGender = gender
-                    ),
-                    heightPickerState = state.heightPickerState.copy(
-                            selectedCentimeter = height,
-                            heightMode = heightMode
-                    ),
-                    weightPickerState = state.weightPickerState.copy(
-                            selectedKgs = weight,
-                            weightMode = weightMode
-                    ),
-            )
-        }
-
-    }.collect()
-
-
-}
-
-
-
-    }*/
 
     private fun onSkipOnboarding() {
         launch {
@@ -365,9 +321,7 @@ launch {
         updateState { it.copy(weightPickerState = it.weightPickerState.copy(visible = false)) }
     }
 
-
 }
-
 
 private data class PersonalSettings(
     val gender: Gender,

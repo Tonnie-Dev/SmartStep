@@ -10,7 +10,7 @@ sealed interface HomeUiEvent : UiEvent {
     data object Continue : HomeUiEvent
     data object PhysicalActivityPermissionRequested : HomeUiEvent
 
-    data class BackgroundAccessChanged(val granted: Boolean): HomeUiEvent
+    data class BackgroundAccessChanged(val granted: Boolean) : HomeUiEvent
     data object ShowBackgroundPermissionSheet : HomeUiEvent
 
     data class ShowPermissionSheet(
@@ -25,14 +25,24 @@ sealed interface HomeUiEvent : UiEvent {
     data object ShowExitDialog : HomeUiEvent
 
     // Steps Goal
-    data class SelectStepGoal(val selectedSteps: Int): HomeUiEvent
-    data object DismissStepGoalPicker: HomeUiEvent
-    data object SaveStepGoal: HomeUiEvent
+    data class SelectStepGoal(val selectedSteps: Int) : HomeUiEvent
+    data object DismissStepGoalPicker : HomeUiEvent
+    data object SaveStepGoal : HomeUiEvent
 
     // Exit Dialog
     data object ConfirmExitDialog : HomeUiEvent
     data object DismissExitDialog : HomeUiEvent
 
-    data object OnMovementDetected : HomeUiEvent
+    // Steps Editor Dialog
+    data class OnDaySelected(val value: Int) : HomeUiEvent
+    data class OnMonthSelected(val value: Int) : HomeUiEvent
+    data class OnYearSelected(val value: Int) : HomeUiEvent
+    data class OnEditSteps(val value: Int) : HomeUiEvent
+    data object SaveStepEditorValues : HomeUiEvent
+    data object DismissStepEditor : HomeUiEvent
+    data object ShowDateSelector : HomeUiEvent
+
+    // Motion
+    data object OnMotionDetected : HomeUiEvent
 
 }
