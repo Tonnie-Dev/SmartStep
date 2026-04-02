@@ -4,6 +4,8 @@ package com.tonyxlab.smartstep.presentation.screens.home.handling
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Stable
 import com.tonyxlab.smartstep.presentation.core.base.handling.UiState
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
@@ -33,7 +35,9 @@ data class HomeUiState(
 
     @Stable
     data class StepEditorState(
+        val isStepEditorVisible: Boolean = false,
+        val isDateSelectorVisible: Boolean = false,
         val selectedDate: LocalDate = LocalDate.now(),
-        val stepsToAdd: Int = 0
+        val stepsTextFieldState: TextFieldState = TextFieldState()
     )
 }

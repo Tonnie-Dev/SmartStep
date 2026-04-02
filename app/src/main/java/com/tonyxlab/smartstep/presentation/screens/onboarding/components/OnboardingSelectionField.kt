@@ -44,7 +44,7 @@ fun OnboardingSelectionField(
             shape = MaterialTheme.shapes.RoundedCornerShape10,
             border = BorderStroke(
                     width = 1.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant
+                    color = MaterialTheme.colorScheme.outline
             ),
             color = backgroundColor
     ) {

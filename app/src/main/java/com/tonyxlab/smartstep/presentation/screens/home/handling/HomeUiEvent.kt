@@ -40,6 +40,7 @@ sealed interface HomeUiEvent : UiEvent {
     data class OnEditSteps(val value: Int) : HomeUiEvent
     data object SaveStepEditorValues : HomeUiEvent
     data object DismissStepEditor : HomeUiEvent
+    data object DismissDateSelector : HomeUiEvent
     data object ShowDateSelector : HomeUiEvent
 
     // Motion
