@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,37 +22,37 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
+import com.tonyxlab.smartstep.presentation.screens.home.components.DateSelector
+import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun StandardWheelPicker(
-    selectedValue: Int,
-    values: List<Int>,
-    onValueSelected: (Int) -> Unit,
+fun <T> StandardWheelPicker(
+    selectedValue: T,
+    values: List<T>,
+    onValueSelected: (T) -> Unit,
     modifier: Modifier = Modifier,
     visibleItemsCount: Int = 5,
-    itemHeight: Dp = MaterialTheme.spacing.spaceDoubleDp * 22,
+    itemHeight: Dp = 44.dp,
     textStyle: TextStyle = MaterialTheme.typography.titleMedium,
     selectedTextStyle: TextStyle = MaterialTheme.typography.titleMedium.copy(
             fontWeight = FontWeight.Bold
     ),
+    labelFormatter: (T) -> String = { it.toString() }
 ) {
     require(visibleItemsCount % 2 == 1) {
         "visibleItemsCount must be an odd number so the picker has a true center row."
-    }
-
-    require(values.isNotEmpty()) {
-        "values must not be empty"
     }
 
     val items = remember(values) { values }
     val centerItemIndex = visibleItemsCount / 2
 
     val initialSelectedIndex = remember(selectedValue, items) {
-        items.indexOf(selectedValue)
-                .takeIf { it >= 0 } ?: 0
+        items.indexOf(selectedValue).takeIf { it >= 0 } ?: 0
     }
 
     val displayItems = remember(items, centerItemIndex) {
@@ -88,7 +89,6 @@ fun StandardWheelPicker(
 
     Box(
             modifier = modifier
-                    .fillMaxWidth()
                     .height(itemHeight * visibleItemsCount),
             contentAlignment = Alignment.Center
     ) {
@@ -108,7 +108,7 @@ fun StandardWheelPicker(
         ) {
             items(
                     count = displayItems.size,
-                    key = { index -> "wheel_item_$index" }
+                    key = { index -> "wheel_item_${displayItems[index]?.hashCode()}_$index" }
             ) { index ->
                 val item = displayItems[index]
                 val actualIndex = index - centerItemIndex
@@ -121,8 +121,7 @@ fun StandardWheelPicker(
                         contentAlignment = Alignment.Center
                 ) {
                     Text(
-                            text = item?.toString()
-                                    .orEmpty(),
+                            text = item?.let(labelFormatter).orEmpty(),
                             style = if (isSelected) selectedTextStyle else textStyle,
                             color = if (isSelected) {
                                 MaterialTheme.colorScheme.onSurface
@@ -140,4 +139,22 @@ fun StandardWheelPicker(
     }
 }
 
-
+@Preview
+@Composable
+private fun DateSelectorPreview() {
+    SmartStepTheme {
+        Box(
+                modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+        ) {
+            DateSelector(
+                    selectedYear = 2025,
+                    selectedMonth = 11,
+                    selectedDay = 30,
+                    onEvent = {}
+            )
+        }
+    }
+}

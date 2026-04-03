@@ -55,6 +55,7 @@ fun WeightPicker(
                                     onValueSelected = {
                                         onEvent(OnboardingUiEvent.OnKilosSelected(value = it))
                                     },
+                                    labelFormatter = {it.toString()}
                             )
                         }
 
@@ -66,6 +67,7 @@ fun WeightPicker(
                                     onValueSelected = {
                                         onEvent(OnboardingUiEvent.OnPoundsSelected(value = it))
                                     },
+                                    labelFormatter = {it.toString()}
                             )
                         }
                     }

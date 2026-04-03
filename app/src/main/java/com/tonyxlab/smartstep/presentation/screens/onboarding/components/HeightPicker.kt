@@ -57,7 +57,6 @@ fun HeightPicker(
                 onCancel = { onEvent(OnboardingUiEvent.CancelHeightDialog) },
                 isUnitOneSelected = heightMode == HeightMode.CENTIMETERS,
                 wheelPicker = {
-
                     when (heightMode) {
                         HeightMode.CENTIMETERS -> {
                             StandardWheelPicker(
@@ -67,6 +66,7 @@ fun HeightPicker(
                                     onValueSelected = {
                                         onEvent(OnboardingUiEvent.OnCentimetersSelected(value = it))
                                     },
+                                    labelFormatter = { it.toString()}
                             )
                         }
 
