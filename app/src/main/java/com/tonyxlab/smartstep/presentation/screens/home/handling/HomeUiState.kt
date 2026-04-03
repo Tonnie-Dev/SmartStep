@@ -16,7 +16,8 @@ data class HomeUiState(
     val currentSteps: Int = 0,
     val permissionUiState: PermissionUiState = PermissionUiState(),
     val stepGoalPickerState: StepGoalPickerState = StepGoalPickerState(),
-    val stepEditorState: StepEditorState = StepEditorState()
+    val stepEditorState: StepEditorState = StepEditorState(),
+    val dateSelectorState: DateSelectorState = DateSelectorState()
 ) : UiState {
 
     @Stable
@@ -36,8 +37,15 @@ data class HomeUiState(
     @Stable
     data class StepEditorState(
         val isStepEditorVisible: Boolean = false,
-        val isDateSelectorVisible: Boolean = false,
         val selectedDate: LocalDate = LocalDate.now(),
         val stepsTextFieldState: TextFieldState = TextFieldState()
+    )
+
+    @Stable
+    data class DateSelectorState(
+        val isDateSelectorVisible: Boolean = false,
+        val day:Int = LocalDate.now().dayOfMonth,
+        val month:Int = LocalDate.now().monthValue,
+        val year:Int = LocalDate.now().year
     )
 }

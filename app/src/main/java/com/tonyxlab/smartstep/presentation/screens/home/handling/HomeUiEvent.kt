@@ -22,6 +22,8 @@ sealed interface HomeUiEvent : UiEvent {
     data object FixCountIssue : HomeUiEvent
     data object ShowStepGoalPicker : HomeUiEvent
     data object OpenPersonalSettings : HomeUiEvent
+    data object EditSteps : HomeUiEvent
+    data object ResetSteps : HomeUiEvent
     data object ShowExitDialog : HomeUiEvent
 
     // Steps Goal
@@ -38,7 +40,8 @@ sealed interface HomeUiEvent : UiEvent {
     data class OnMonthSelected(val value: Int) : HomeUiEvent
     data class OnYearSelected(val value: Int) : HomeUiEvent
     data class OnEditSteps(val value: Int) : HomeUiEvent
-    data object SaveStepEditorValues : HomeUiEvent
+    data object ConfirmStepEditorValues : HomeUiEvent
+    data object ConfirmDateSelection:HomeUiEvent
     data object DismissStepEditor : HomeUiEvent
     data object DismissDateSelector : HomeUiEvent
     data object ShowDateSelector : HomeUiEvent

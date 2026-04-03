@@ -1,5 +1,9 @@
+@file:RequiresApi(Build.VERSION_CODES.O)
+
 package com.tonyxlab.smartstep.presentation.screens.home.components
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,9 +29,10 @@ import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
 import com.tonyxlab.smartstep.presentation.theme.EndVerticalRoundedCornerShape16
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
+import timber.log.Timber
 
 @Composable
-fun AppNavigationDrawer(
+fun NavigationDrawer(
     uiState: HomeUiState,
     onEvent: (HomeUiEvent) -> Unit,
     modifier: Modifier = Modifier,
@@ -57,22 +62,50 @@ fun AppNavigationDrawer(
                         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
                 )
             }
+
             DrawerItem(
                     text = stringResource(id = R.string.nav_drawer_step_goal),
                     onClick = { onEvent(HomeUiEvent.ShowStepGoalPicker) }
             )
+
             HorizontalDivider(
                     modifier = Modifier.padding(horizontal = MaterialTheme.spacing.spaceMedium),
                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
             )
+
             DrawerItem(
                     text = stringResource(id = R.string.nav_drawer_personal_settings),
                     onClick = { onEvent(HomeUiEvent.OpenPersonalSettings) }
             )
+
             HorizontalDivider(
                     modifier = Modifier.padding(horizontal = MaterialTheme.spacing.spaceMedium),
                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
             )
+
+            DrawerItem(
+                    text = stringResource(id = R.string.nav_drawer_edit_steps),
+                    onClick = {
+
+                        Timber.tag("HomeScreen").i("Nav event sent")
+                        onEvent(HomeUiEvent.EditSteps) }
+            )
+
+            HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = MaterialTheme.spacing.spaceMedium),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+            )
+
+            DrawerItem(
+                    text = stringResource(id = R.string.nav_drawer_reset),
+                    onClick = { onEvent(HomeUiEvent.ResetSteps) }
+            )
+
+            HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = MaterialTheme.spacing.spaceMedium),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+            )
+
             DrawerItem(
                     text = stringResource(id = R.string.nav_drawer_exit),
                     textColor = MaterialTheme.colorScheme.primary,
@@ -101,9 +134,10 @@ private fun DrawerItem(
     )
 }
 
+
 @Preview(showBackground = true)
 @Composable
-private fun AppNavigationDrawerPreview() {
+private fun NavigationDrawerPreview() {
     SmartStepTheme {
         Column(
                 modifier = Modifier
@@ -111,7 +145,7 @@ private fun AppNavigationDrawerPreview() {
                         .fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceMedium)
         ) {
-            AppNavigationDrawer(
+            NavigationDrawer(
                     uiState = HomeUiState(),
                     onEvent = {}
             )

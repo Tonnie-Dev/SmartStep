@@ -21,7 +21,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.base.BaseContentLayout
 import com.tonyxlab.smartstep.presentation.core.components.AppButton
@@ -30,7 +29,7 @@ import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.navigation.Navigator
 import com.tonyxlab.smartstep.presentation.screens.onboarding.components.GenderSelectionField
 import com.tonyxlab.smartstep.presentation.screens.onboarding.components.HeightPicker
-import com.tonyxlab.smartstep.presentation.screens.onboarding.components.OnboardingSelectionField
+import com.tonyxlab.smartstep.presentation.core.components.SelectionField
 import com.tonyxlab.smartstep.presentation.screens.onboarding.components.WeightPicker
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.OnboardingActionEvent
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.OnboardingUiEvent
@@ -136,7 +135,7 @@ fun OnboardingScreenContent(
                     // Height Picker
                     with(uiState.heightPickerState) {
 
-                        OnboardingSelectionField(
+                        SelectionField(
                                 label = stringResource(id = R.string.label_text_height),
                                 value = displayHeight,
                                 onClick = { onEvent(OnboardingUiEvent.HeightPickerVisibilityChange) }
@@ -156,7 +155,7 @@ fun OnboardingScreenContent(
                     // Weight Picker
                     with(uiState.weightPickerState) {
 
-                        OnboardingSelectionField(
+                        SelectionField(
                                 label = stringResource(id = R.string.label_text_weight),
                                 value = displayWeight,
                                 onClick = { onEvent(OnboardingUiEvent.WeightPickerVisibilityChange) }

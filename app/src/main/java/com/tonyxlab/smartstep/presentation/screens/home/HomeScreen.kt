@@ -37,11 +37,12 @@ import com.tonyxlab.smartstep.presentation.core.base.BaseContentLayout
 import com.tonyxlab.smartstep.presentation.core.components.AppTopBar
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.navigation.Navigator
-import com.tonyxlab.smartstep.presentation.screens.home.components.AppNavigationDrawer
-import com.tonyxlab.smartstep.presentation.screens.home.components.CloseAppDialog
+import com.tonyxlab.smartstep.presentation.screens.home.components.DateSelector
+import com.tonyxlab.smartstep.presentation.screens.home.components.NavigationDrawer
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionHandler
 import com.tonyxlab.smartstep.presentation.screens.home.components.StepCounterCard
 import com.tonyxlab.smartstep.presentation.screens.home.components.StepGoalPicker
+import com.tonyxlab.smartstep.presentation.screens.home.components.StepsEditor
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
@@ -68,7 +69,7 @@ fun HomeScreen(
     ModalNavigationDrawer(
             drawerState = drawerState,
             drawerContent = {
-                AppNavigationDrawer(
+                NavigationDrawer(
                         uiState = uiState,
                         onEvent = { event ->
                             scope.launch { drawerState.close() }
@@ -89,7 +90,9 @@ fun HomeScreen(
                                 HomeUiEvent.ShowExitDialog -> {
                                     viewModel.onEvent(HomeUiEvent.ShowExitDialog)
                                 }
-
+                                HomeUiEvent.EditSteps -> {
+                                    viewModel.onEvent(HomeUiEvent.EditSteps)
+                                }
                                 else -> Unit
                             }
                         }
@@ -201,12 +204,20 @@ fun HomeScreenContent(
             )
         }
 
-        if (uiState.showExitDialog) {
-            CloseAppDialog(
-                    modifier = Modifier.widthIn(max = maxWidth2),
-                    onConfirm = { onEvent(HomeUiEvent.ConfirmExitDialog) },
-                    onDismiss = { onEvent(HomeUiEvent.DismissExitDialog) }
+        if (uiState.stepEditorState.isStepEditorVisible) {
+            StepsEditor(
+                    uiState = uiState,
+                    onEvent = onEvent
             )
+
+            if (uiState.dateSelectorState.isDateSelectorVisible) {
+                DateSelector(
+                        selectedDay = uiState.dateSelectorState.day,
+                        selectedMonth = uiState.dateSelectorState.month,
+                        selectedYear = uiState.dateSelectorState.year,
+                        onEvent = onEvent
+                )
+            }
         }
     }
 }

@@ -40,8 +40,8 @@ import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 @Composable
 fun StepGoalPicker(
     selectedStep: Int,
-    modifier: Modifier = Modifier,
     isDeviceWide: Boolean,
+    modifier: Modifier = Modifier,
     onEvent: (HomeUiEvent) -> Unit,
 ) {
 

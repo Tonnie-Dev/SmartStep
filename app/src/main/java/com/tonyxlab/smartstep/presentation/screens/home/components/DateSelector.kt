@@ -45,13 +45,13 @@ import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 
 @Composable
 fun DateSelector(
-    selectedYear: Int,
-    selectedMonth: Int,
     selectedDay: Int,
+    selectedMonth: Int,
+    selectedYear: Int,
     onEvent: (HomeUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Dialog(onDismissRequest = { onEvent(HomeUiEvent.DismissStepEditor) }) {
+    Dialog(onDismissRequest = { onEvent(HomeUiEvent.DismissDateSelector) }) {
         Surface(
             modifier = modifier
                 .fillMaxWidth()
@@ -76,9 +76,9 @@ fun DateSelector(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
 
+                    val days = remember { (1..31).toList() }
                     val years = remember { (2020..2030).toList() }
                     val months = remember { (1..12).toList() }
-                    val days = remember { (1..31).toList() }
 
                     WheelPicker(
                             modifier = Modifier.weight(1f),
@@ -111,7 +111,7 @@ fun DateSelector(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = { onEvent(HomeUiEvent.DismissStepEditor) }) {
+                    TextButton(onClick = { onEvent(HomeUiEvent.DismissDateSelector) }) {
                         Text(
                             text = stringResource(id = R.string.button_text_cancel),
                             style = MaterialTheme.typography.BodyLargeMedium,
@@ -119,7 +119,7 @@ fun DateSelector(
                         )
                     }
                     Spacer(modifier = Modifier.width(MaterialTheme.spacing.spaceMedium))
-                    TextButton(onClick = { onEvent(HomeUiEvent.SaveStepEditorValues) }) {
+                    TextButton(onClick = { onEvent(HomeUiEvent.ConfirmDateSelection) }) {
                         Text(
                             text = stringResource(id = R.string.button_text_save),
                             style = MaterialTheme.typography.BodyLargeMedium,

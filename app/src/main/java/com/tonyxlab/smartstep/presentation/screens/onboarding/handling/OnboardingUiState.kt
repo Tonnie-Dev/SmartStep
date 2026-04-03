@@ -62,7 +62,6 @@ enum class Gender {
             else -> "Female"
         }
     }
-
 }
 
 enum class HeightMode { CENTIMETERS, FEET_INCHES }

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import com.tonyxlab.smartstep.R
+import com.tonyxlab.smartstep.presentation.core.components.SelectionField
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.Gender
 import com.tonyxlab.smartstep.presentation.theme.RoundedCornerShape10
@@ -53,7 +54,7 @@ fun GenderSelectionField(
             onExpandedChange = { expanded = !expanded }
     ) {
 
-        OnboardingSelectionField(
+        SelectionField(
                 modifier = Modifier
                         .menuAnchor(
                                 type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,

@@ -34,7 +34,7 @@ import com.tonyxlab.smartstep.presentation.core.components.AppInputField
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
-import com.tonyxlab.smartstep.presentation.screens.onboarding.components.OnboardingSelectionField
+import com.tonyxlab.smartstep.presentation.core.components.SelectionField
 import com.tonyxlab.smartstep.presentation.theme.BodyMediumRegular
 import com.tonyxlab.smartstep.presentation.theme.BodySmallRegular
 import com.tonyxlab.smartstep.presentation.theme.RoundedCornerShape10
@@ -64,6 +64,7 @@ fun StepsEditor(
                             .padding(top = MaterialTheme.spacing.spaceTwelve * 2)
                             .padding(bottom = MaterialTheme.spacing.spaceTen)
             ) {
+
                 Text(
                         text = stringResource(id = R.string.header_text_edit_steps),
                         style = MaterialTheme.typography.titleMedium,
@@ -81,7 +82,7 @@ fun StepsEditor(
                 Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceTwelve * 2))
 
                 // Date Field
-                OnboardingSelectionField(
+                SelectionField(
                         label = stringResource(id = R.string.label_text_date),
                         value = uiState.stepEditorState.selectedDate.toDisplayDate(),
                         backgroundColor = MaterialTheme.colorScheme.surface,
@@ -112,7 +113,7 @@ fun StepsEditor(
 
                     Spacer(modifier = Modifier.width(MaterialTheme.spacing.spaceSmall))
 
-                    TextButton(onClick = { onEvent(HomeUiEvent.SaveStepEditorValues) }) {
+                    TextButton(onClick = { onEvent(HomeUiEvent.ConfirmStepEditorValues) }) {
                         Text(
                                 text = stringResource(id = R.string.button_text_save),
                                 style = MaterialTheme.typography.labelLarge,

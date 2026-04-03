@@ -11,6 +11,7 @@ import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionShe
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
+import java.time.LocalDate
 
 typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeActionEvent>
 
@@ -40,14 +41,12 @@ class HomeViewModel(
             HomeUiEvent.FixCountIssue -> showPermissionSheet(PermissionSheetType.BACKGROUND_ACCESS)
             HomeUiEvent.OpenPersonalSettings -> openPersonalSettings()
             HomeUiEvent.ShowStepGoalPicker -> showStepGoalPicker()
+            HomeUiEvent.ResetSteps -> TODO()
 
             is HomeUiEvent.BackgroundAccessChanged -> updateBackgroundAccessState(event.granted)
             HomeUiEvent.DismissStepGoalPicker -> dismissStepGoalPicker()
             HomeUiEvent.SaveStepGoal -> saveStepGoalPicker()
             is HomeUiEvent.SelectStepGoal -> onSelectStepGoal(event.selectedSteps)
-
-            HomeUiEvent.ConfirmExitDialog -> confirmExitDialog()
-            HomeUiEvent.DismissExitDialog ->dismissExitDialog()
 
             HomeUiEvent.ShowBackgroundPermissionSheet -> Unit
             HomeUiEvent.AllowAccess -> Unit
@@ -56,21 +55,32 @@ class HomeViewModel(
             HomeUiEvent.OnMotionDetected -> incrementSteps()
 
             // Steps Editor
-            HomeUiEvent.DismissStepEditor -> TODO()
-            is HomeUiEvent.OnDaySelected -> TODO()
+            HomeUiEvent.EditSteps -> showEditStepDialog()
+            HomeUiEvent.ConfirmStepEditorValues -> onConfirmStepEditorDialog()
+            HomeUiEvent.DismissStepEditor -> dismissStepEditorDialog()
+            HomeUiEvent.ShowDateSelector -> showDateSelectorDialog()
             is HomeUiEvent.OnEditSteps -> TODO()
-            is HomeUiEvent.OnMonthSelected -> TODO()
-            is HomeUiEvent.OnYearSelected -> TODO()
-            HomeUiEvent.SaveStepEditorValues -> TODO()
-            HomeUiEvent.ShowDateSelector -> TODO()
-            HomeUiEvent.DismissDateSelector -> TODO()
+
+            // Date Selector
+            is HomeUiEvent.OnDaySelected -> onDaySelected(event.value)
+            is HomeUiEvent.OnMonthSelected -> onMonthSelected(event.value)
+            is HomeUiEvent.OnYearSelected -> onYearSelected(event.value)
+            HomeUiEvent.ConfirmDateSelection -> confirmDateSelectorDialog()
+            HomeUiEvent.DismissDateSelector -> dismissDateSelectorDialog()
+
+            // Exit Dialog
+            HomeUiEvent.ConfirmExitDialog -> confirmExitDialog()
+            HomeUiEvent.DismissExitDialog -> dismissExitDialog()
+
         }
     }
+
     private fun incrementSteps() {
         updateState {
             it.copy(currentSteps = it.currentSteps + 1)
         }
     }
+
     private fun observePermissionStates() {
         launch {
             permPrefsDataStore.physicalActivityPermissionRequested.collect { requested ->
@@ -84,7 +94,6 @@ class HomeViewModel(
             }
         }
     }
-
 
     private fun openPersonalSettings() {
         sendActionEvent(HomeActionEvent.OpenAppSettings)
@@ -157,9 +166,9 @@ class HomeViewModel(
                             .copy(isBackgroundAccessGranted = granted)
             )
         }
-
     }
 
+    // Navigation Drawer
     private fun showStepGoalPicker() {
         updateState {
             it.copy(
@@ -169,6 +178,15 @@ class HomeViewModel(
         }
     }
 
+    private fun showEditStepDialog() {
+        updateState {
+
+
+            it.copy(stepEditorState = currentState.stepEditorState.copy(isStepEditorVisible = true))
+        }
+    }
+
+    // Step Goal Picker
     private fun saveStepGoalPicker() {
         launch {
             val selectedSteps = currentState.stepGoalPickerState.selectedStepsGoal
@@ -192,6 +210,94 @@ class HomeViewModel(
         }
     }
 
+    // Step Editor
+    private fun onConfirmStepEditorDialog() {
+
+        val stepsText = currentState.stepEditorState.stepsTextFieldState.text
+                .toString()
+                .trim()
+
+        val steps = stepsText.toIntOrNull() ?: 0
+
+        updateState {
+            it.copy(
+                    currentSteps = steps,
+                    stepEditorState = currentState.stepEditorState.copy(
+                            isStepEditorVisible = false
+                    )
+            )
+        }
+    }
+
+    private fun dismissStepEditorDialog() {
+        updateState {
+            it.copy(
+                    stepEditorState = initialState.stepEditorState,
+                    dateSelectorState = initialState.dateSelectorState
+            )
+        }
+    }
+
+    private fun showDateSelectorDialog() {
+        updateState {
+            it.copy(
+                    dateSelectorState = currentState.dateSelectorState.copy(
+                            isDateSelectorVisible = true
+                    )
+            )
+        }
+    }
+
+    // Date Selector
+    private fun onDaySelected(day: Int) {
+        updateState {
+            it.copy(
+                    dateSelectorState = currentState.dateSelectorState.copy(day = day)
+            )
+        }
+    }
+
+    private fun onMonthSelected(month: Int) {
+        updateState {
+            it.copy(
+                    dateSelectorState = currentState.dateSelectorState.copy(month = month)
+            )
+        }
+    }
+
+    private fun onYearSelected(year: Int) {
+        updateState {
+            it.copy(
+                    dateSelectorState = currentState.dateSelectorState.copy(year = year)
+            )
+        }
+    }
+
+    private fun confirmDateSelectorDialog() {
+        val date = currentState.dateSelectorState.run {
+            LocalDate.of(year, month, day)
+        }
+
+        updateState {
+            it.copy(
+                    stepEditorState = currentState.stepEditorState.copy(selectedDate = date),
+                    dateSelectorState = currentState.dateSelectorState.copy(
+                            isDateSelectorVisible = false
+                    )
+            )
+        }
+    }
+
+    private fun dismissDateSelectorDialog() {
+        updateState {
+            it.copy(
+                    dateSelectorState = currentState.dateSelectorState.copy(
+                            isDateSelectorVisible = false
+                    )
+            )
+        }
+    }
+
     private fun showExitDialog() {
         updateState {
             it.copy(showExitDialog = true)
@@ -205,6 +311,7 @@ class HomeViewModel(
         }
         sendActionEvent(HomeActionEvent.CloseApp)
     }
+
     private fun dismissExitDialog() {
         updateState {
             it.copy(showExitDialog = false)

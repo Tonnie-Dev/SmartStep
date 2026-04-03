@@ -1,4 +1,4 @@
-package com.tonyxlab.smartstep.presentation.screens.onboarding.components
+package com.tonyxlab.smartstep.presentation.core.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -30,7 +30,7 @@ import com.tonyxlab.smartstep.presentation.theme.RoundedCornerShape10
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 
 @Composable
-fun OnboardingSelectionField(
+fun SelectionField(
     label: String,
     value: String,
     onClick: () -> Unit,
@@ -83,7 +83,7 @@ fun OnboardingSelectionField(
 
 @PreviewLightDark
 @Composable
-private fun OnboardingSelectionField_Preview() {
+private fun SelectionField_Preview() {
     SmartStepTheme {
         Column(
                 modifier = Modifier
@@ -92,7 +92,7 @@ private fun OnboardingSelectionField_Preview() {
                         .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceMedium)
         ) {
-            OnboardingSelectionField(
+            SelectionField(
                     label = stringResource(id = R.string.label_text_height),
                     value = "170",
                     onClick = {}
