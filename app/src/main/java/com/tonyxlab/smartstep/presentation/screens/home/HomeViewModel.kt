@@ -11,7 +11,9 @@ import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionShe
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
-import java.time.LocalDate
+import com.tonyxlab.smartstep.presentation.screens.home.handling.PermissionHandler
+import com.tonyxlab.smartstep.presentation.screens.home.handling.ResetExitHandler
+import com.tonyxlab.smartstep.presentation.screens.home.handling.StepsHandler
 
 typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeActionEvent>
 
@@ -19,6 +21,10 @@ class HomeViewModel(
     private val permPrefsDataStore: PermPrefsDataStore,
     private val onboardingDataStore: OnboardingDataStore
 ) : HomeBaseViewModel() {
+
+    private val stepsHandler = StepsHandler()
+    private val permissionHandler = PermissionHandler()
+    private val resetExitHandler = ResetExitHandler()
 
     override val initialState: HomeUiState
         get() = HomeUiState()
@@ -29,71 +35,120 @@ class HomeViewModel(
 
     override fun onEvent(event: HomeUiEvent) {
         when (event) {
-            is HomeUiEvent.ShowPermissionSheet -> showPermissionSheet(event.type)
-            HomeUiEvent.DismissPermissionDialog -> dismissPermissionDialog()
+
+            // Permissions
+            is HomeUiEvent.ShowPermissionSheet -> updateState {
+                permissionHandler.showPermissionSheet(
+                        state = it,
+                        type = event.type
+                )
+            }
+
+            HomeUiEvent.DismissPermissionDialog -> updateState {
+                permissionHandler.dismissPermissionDialog(it)
+            }
+
             HomeUiEvent.OpenPermissionsSettings -> openPermissionsSettings()
             HomeUiEvent.Continue -> handleContinue()
+            is HomeUiEvent.BackgroundAccessChanged -> updateState {
+                permissionHandler.updateBackgroundAccessState(
+                        state = it,
+                        granted = event.granted
+                )
+            }
+
             HomeUiEvent.PhysicalActivityPermissionRequested -> physicalActivityPermissionRequested()
-            HomeUiEvent.ShowExitDialog -> showExitDialog()
+            HomeUiEvent.ShowBackgroundPermissionSheet -> Unit
+            HomeUiEvent.AllowAccess -> Unit
 
             // Navigation Drawer
             HomeUiEvent.OpenNavigationDrawer -> Unit
             HomeUiEvent.FixCountIssue -> showPermissionSheet(PermissionSheetType.BACKGROUND_ACCESS)
             HomeUiEvent.OpenPersonalSettings -> openPersonalSettings()
-            HomeUiEvent.ShowStepGoalPicker -> showStepGoalPicker()
-            HomeUiEvent.ResetSteps -> showResetDialog()
-
-            is HomeUiEvent.BackgroundAccessChanged -> updateBackgroundAccessState(event.granted)
-            HomeUiEvent.DismissStepGoalPicker -> dismissStepGoalPicker()
+            HomeUiEvent.ResetSteps -> updateState { resetExitHandler.showResetDialog(it) }
             HomeUiEvent.SaveStepGoal -> saveStepGoalPicker()
-            is HomeUiEvent.SelectStepGoal -> onSelectStepGoal(event.selectedSteps)
+            is HomeUiEvent.SelectStepGoal -> updateState {
+                stepsHandler.onSelectStepGoal(
+                        state = it,
+                        selectedSteps = event.selectedSteps
+                )
+            }
 
-            HomeUiEvent.ShowBackgroundPermissionSheet -> Unit
-            HomeUiEvent.AllowAccess -> Unit
-
-            // Motion
-            HomeUiEvent.OnMotionDetected -> incrementSteps()
+            HomeUiEvent.ShowExitDialog -> updateState { resetExitHandler.showExitDialog(it) }
 
             // Steps Editor
-            HomeUiEvent.EditSteps -> showEditStepDialog()
-            HomeUiEvent.ConfirmStepEditorValues -> onConfirmStepEditorDialog()
-            HomeUiEvent.DismissStepEditor -> dismissStepEditorDialog()
-            HomeUiEvent.ShowDateSelector -> showDateSelectorDialog()
+            HomeUiEvent.EditSteps -> updateState { stepsHandler.showStepEditor(it) }
+            HomeUiEvent.ConfirmStepEditorValues -> updateState {
+                stepsHandler.confirmStepEditor(
+                        currentState
+                )
+            }
+            HomeUiEvent.DismissStepEditor -> updateState {
+                stepsHandler.dismissStepEditor(
+                        initialState,
+                        currentState
+                )
+            }
+            HomeUiEvent.ShowDateSelector -> updateState {
+                stepsHandler.showDateSelector(
+                        currentState
+                )
+            }
 
             // Date Selector
-            is HomeUiEvent.OnDaySelected -> onDaySelected(event.value)
-            is HomeUiEvent.OnMonthSelected -> onMonthSelected(event.value)
-            is HomeUiEvent.OnYearSelected -> onYearSelected(event.value)
-            HomeUiEvent.ConfirmDateSelection -> confirmDateSelectorDialog()
-            HomeUiEvent.DismissDateSelector -> dismissDateSelectorDialog()
+            is HomeUiEvent.OnDaySelected -> updateState {
+                stepsHandler.onDaySelected(
+                        currentState,
+                        event.value
+                )
+            }
+            is HomeUiEvent.OnMonthSelected -> updateState {
+                stepsHandler.onMonthSelected(
+                        currentState,
+                        event.value
+                )
+            }
+            is HomeUiEvent.OnYearSelected -> updateState {
+                stepsHandler.onYearSelected(
+                        currentState,
+                        event.value
+                )
+            }
+            HomeUiEvent.ConfirmDateSelection -> updateState {
+                stepsHandler.confirmDateSelection(
+                        currentState
+                )
+            }
+            HomeUiEvent.DismissDateSelector -> updateState {
+                stepsHandler.dismissDateSelector(
+                        currentState
+                )
+            }
+
+            // Goal Picker
+            HomeUiEvent.ShowStepGoalSheet -> showStepGoalPicker()
+            HomeUiEvent.DismissStepGoalSheet -> updateState { stepsHandler.closeStepGoalSheet(it) }
+
+            // Motion
+            HomeUiEvent.OnMotionDetected -> updateState { stepsHandler.incrementSteps(it) }
 
             // Reset Dialog
-            HomeUiEvent.ConfirmResetDialog -> confirmResetDialog()
-            HomeUiEvent.DismissResetDialog -> dismissResetDialog()
+            HomeUiEvent.ConfirmResetDialog -> updateState { resetExitHandler.confirmResetDialog(it) }
+            HomeUiEvent.DismissResetDialog -> updateState { resetExitHandler.dismissResetDialog(it) }
 
             // Exit Dialog
             HomeUiEvent.ConfirmExitDialog -> confirmExitDialog()
-            HomeUiEvent.DismissExitDialog -> dismissExitDialog()
+            HomeUiEvent.DismissExitDialog -> updateState { resetExitHandler.closeExitDialog(it) }
         }
     }
 
-    private fun incrementSteps() {
+    // Navigation Drawer
+    private fun showStepGoalPicker() {
         updateState {
-            it.copy(currentSteps = it.currentSteps + 1)
-        }
-    }
-
-    private fun observePermissionStates() {
-        launch {
-            permPrefsDataStore.physicalActivityPermissionRequested.collect { requested ->
-                updateState {
-                    it.copy(
-                            permissionUiState = currentState.permissionUiState.copy(
-                                    physicalActivityPermissionRequested = requested
-                            )
-                    )
-                }
-            }
+            it.copy(
+                    stepGoalPickerState = currentState.stepGoalPickerState
+                            .copy(pickerSheetVisible = true)
+            )
         }
     }
 
@@ -101,12 +156,16 @@ class HomeViewModel(
         sendActionEvent(HomeActionEvent.OpenAppSettings)
     }
 
-    private fun onSelectStepGoal(selectedSteps: Int) {
-        updateState {
-            it.copy(
-                    stepGoalPickerState = currentState.stepGoalPickerState
-                            .copy(selectedStepsGoal = selectedSteps)
-            )
+    private fun observePermissionStates() {
+        launch {
+            permPrefsDataStore.physicalActivityPermissionRequested.collect { requested ->
+                updateState {
+                    permissionHandler.updatePhysicalActivityPermissionRequested(
+                            state = it,
+                            requested = requested
+                    )
+                }
+            }
         }
     }
 
@@ -122,35 +181,13 @@ class HomeViewModel(
         }
     }
 
-    private fun dismissPermissionDialog() {
-        updateState {
-            it.copy(
-                    permissionUiState = currentState.permissionUiState
-                            .copy(
-                                    permissionSheetVisible = false,
-                                    permissionSheetType = null
-                            )
-            )
-        }
-    }
-
     private fun openPermissionsSettings() {
-        updateState {
-            it.copy(
-                    permissionUiState = currentState.permissionUiState
-                            .copy(permissionSheetVisible = false)
-            )
-        }
+        updateState { permissionHandler.closePermissionSheet(it) }
         sendActionEvent(HomeActionEvent.OpenAppSettings)
     }
 
     private fun handleContinue() {
-        updateState {
-            it.copy(
-                    permissionUiState = currentState.permissionUiState
-                            .copy(permissionSheetVisible = false)
-            )
-        }
+        updateState { permissionHandler.closePermissionSheet(it) }
         sendActionEvent(HomeActionEvent.RequestBatteryOptimization)
     }
 
@@ -160,183 +197,16 @@ class HomeViewModel(
         }
     }
 
-    private fun updateBackgroundAccessState(granted: Boolean) {
-
-        updateState {
-            it.copy(
-                    permissionUiState = currentState.permissionUiState
-                            .copy(isBackgroundAccessGranted = granted)
-            )
-        }
-    }
-
-    // Navigation Drawer
-    private fun showStepGoalPicker() {
-        updateState {
-            it.copy(
-                    stepGoalPickerState = currentState.stepGoalPickerState
-                            .copy(pickerSheetVisible = true)
-            )
-        }
-    }
-
-    private fun showEditStepDialog() {
-        updateState {
-            it.copy(stepEditorState = currentState.stepEditorState.copy(isStepEditorVisible = true))
-        }
-    }
-
     // Step Goal Picker
     private fun saveStepGoalPicker() {
         launch {
             val selectedSteps = currentState.stepGoalPickerState.selectedStepsGoal
             onboardingDataStore.setDailyStepGoal(stepGoal = selectedSteps)
-
-            updateState {
-                it.copy(
-                        stepGoalPickerState = currentState.stepGoalPickerState
-                                .copy(pickerSheetVisible = false)
-                )
-            }
         }
+        updateState { stepsHandler.closeStepGoalSheet(it) }
     }
 
-    private fun dismissStepGoalPicker() {
-        updateState {
-            it.copy(
-                    stepGoalPickerState = currentState.stepGoalPickerState
-                            .copy(pickerSheetVisible = false)
-            )
-        }
-    }
-
-    // Step Editor
-    private fun onConfirmStepEditorDialog() {
-
-        val stepsText = currentState.stepEditorState.stepsTextFieldState.text
-                .toString()
-                .trim()
-
-        val steps = stepsText.toIntOrNull() ?: 0
-
-        updateState {
-            it.copy(
-                    currentSteps = steps,
-                    stepEditorState = currentState.stepEditorState.copy(
-                            isStepEditorVisible = false
-                    )
-            )
-        }
-    }
-
-    private fun dismissStepEditorDialog() {
-        updateState {
-            it.copy(
-                    stepEditorState = initialState.stepEditorState,
-                    dateSelectorState = initialState.dateSelectorState
-            )
-        }
-    }
-
-    private fun showDateSelectorDialog() {
-        updateState {
-            it.copy(
-                    dateSelectorState = currentState.dateSelectorState.copy(
-                            isDateSelectorVisible = true
-                    )
-            )
-        }
-    }
-
-    // Date Selector
-    private fun onDaySelected(day: Int) {
-        updateState {
-            it.copy(
-                    dateSelectorState = currentState.dateSelectorState.copy(day = day)
-            )
-        }
-    }
-
-    private fun onMonthSelected(month: Int) {
-        updateState {
-            it.copy(
-                    dateSelectorState = currentState.dateSelectorState.copy(month = month)
-            )
-        }
-    }
-
-    private fun onYearSelected(year: Int) {
-        updateState {
-            it.copy(
-                    dateSelectorState = currentState.dateSelectorState.copy(year = year)
-            )
-        }
-    }
-
-    private fun confirmDateSelectorDialog() {
-        val date = runCatching {
-            currentState.dateSelectorState.run {
-                LocalDate.of(year, month, day)
-            }
-        }.getOrNull() ?: return
-        updateState {
-            it.copy(
-                    stepEditorState = currentState.stepEditorState.copy(selectedDate = date),
-                    dateSelectorState = currentState.dateSelectorState.copy(
-                            isDateSelectorVisible = false
-                    )
-            )
-        }
-    }
-
-    private fun dismissDateSelectorDialog() {
-        updateState {
-            it.copy(
-                    dateSelectorState = currentState.dateSelectorState.copy(
-                            isDateSelectorVisible = false
-                    )
-            )
-        }
-    }
-
-    private fun showResetDialog() {
-        updateState {
-            it.copy(showResetDialog = true)
-        }
-    }
-
-    private fun confirmResetDialog() {
-        updateState {
-            it.copy(
-                    showResetDialog = false,
-                    currentSteps = 0
-            )
-        }
-    }
-
-    private fun dismissResetDialog() {
-        updateState {
-            it.copy(showResetDialog = false)
-        }
-    }
-
-    private fun showExitDialog() {
-        updateState {
-            it.copy(showExitDialog = true)
-        }
-    }
-
-    private fun confirmExitDialog() {
-        updateState {
-            it.copy(showExitDialog = false)
-
-        }
+    fun confirmExitDialog() {
         sendActionEvent(HomeActionEvent.CloseApp)
-    }
-
-    private fun dismissExitDialog() {
-        updateState {
-            it.copy(showExitDialog = false)
-        }
     }
 }

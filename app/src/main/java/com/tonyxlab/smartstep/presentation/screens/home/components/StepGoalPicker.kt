@@ -48,7 +48,7 @@ fun StepGoalPicker(
     val sheetState = rememberModalBottomSheetState()
 
     if (isDeviceWide) {
-        Dialog(onDismissRequest = { onEvent(HomeUiEvent.DismissStepGoalPicker) }) {
+        Dialog(onDismissRequest = { onEvent(HomeUiEvent.DismissStepGoalSheet) }) {
             GoalPickerContent(
                     modifier = modifier.clip(shape = MaterialTheme.shapes.RoundedCornerShape28),
                     selectedSteps = selectedStep,
@@ -59,7 +59,7 @@ fun StepGoalPicker(
 
         ModalBottomSheet(
                 modifier = modifier,
-                onDismissRequest = { onEvent(HomeUiEvent.DismissStepGoalPicker) },
+                onDismissRequest = { onEvent(HomeUiEvent.DismissStepGoalSheet) },
                 sheetState = sheetState,
                 shape = MaterialTheme.shapes.HorizontalRoundedCornerShape28,
                 containerColor = MaterialTheme.colorScheme.surface,
@@ -111,7 +111,7 @@ private fun GoalPickerContent(
             )
 
             TextButton(
-                    onClick = { onEvent(HomeUiEvent.DismissStepGoalPicker) },
+                    onClick = { onEvent(HomeUiEvent.DismissStepGoalSheet) },
 
                     ) {
                 Text(

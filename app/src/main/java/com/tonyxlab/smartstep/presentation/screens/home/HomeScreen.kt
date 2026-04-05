@@ -40,7 +40,7 @@ import com.tonyxlab.smartstep.presentation.navigation.Navigator
 import com.tonyxlab.smartstep.presentation.screens.home.components.CloseAppDialog
 import com.tonyxlab.smartstep.presentation.screens.home.components.DateSelector
 import com.tonyxlab.smartstep.presentation.screens.home.components.NavigationDrawer
-import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionHandler
+import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionUiHandler
 import com.tonyxlab.smartstep.presentation.screens.home.components.ResetStepsDialog
 import com.tonyxlab.smartstep.presentation.screens.home.components.StepCounterCard
 import com.tonyxlab.smartstep.presentation.screens.home.components.StepGoalPicker
@@ -81,8 +81,8 @@ fun HomeScreen(
                                     viewModel.onEvent(event)
                                 }
 
-                                HomeUiEvent.ShowStepGoalPicker -> {
-                                    viewModel.onEvent(HomeUiEvent.ShowStepGoalPicker)
+                                HomeUiEvent.ShowStepGoalSheet -> {
+                                    viewModel.onEvent(HomeUiEvent.ShowStepGoalSheet)
                                 }
 
                                 HomeUiEvent.OpenPersonalSettings -> {
@@ -196,7 +196,7 @@ fun HomeScreenContent(
                 stepsGoal = uiState.stepGoalPickerState.selectedStepsGoal
         )
 
-        PermissionHandler(
+        PermissionUiHandler(
                 isDeviceWide = isDeviceWide,
                 uiState = uiState,
                 onEvent = onEvent

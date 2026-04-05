@@ -20,7 +20,7 @@ sealed interface HomeUiEvent : UiEvent {
     // Navigation Drawer Events
     data object OpenNavigationDrawer : HomeUiEvent
     data object FixCountIssue : HomeUiEvent
-    data object ShowStepGoalPicker : HomeUiEvent
+    data object ShowStepGoalSheet : HomeUiEvent
     data object OpenPersonalSettings : HomeUiEvent
     data object EditSteps : HomeUiEvent
     data object ResetSteps : HomeUiEvent
@@ -28,7 +28,7 @@ sealed interface HomeUiEvent : UiEvent {
 
     // Steps Goal
     data class SelectStepGoal(val selectedSteps: Int) : HomeUiEvent
-    data object DismissStepGoalPicker : HomeUiEvent
+    data object DismissStepGoalSheet : HomeUiEvent
     data object SaveStepGoal : HomeUiEvent
 
     // Steps Editor Dialog

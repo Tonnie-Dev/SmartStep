@@ -65,7 +65,7 @@ fun NavigationDrawer(
 
             DrawerItem(
                     text = stringResource(id = R.string.nav_drawer_step_goal),
-                    onClick = { onEvent(HomeUiEvent.ShowStepGoalPicker) }
+                    onClick = { onEvent(HomeUiEvent.ShowStepGoalSheet) }
             )
 
             HorizontalDivider(

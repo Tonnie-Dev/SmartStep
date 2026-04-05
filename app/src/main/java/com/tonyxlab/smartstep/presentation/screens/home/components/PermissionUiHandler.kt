@@ -27,7 +27,7 @@ enum class PermissionSheetType {
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun PermissionHandler(
+fun PermissionUiHandler(
     isDeviceWide: Boolean,
     uiState: HomeUiState,
     onEvent: (HomeUiEvent) -> Unit,
