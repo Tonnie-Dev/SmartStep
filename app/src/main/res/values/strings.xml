@@ -71,6 +71,7 @@
     <string name="text_button_skip">Skip</string>
     <string name="text_button_save">Save</string>
     <string name="text_button_cancel">Cancel</string>
+    <string name="text_button_reset">Reset</string>
 
     <!--Content Description Texts-->
     <string name="cds_text_check_mark">Check Mark</string>
@@ -84,7 +85,8 @@
     <string name="toast_text_copied">Copied to Clipboard</string>
 
     <!--Dialog Texts-->
-    <string name="dialog_text_title">Are you sure you want to log out?</string>
+    <string name="dialog_text_log_out">Are you sure you want to log out?</string>
+    <string name="dialog_text_reset">Are you sure you want to reset today\'s steps?</string>
 
     <!--Supporting Texts-->
     <string name="sup_text_def_username">Use between 3 and 20 characters for your username.</string>

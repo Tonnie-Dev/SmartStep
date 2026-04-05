@@ -12,8 +12,9 @@ import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionShe
 import java.time.LocalDate
 
 data class HomeUiState(
-    val showExitDialog: Boolean = false,
     val currentSteps: Int = 0,
+    val showExitDialog: Boolean = false,
+    val showResetDialog: Boolean = false,
     val permissionUiState: PermissionUiState = PermissionUiState(),
     val stepGoalPickerState: StepGoalPickerState = StepGoalPickerState(),
     val stepEditorState: StepEditorState = StepEditorState(),

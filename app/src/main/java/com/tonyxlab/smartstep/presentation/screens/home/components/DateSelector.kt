@@ -1,5 +1,7 @@
 package com.tonyxlab.smartstep.presentation.screens.home.components
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,7 +32,9 @@ import com.tonyxlab.smartstep.presentation.screens.onboarding.components.Standar
 import com.tonyxlab.smartstep.presentation.theme.BodyLargeMedium
 import com.tonyxlab.smartstep.presentation.theme.RoundedCornerShape28
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
+import java.time.YearMonth
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DateSelector(
     selectedDay: Int,
@@ -63,8 +67,11 @@ fun DateSelector(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val maxDays = YearMonth.of(selectedYear, selectedMonth).lengthOfMonth()
+                    val days = remember(selectedMonth, selectedYear) {
+                        (1..maxDays).toList() }
 
-                    val days = remember { (1..31).toList() }
+                 //   val days = remember { (1..31).toList() }
                     val years = remember { (2020..2030).toList() }
                     val months = remember { (1..12).toList() }
 

@@ -31,15 +31,10 @@ sealed interface HomeUiEvent : UiEvent {
     data object DismissStepGoalPicker : HomeUiEvent
     data object SaveStepGoal : HomeUiEvent
 
-    // Exit Dialog
-    data object ConfirmExitDialog : HomeUiEvent
-    data object DismissExitDialog : HomeUiEvent
-
     // Steps Editor Dialog
     data class OnDaySelected(val value: Int) : HomeUiEvent
     data class OnMonthSelected(val value: Int) : HomeUiEvent
     data class OnYearSelected(val value: Int) : HomeUiEvent
-    data class OnEditSteps(val value: Int) : HomeUiEvent
     data object ConfirmStepEditorValues : HomeUiEvent
     data object ConfirmDateSelection:HomeUiEvent
     data object DismissStepEditor : HomeUiEvent
@@ -49,4 +44,11 @@ sealed interface HomeUiEvent : UiEvent {
     // Motion
     data object OnMotionDetected : HomeUiEvent
 
+    // Reset Dialog
+    data object ConfirmResetDialog : HomeUiEvent
+    data object DismissResetDialog : HomeUiEvent
+
+    // Exit Dialog
+    data object ConfirmExitDialog : HomeUiEvent
+    data object DismissExitDialog : HomeUiEvent
 }

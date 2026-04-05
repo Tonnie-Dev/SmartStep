@@ -37,9 +37,11 @@ import com.tonyxlab.smartstep.presentation.core.base.BaseContentLayout
 import com.tonyxlab.smartstep.presentation.core.components.AppTopBar
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.navigation.Navigator
+import com.tonyxlab.smartstep.presentation.screens.home.components.CloseAppDialog
 import com.tonyxlab.smartstep.presentation.screens.home.components.DateSelector
 import com.tonyxlab.smartstep.presentation.screens.home.components.NavigationDrawer
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionHandler
+import com.tonyxlab.smartstep.presentation.screens.home.components.ResetStepsDialog
 import com.tonyxlab.smartstep.presentation.screens.home.components.StepCounterCard
 import com.tonyxlab.smartstep.presentation.screens.home.components.StepGoalPicker
 import com.tonyxlab.smartstep.presentation.screens.home.components.StepsEditor
@@ -87,11 +89,16 @@ fun HomeScreen(
                                     navigator.navigateToOnboarding()
                                 }
 
-                                HomeUiEvent.ShowExitDialog -> {
-                                    viewModel.onEvent(HomeUiEvent.ShowExitDialog)
-                                }
                                 HomeUiEvent.EditSteps -> {
                                     viewModel.onEvent(HomeUiEvent.EditSteps)
+                                }
+
+                                HomeUiEvent.ResetSteps -> {
+                                    viewModel.onEvent(event)
+                                }
+
+                                HomeUiEvent.ShowExitDialog -> {
+                                    viewModel.onEvent(event)
                                 }
                                 else -> Unit
                             }
@@ -218,6 +225,16 @@ fun HomeScreenContent(
                         onEvent = onEvent
                 )
             }
+        }
+
+        if (uiState.showResetDialog){
+            ResetStepsDialog(
+                    onEvent = onEvent
+            )
+        }
+
+        if (uiState.showExitDialog){
+            CloseAppDialog (onEvent = onEvent)
         }
     }
 }

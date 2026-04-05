@@ -41,7 +41,7 @@ class HomeViewModel(
             HomeUiEvent.FixCountIssue -> showPermissionSheet(PermissionSheetType.BACKGROUND_ACCESS)
             HomeUiEvent.OpenPersonalSettings -> openPersonalSettings()
             HomeUiEvent.ShowStepGoalPicker -> showStepGoalPicker()
-            HomeUiEvent.ResetSteps -> TODO()
+            HomeUiEvent.ResetSteps -> showResetDialog()
 
             is HomeUiEvent.BackgroundAccessChanged -> updateBackgroundAccessState(event.granted)
             HomeUiEvent.DismissStepGoalPicker -> dismissStepGoalPicker()
@@ -59,7 +59,6 @@ class HomeViewModel(
             HomeUiEvent.ConfirmStepEditorValues -> onConfirmStepEditorDialog()
             HomeUiEvent.DismissStepEditor -> dismissStepEditorDialog()
             HomeUiEvent.ShowDateSelector -> showDateSelectorDialog()
-            is HomeUiEvent.OnEditSteps -> TODO()
 
             // Date Selector
             is HomeUiEvent.OnDaySelected -> onDaySelected(event.value)
@@ -68,10 +67,13 @@ class HomeViewModel(
             HomeUiEvent.ConfirmDateSelection -> confirmDateSelectorDialog()
             HomeUiEvent.DismissDateSelector -> dismissDateSelectorDialog()
 
+            // Reset Dialog
+            HomeUiEvent.ConfirmResetDialog -> confirmResetDialog()
+            HomeUiEvent.DismissResetDialog -> dismissResetDialog()
+
             // Exit Dialog
             HomeUiEvent.ConfirmExitDialog -> confirmExitDialog()
             HomeUiEvent.DismissExitDialog -> dismissExitDialog()
-
         }
     }
 
@@ -180,8 +182,6 @@ class HomeViewModel(
 
     private fun showEditStepDialog() {
         updateState {
-
-
             it.copy(stepEditorState = currentState.stepEditorState.copy(isStepEditorVisible = true))
         }
     }
@@ -274,10 +274,11 @@ class HomeViewModel(
     }
 
     private fun confirmDateSelectorDialog() {
-        val date = currentState.dateSelectorState.run {
-            LocalDate.of(year, month, day)
-        }
-
+        val date = runCatching {
+            currentState.dateSelectorState.run {
+                LocalDate.of(year, month, day)
+            }
+        }.getOrNull() ?: return
         updateState {
             it.copy(
                     stepEditorState = currentState.stepEditorState.copy(selectedDate = date),
@@ -295,6 +296,27 @@ class HomeViewModel(
                             isDateSelectorVisible = false
                     )
             )
+        }
+    }
+
+    private fun showResetDialog() {
+        updateState {
+            it.copy(showResetDialog = true)
+        }
+    }
+
+    private fun confirmResetDialog() {
+        updateState {
+            it.copy(
+                    showResetDialog = false,
+                    currentSteps = 0
+            )
+        }
+    }
+
+    private fun dismissResetDialog() {
+        updateState {
+            it.copy(showResetDialog = false)
         }
     }
 
