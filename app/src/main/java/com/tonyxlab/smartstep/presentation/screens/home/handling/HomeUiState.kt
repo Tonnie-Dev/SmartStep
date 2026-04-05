@@ -5,7 +5,6 @@ package com.tonyxlab.smartstep.presentation.screens.home.handling
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Stable
 import com.tonyxlab.smartstep.presentation.core.base.handling.UiState
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
@@ -16,7 +15,7 @@ data class HomeUiState(
     val showExitDialog: Boolean = false,
     val showResetDialog: Boolean = false,
     val permissionUiState: PermissionUiState = PermissionUiState(),
-    val stepGoalPickerState: StepGoalPickerState = StepGoalPickerState(),
+    val stepGoalSheetState: StepGoalSheetState = StepGoalSheetState(),
     val stepEditorState: StepEditorState = StepEditorState(),
     val dateSelectorState: DateSelectorState = DateSelectorState()
 ) : UiState {
@@ -30,13 +29,14 @@ data class HomeUiState(
     )
 
     @Stable
-    data class StepGoalPickerState(
+    data class StepGoalSheetState(
         val pickerSheetVisible: Boolean = false,
         val selectedStepsGoal: Int = 2000
     )
 
     @Stable
     data class StepEditorState(
+        val paused: Boolean = false,
         val isStepEditorVisible: Boolean = false,
         val selectedDate: LocalDate = LocalDate.now(),
         val stepsTextFieldState: TextFieldState = TextFieldState()

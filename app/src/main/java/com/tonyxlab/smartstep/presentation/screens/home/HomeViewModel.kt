@@ -94,7 +94,7 @@ class HomeViewModel(
                         currentState
                 )
             }
-
+            HomeUiEvent.PauseStepCounting -> updateState { stepsHandler.pauseStepCounting(it) }
             // Date Selector
             is HomeUiEvent.OnDaySelected -> updateState {
                 stepsHandler.onDaySelected(
@@ -139,6 +139,7 @@ class HomeViewModel(
             // Exit Dialog
             HomeUiEvent.ConfirmExitDialog -> confirmExitDialog()
             HomeUiEvent.DismissExitDialog -> updateState { resetExitHandler.closeExitDialog(it) }
+
         }
     }
 
@@ -146,7 +147,7 @@ class HomeViewModel(
     private fun showStepGoalPicker() {
         updateState {
             it.copy(
-                    stepGoalPickerState = currentState.stepGoalPickerState
+                    stepGoalSheetState = currentState.stepGoalSheetState
                             .copy(pickerSheetVisible = true)
             )
         }
@@ -200,7 +201,7 @@ class HomeViewModel(
     // Step Goal Picker
     private fun saveStepGoalPicker() {
         launch {
-            val selectedSteps = currentState.stepGoalPickerState.selectedStepsGoal
+            val selectedSteps = currentState.stepGoalSheetState.selectedStepsGoal
             onboardingDataStore.setDailyStepGoal(stepGoal = selectedSteps)
         }
         updateState { stepsHandler.closeStepGoalSheet(it) }

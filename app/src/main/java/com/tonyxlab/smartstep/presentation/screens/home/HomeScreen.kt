@@ -172,12 +172,14 @@ fun HomeScreenContent(
     }
     val context = LocalContext.current
 
-    DisposableEffect(Unit) {
+    DisposableEffect(uiState.stepEditorState.paused) {
         val detector = MotionStepDetector(context) {
             onEvent(HomeUiEvent.OnMotionDetected)
         }
 
-        detector.start()
+        if (!uiState.stepEditorState.paused) {
+            detector.start()
+        }
 
         onDispose {
             detector.stop()
@@ -192,8 +194,8 @@ fun HomeScreenContent(
     ) {
         StepCounterCard(
                 modifier = Modifier.widthIn(max = maxWidth1),
-                currentSteps = uiState.currentSteps,
-                stepsGoal = uiState.stepGoalPickerState.selectedStepsGoal
+                uiState = uiState,
+                onEvent = onEvent
         )
 
         PermissionUiHandler(
@@ -202,11 +204,11 @@ fun HomeScreenContent(
                 onEvent = onEvent
         )
 
-        if (uiState.stepGoalPickerState.pickerSheetVisible) {
+        if (uiState.stepGoalSheetState.pickerSheetVisible) {
             StepGoalPicker(
                     modifier = Modifier.widthIn(max = maxWidth2),
                     isDeviceWide = isDeviceWide,
-                    selectedStep = uiState.stepGoalPickerState.selectedStepsGoal,
+                    selectedStep = uiState.stepGoalSheetState.selectedStepsGoal,
                     onEvent = onEvent
             )
         }

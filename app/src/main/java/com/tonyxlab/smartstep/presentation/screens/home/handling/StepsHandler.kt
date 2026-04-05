@@ -11,20 +11,21 @@ class StepsHandler {
 
     // Motion
     fun incrementSteps(state: HomeUiState): HomeUiState {
+        if (state.stepEditorState.paused) return state
         return state.copy(currentSteps = state.currentSteps + 1)
     }
 
     // Step Goal Picker
     fun onSelectStepGoal(state: HomeUiState, selectedSteps: Int): HomeUiState {
         return state.copy(
-                stepGoalPickerState = state.stepGoalPickerState
+                stepGoalSheetState = state.stepGoalSheetState
                         .copy(selectedStepsGoal = selectedSteps)
         )
     }
 
     fun closeStepGoalSheet(state: HomeUiState): HomeUiState {
         return state.copy(
-                stepGoalPickerState = state.stepGoalPickerState
+                stepGoalSheetState = state.stepGoalSheetState
                         .copy(pickerSheetVisible = false)
         )
     }
@@ -119,6 +120,12 @@ class StepsHandler {
                         isDateSelectorVisible = false
                 )
         )
+    }
+
+    fun pauseStepCounting(state: HomeUiState): HomeUiState {
+
+        val currentPauseState = state.stepEditorState.paused
+        return state.copy(stepEditorState = state.stepEditorState.copy(paused = !currentPauseState))
     }
 }
 

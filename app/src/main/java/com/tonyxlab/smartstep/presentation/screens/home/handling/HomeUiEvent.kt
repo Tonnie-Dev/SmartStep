@@ -40,7 +40,7 @@ sealed interface HomeUiEvent : UiEvent {
     data object DismissStepEditor : HomeUiEvent
     data object DismissDateSelector : HomeUiEvent
     data object ShowDateSelector : HomeUiEvent
-
+    data object PauseStepCounting : HomeUiEvent
     // Motion
     data object OnMotionDetected : HomeUiEvent
 

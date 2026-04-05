@@ -5,14 +5,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.tonyxlab.smartstep.R
 
 private val InterFontFamily = FontFamily(
-    Font(R.font.inter_18_regular, weight = FontWeight.Normal),
-    Font(R.font.inter_18_medium, weight = FontWeight.Medium),
-    Font(R.font.inter_variable_font, weight = FontWeight.SemiBold)
+    Font(resId = R.font.inter_18_regular, weight = FontWeight.Normal),
+    Font(resId = R.font.inter_18_medium, weight = FontWeight.Medium),
+    Font(resId = R.font.inter_28_semi_bold, weight = FontWeight.SemiBold )
 )
 
 
