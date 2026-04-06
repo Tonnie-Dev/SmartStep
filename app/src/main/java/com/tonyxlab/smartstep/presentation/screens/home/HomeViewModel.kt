@@ -14,6 +14,7 @@ import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
 import com.tonyxlab.smartstep.presentation.screens.home.handling.PermissionHandler
 import com.tonyxlab.smartstep.presentation.screens.home.handling.ResetExitHandler
 import com.tonyxlab.smartstep.presentation.screens.home.handling.StepsHandler
+import kotlinx.coroutines.flow.combine
 
 typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeActionEvent>
 
@@ -31,6 +32,7 @@ class HomeViewModel(
 
     init {
         observePermissionStates()
+        observeMetricData()
     }
 
     override fun onEvent(event: HomeUiEvent) {
@@ -63,7 +65,13 @@ class HomeViewModel(
 
             // Navigation Drawer
             HomeUiEvent.OpenNavigationDrawer -> Unit
-            HomeUiEvent.FixCountIssue -> showPermissionSheet(PermissionSheetType.BACKGROUND_ACCESS)
+            HomeUiEvent.FixCountIssue -> updateState {
+                permissionHandler.showPermissionSheet(
+                        state = it,
+                        type = PermissionSheetType.BACKGROUND_ACCESS
+                )
+            }
+
             HomeUiEvent.OpenPersonalSettings -> openPersonalSettings()
             HomeUiEvent.ResetSteps -> updateState { resetExitHandler.showResetDialog(it) }
             HomeUiEvent.SaveStepGoal -> saveStepGoalPicker()
@@ -78,22 +86,24 @@ class HomeViewModel(
 
             // Steps Editor
             HomeUiEvent.EditSteps -> updateState { stepsHandler.showStepEditor(it) }
-            HomeUiEvent.ConfirmStepEditorValues -> updateState {
-                stepsHandler.confirmStepEditor(
-                        currentState
-                )
+            HomeUiEvent.ConfirmStepEditorValues -> updateState { state ->
+                val updatedState = stepsHandler.confirmStepEditor(state)
+                stepsHandler.recalculateMetrics(updatedState)
             }
+
             HomeUiEvent.DismissStepEditor -> updateState {
                 stepsHandler.dismissStepEditor(
                         initialState,
                         currentState
                 )
             }
+
             HomeUiEvent.ShowDateSelector -> updateState {
                 stepsHandler.showDateSelector(
                         currentState
                 )
             }
+
             HomeUiEvent.PauseStepCounting -> updateState { stepsHandler.pauseStepCounting(it) }
             // Date Selector
             is HomeUiEvent.OnDaySelected -> updateState {
@@ -102,23 +112,27 @@ class HomeViewModel(
                         event.value
                 )
             }
+
             is HomeUiEvent.OnMonthSelected -> updateState {
                 stepsHandler.onMonthSelected(
                         currentState,
                         event.value
                 )
             }
+
             is HomeUiEvent.OnYearSelected -> updateState {
                 stepsHandler.onYearSelected(
                         currentState,
                         event.value
                 )
             }
+
             HomeUiEvent.ConfirmDateSelection -> updateState {
                 stepsHandler.confirmDateSelection(
                         currentState
                 )
             }
+
             HomeUiEvent.DismissDateSelector -> updateState {
                 stepsHandler.dismissDateSelector(
                         currentState
@@ -130,10 +144,20 @@ class HomeViewModel(
             HomeUiEvent.DismissStepGoalSheet -> updateState { stepsHandler.closeStepGoalSheet(it) }
 
             // Motion
-            HomeUiEvent.OnMotionDetected -> updateState { stepsHandler.incrementSteps(it) }
+            HomeUiEvent.OnMotionDetected -> updateState { state ->
+
+                val updatedState = stepsHandler.recalculateMetrics(state)
+
+                stepsHandler.incrementSteps(updatedState)
+            }
 
             // Reset Dialog
-            HomeUiEvent.ConfirmResetDialog -> updateState { resetExitHandler.confirmResetDialog(it) }
+            HomeUiEvent.ConfirmResetDialog -> updateState { state ->
+
+                val updatedState = resetExitHandler.confirmResetDialog(state)
+                stepsHandler.recalculateMetrics(updatedState)
+            }
+
             HomeUiEvent.DismissResetDialog -> updateState { resetExitHandler.dismissResetDialog(it) }
 
             // Exit Dialog
@@ -170,16 +194,26 @@ class HomeViewModel(
         }
     }
 
-    private fun showPermissionSheet(type: PermissionSheetType) {
-        updateState {
-            it.copy(
-                    permissionUiState = currentState.permissionUiState
-                            .copy(
-                                    permissionSheetVisible = true,
-                                    permissionSheetType = type
+    private fun observeMetricData() {
+        launch {
+            val heightFlow = onboardingDataStore.heightInCm
+            val weightFlow = onboardingDataStore.weightInKg
+
+            combine(heightFlow, weightFlow) { height, weight ->
+                height to weight
+            }.collect {
+
+                updateState { state ->
+                    state.copy(
+                            metricDataState = state.metricDataState.copy(
+                                    heightInCm = it.first
                             )
-            )
+                    )
+                }
+
+            }
         }
+
     }
 
     private fun openPermissionsSettings() {
@@ -211,3 +245,6 @@ class HomeViewModel(
         sendActionEvent(HomeActionEvent.CloseApp)
     }
 }
+
+
+

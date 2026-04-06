@@ -105,7 +105,9 @@ fun StepCounterCard(
                 ) {
                     Icon(
                             modifier = Modifier,
-                            painter = if (uiState.stepEditorState.paused)  painterResource(id = R.drawable.ic_play) else painterResource(R.drawable.ic_pause),
+                            painter = if (uiState.stepEditorState.paused) painterResource(id = R.drawable.ic_play) else painterResource(
+                                    R.drawable.ic_pause
+                            ),
                             contentDescription = stringResource(id = R.string.cds_shoe_icon),
                             tint = Color.White
                     )
@@ -138,30 +140,15 @@ fun StepCounterCard(
                 modifier = Modifier.padding(bottom = MaterialTheme.spacing.spaceLarge),
                 progress = progress,
         )
-        Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceMedium)
-        ) {
-            MetadataItem(
-                    modifier = Modifier.weight(1f),
-                    iconRes = R.drawable.ic_pin,
-                    value = MetadataValue.Decimal(3.9),
-                    unit = "km",
-            )
-            MetadataItem(
-                    modifier = Modifier.weight(1f),
-                    iconRes = R.drawable.ic_weight,
-                    value = MetadataValue.WholeNumber(12),
-                    unit = "kcal",
-            )
-            MetadataItem(
-                    modifier = Modifier.weight(1f),
-                    iconRes = R.drawable.ic_clock,
-                    value = MetadataValue.WholeNumber(12),
-                    unit = "min",
+
+        with(uiState.metricDataState) {
+            MetricSection(
+                    modifier = Modifier,
+                    distanceTraveled = distance,
+                    caloriesBurnt = calories,
+                    time = time
             )
         }
-
     }
 }
 
@@ -184,6 +171,39 @@ fun CustomProgressBar(
                         .background(MaterialTheme.colorScheme.background)
         )
     }
+}
+
+@Composable
+private fun MetricSection(
+    distanceTraveled: Double,
+    caloriesBurnt: Int,
+    time: Int,
+    modifier: Modifier = Modifier
+) {
+    Row(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceMedium)
+    ) {
+        MetadataItem(
+                modifier = Modifier.weight(1f),
+                iconRes = R.drawable.ic_pin,
+                value = MetadataValue.Decimal(value = distanceTraveled),
+                unit = "km",
+        )
+        MetadataItem(
+                modifier = Modifier.weight(1f),
+                iconRes = R.drawable.ic_weight,
+                value = MetadataValue.WholeNumber(value = caloriesBurnt),
+                unit = "kcal",
+        )
+        MetadataItem(
+                modifier = Modifier.weight(1f),
+                iconRes = R.drawable.ic_clock,
+                value = MetadataValue.WholeNumber(value = time),
+                unit = "min",
+        )
+    }
+
 }
 
 @Composable

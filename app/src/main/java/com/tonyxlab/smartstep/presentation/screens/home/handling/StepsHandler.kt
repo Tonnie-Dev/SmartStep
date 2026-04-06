@@ -4,6 +4,8 @@ package com.tonyxlab.smartstep.presentation.screens.home.handling
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.tonyxlab.smartstep.utils.UnitConverter
+import timber.log.Timber
 import java.time.LocalDate
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -13,6 +15,22 @@ class StepsHandler {
     fun incrementSteps(state: HomeUiState): HomeUiState {
         if (state.stepEditorState.paused) return state
         return state.copy(currentSteps = state.currentSteps + 1)
+    }
+
+    // Calculations
+     fun recalculateMetrics(state: HomeUiState): HomeUiState {
+        val heightInCm = state.metricDataState.heightInCm
+
+        val distance = UnitConverter.stepsToKm(
+                heightInCm = heightInCm,
+                steps = state.currentSteps
+        )
+
+        return state.copy(
+                metricDataState = state.metricDataState.copy(
+                        distance = distance
+                )
+        )
     }
 
     // Step Goal Picker
@@ -55,6 +73,7 @@ class StepsHandler {
                 .trim()
 
         val steps = stepsText.toIntOrNull() ?: 0
+
 
         return state.copy(
                 currentSteps = steps,

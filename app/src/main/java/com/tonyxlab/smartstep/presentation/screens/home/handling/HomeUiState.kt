@@ -8,6 +8,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Stable
 import com.tonyxlab.smartstep.presentation.core.base.handling.UiState
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
+import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.Gender
 import java.time.LocalDate
 
 data class HomeUiState(
@@ -17,7 +18,8 @@ data class HomeUiState(
     val permissionUiState: PermissionUiState = PermissionUiState(),
     val stepGoalSheetState: StepGoalSheetState = StepGoalSheetState(),
     val stepEditorState: StepEditorState = StepEditorState(),
-    val dateSelectorState: DateSelectorState = DateSelectorState()
+    val dateSelectorState: DateSelectorState = DateSelectorState(),
+    val metricDataState: MetricDataState = MetricDataState()
 ) : UiState {
 
     @Stable
@@ -45,8 +47,19 @@ data class HomeUiState(
     @Stable
     data class DateSelectorState(
         val isDateSelectorVisible: Boolean = false,
-        val day:Int = LocalDate.now().dayOfMonth,
-        val month:Int = LocalDate.now().monthValue,
-        val year:Int = LocalDate.now().year
+        val day: Int = LocalDate.now().dayOfMonth,
+        val month: Int = LocalDate.now().monthValue,
+        val year: Int = LocalDate.now().year
     )
+
+    @Stable
+    data class MetricDataState(
+        val distance: Double = 0.0,
+        val calories: Int = 0,
+        val time: Int = 0,
+        val heightInCm: Int = 0,
+        val weightInKg: Int = 0,
+        val gender: Gender = Gender.FEMALE
+    )
+
 }
