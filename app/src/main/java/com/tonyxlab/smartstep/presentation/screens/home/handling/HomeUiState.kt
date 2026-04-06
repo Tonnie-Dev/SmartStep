@@ -9,6 +9,7 @@ import androidx.compose.runtime.Stable
 import com.tonyxlab.smartstep.presentation.core.base.handling.UiState
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.Gender
+import com.tonyxlab.smartstep.utils.AppDefaults
 import java.time.LocalDate
 
 data class HomeUiState(
@@ -54,12 +55,12 @@ data class HomeUiState(
 
     @Stable
     data class MetricDataState(
+        val heightInCm: Int = AppDefaults.DEFAULT_HEIGHT_CM,
+        val weightInKg: Int = AppDefaults.DEFAULT_WEIGHT_KG,
+        val gender: Gender = Gender.MALE,
         val distance: Double = 0.0,
         val calories: Int = 0,
-        val time: Int = 0,
-        val heightInCm: Int = 0,
-        val weightInKg: Int = 0,
-        val gender: Gender = Gender.FEMALE
+        val activityDurationSeconds: Int = 0,
+        val time: Int = 0
     )
-
 }

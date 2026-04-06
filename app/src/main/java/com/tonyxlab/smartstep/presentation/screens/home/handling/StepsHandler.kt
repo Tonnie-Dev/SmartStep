@@ -5,11 +5,36 @@ package com.tonyxlab.smartstep.presentation.screens.home.handling
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.tonyxlab.smartstep.utils.UnitConverter
-import timber.log.Timber
 import java.time.LocalDate
 
 @RequiresApi(Build.VERSION_CODES.O)
 class StepsHandler {
+
+    // Calculations
+    fun recalculateMetrics(state: HomeUiState): HomeUiState {
+        val heightInCm = state.metricDataState.heightInCm
+        val weightInKg = state.metricDataState.weightInKg
+        val activitySeconds = state.metricDataState.activityDurationSeconds
+
+        val distance = UnitConverter.stepsToKm(
+                heightInCm = heightInCm,
+                steps = state.currentSteps
+        )
+        val caloriesBurnt = UnitConverter.stepsToCalories(
+                steps = state.currentSteps,
+                weight = weightInKg,
+                gender = state.metricDataState.gender
+        )
+
+        val activityDisplayMinutes = UnitConverter.secondsToDisplayMinutes(activitySeconds)
+        return state.copy(
+                metricDataState = state.metricDataState.copy(
+                        distance = distance,
+                        calories = caloriesBurnt,
+                        time = activityDisplayMinutes
+                )
+        )
+    }
 
     // Motion
     fun incrementSteps(state: HomeUiState): HomeUiState {
@@ -17,18 +42,23 @@ class StepsHandler {
         return state.copy(currentSteps = state.currentSteps + 1)
     }
 
-    // Calculations
-     fun recalculateMetrics(state: HomeUiState): HomeUiState {
-        val heightInCm = state.metricDataState.heightInCm
-
-        val distance = UnitConverter.stepsToKm(
-                heightInCm = heightInCm,
-                steps = state.currentSteps
-        )
+    // Timer
+    fun addActivitySecond(state: HomeUiState): HomeUiState {
+        val updatedSeconds = state.metricDataState.activityDurationSeconds + 1
 
         return state.copy(
                 metricDataState = state.metricDataState.copy(
-                        distance = distance
+                        activityDurationSeconds = updatedSeconds,
+                        time = UnitConverter.secondsToDisplayMinutes(updatedSeconds)
+                )
+        )
+    }
+
+    fun resetActivityTime(state: HomeUiState): HomeUiState {
+        return state.copy(
+                metricDataState = state.metricDataState.copy(
+                        activityDurationSeconds = 0,
+                        time = 0
                 )
         )
     }

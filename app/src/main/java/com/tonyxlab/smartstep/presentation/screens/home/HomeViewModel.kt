@@ -14,7 +14,12 @@ import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
 import com.tonyxlab.smartstep.presentation.screens.home.handling.PermissionHandler
 import com.tonyxlab.smartstep.presentation.screens.home.handling.ResetExitHandler
 import com.tonyxlab.smartstep.presentation.screens.home.handling.StepsHandler
+import com.tonyxlab.smartstep.utils.MeasurementConstants.ACTIVITY_TIMEOUT_IN_SECONDS
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.isActive
 
 typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeActionEvent>
 
@@ -23,9 +28,15 @@ class HomeViewModel(
     private val onboardingDataStore: OnboardingDataStore
 ) : HomeBaseViewModel() {
 
+    // Handlers
     private val stepsHandler = StepsHandler()
     private val permissionHandler = PermissionHandler()
     private val resetExitHandler = ResetExitHandler()
+
+    // Timer
+    private var activityTimerJob: Job? = null
+    private var lastStepTimestampMillis: Long = 0L
+    private var isActivityOngoing: Boolean = false
 
     override val initialState: HomeUiState
         get() = HomeUiState()
@@ -104,7 +115,14 @@ class HomeViewModel(
                 )
             }
 
-            HomeUiEvent.PauseStepCounting -> updateState { stepsHandler.pauseStepCounting(it) }
+            HomeUiEvent.PauseStepCounting ->  {
+            updateState { stepsHandler.pauseStepCounting(it) }
+
+            if (currentState.stepEditorState.paused) {
+                activityTimerJob?.cancel()
+                isActivityOngoing = false
+            }
+        }
             // Date Selector
             is HomeUiEvent.OnDaySelected -> updateState {
                 stepsHandler.onDaySelected(
@@ -144,18 +162,19 @@ class HomeViewModel(
             HomeUiEvent.DismissStepGoalSheet -> updateState { stepsHandler.closeStepGoalSheet(it) }
 
             // Motion
-            HomeUiEvent.OnMotionDetected -> updateState { state ->
-
-                val updatedState = stepsHandler.recalculateMetrics(state)
-
-                stepsHandler.incrementSteps(updatedState)
-            }
+            HomeUiEvent.OnMotionDetected -> onStepDetected()
 
             // Reset Dialog
-            HomeUiEvent.ConfirmResetDialog -> updateState { state ->
+            HomeUiEvent.ConfirmResetDialog -> {
+                activityTimerJob?.cancel()
+                isActivityOngoing = false
+                lastStepTimestampMillis = 0L
 
-                val updatedState = resetExitHandler.confirmResetDialog(state)
-                stepsHandler.recalculateMetrics(updatedState)
+                updateState { state ->
+                    val updatedState = resetExitHandler.confirmResetDialog(state)
+                    val resetTimeState = stepsHandler.resetActivityTime(updatedState)
+                    stepsHandler.recalculateMetrics(resetTimeState)
+                }
             }
 
             HomeUiEvent.DismissResetDialog -> updateState { resetExitHandler.dismissResetDialog(it) }
@@ -163,7 +182,6 @@ class HomeViewModel(
             // Exit Dialog
             HomeUiEvent.ConfirmExitDialog -> confirmExitDialog()
             HomeUiEvent.DismissExitDialog -> updateState { resetExitHandler.closeExitDialog(it) }
-
         }
     }
 
@@ -206,16 +224,57 @@ class HomeViewModel(
                 updateState { state ->
                     state.copy(
                             metricDataState = state.metricDataState.copy(
-                                    heightInCm = it.first
+                                    heightInCm = it.first,
+                                    weightInKg = it.second
                             )
                     )
                 }
-
             }
         }
 
     }
 
+
+    private fun onStepDetected() {
+        val now = System.currentTimeMillis()
+        lastStepTimestampMillis = now
+
+        updateState { state ->
+            val incrementedState = stepsHandler.incrementSteps(state)
+            stepsHandler.recalculateMetrics(incrementedState)
+        }
+
+        if (!isActivityOngoing) {
+            isActivityOngoing = true
+            startActivityTimer()
+        }
+    }
+
+
+    private fun startActivityTimer() {
+        activityTimerJob?.cancel()
+
+        activityTimerJob = launch {
+            while (isActive) {
+                delay(1000)
+
+                val now = System.currentTimeMillis()
+                val secondsSinceLastStep = (now - lastStepTimestampMillis) / 1000
+
+                if (secondsSinceLastStep <= ACTIVITY_TIMEOUT_IN_SECONDS) {
+                    updateState { state ->
+                        val updatedState = stepsHandler.addActivitySecond(state)
+                        stepsHandler.recalculateMetrics(updatedState)
+                    }
+                } else {
+                    isActivityOngoing = false
+                    cancel()
+                }
+            }
+        }
+    }
+
+    // Permissions
     private fun openPermissionsSettings() {
         updateState { permissionHandler.closePermissionSheet(it) }
         sendActionEvent(HomeActionEvent.OpenAppSettings)

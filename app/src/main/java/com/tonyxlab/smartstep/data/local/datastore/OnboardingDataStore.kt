@@ -9,9 +9,9 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.Gender
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.HeightMode
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.WeightMode
-import com.tonyxlab.smartstep.utils.Constants
-import com.tonyxlab.smartstep.utils.Constants.DEFAULT_DAILY_STEP_GOAL
-import com.tonyxlab.smartstep.utils.Constants.DEFAULT_WEIGHT_KG
+import com.tonyxlab.smartstep.utils.AppDefaults.DEFAULT_DAILY_STEP_GOAL
+import com.tonyxlab.smartstep.utils.AppDefaults.DEFAULT_HEIGHT_CM
+import com.tonyxlab.smartstep.utils.AppDefaults.DEFAULT_WEIGHT_KG
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -89,7 +89,7 @@ class OnboardingDataStore(private val context: Context) {
         } else throw e
     }
             .map { prefs ->
-                prefs[OnboardingKeyPreferences.HEIGHT_IN_CM] ?: Constants.DEFAULT_HEIGHT_CM
+                prefs[OnboardingKeyPreferences.HEIGHT_IN_CM] ?: DEFAULT_HEIGHT_CM
             }
 
     suspend fun setHeightInCm(heightInCm: Int) {

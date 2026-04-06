@@ -2,10 +2,11 @@ package com.tonyxlab.smartstep.presentation.screens.onboarding.handling
 
 import androidx.compose.runtime.Stable
 import com.tonyxlab.smartstep.presentation.core.base.handling.UiState
-import com.tonyxlab.smartstep.utils.Constants
-import com.tonyxlab.smartstep.utils.Constants.DEFAULT_HEIGHT_CM
-import com.tonyxlab.smartstep.utils.Constants.DEFAULT_WEIGHT_KG
-import com.tonyxlab.smartstep.utils.Constants.DEFAULT_WEIGHT_LB
+import com.tonyxlab.smartstep.utils.AppDefaults.DEFAULT_HEIGHT_CM
+import com.tonyxlab.smartstep.utils.AppDefaults.DEFAULT_HEIGHT_FT
+import com.tonyxlab.smartstep.utils.AppDefaults.DEFAULT_HEIGHT_IN
+import com.tonyxlab.smartstep.utils.AppDefaults.DEFAULT_WEIGHT_KG
+import com.tonyxlab.smartstep.utils.AppDefaults.DEFAULT_WEIGHT_LB
 
 data class OnboardingUiState(
     val onboardingSeen: Boolean = false,
@@ -26,8 +27,8 @@ data class OnboardingUiState(
         val visible: Boolean = false,
         val heightMode: HeightMode = HeightMode.CENTIMETERS,
         val selectedCentimeter: Int = DEFAULT_HEIGHT_CM,
-        val selectedFeet: Int = Constants.DEFAULT_HEIGHT_FT,
-        val selectedInches: Int = Constants.DEFAULT_HEIGHT_IN,
+        val selectedFeet: Int = DEFAULT_HEIGHT_FT,
+        val selectedInches: Int = DEFAULT_HEIGHT_IN,
 
         ) {
         val displayHeight: String
@@ -50,7 +51,6 @@ data class OnboardingUiState(
                 WeightMode.LBS -> "$selectedLbs lbs"
             }
     }
-
 }
 
 enum class Gender {
