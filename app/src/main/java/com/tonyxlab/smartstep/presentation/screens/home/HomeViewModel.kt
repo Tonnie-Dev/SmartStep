@@ -8,6 +8,7 @@ import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
+import com.tonyxlab.smartstep.presentation.screens.home.handling.AnalyticsHandler
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
@@ -31,6 +32,7 @@ class HomeViewModel(
     private val stepsHandler = StepsHandler()
     private val permissionHandler = PermissionHandler()
     private val resetExitHandler = ResetExitHandler()
+    private val analyticsHandler = AnalyticsHandler()
 
     private var activityTimerJob: Job? = null
     private var lastStepTimestampMillis: Long = 0L
@@ -42,6 +44,12 @@ class HomeViewModel(
     init {
         observePermissionStates()
         observeMetricData()
+
+        updateState {
+
+            analyticsHandler.populateStats(it)
+
+        }
     }
 
     override fun onEvent(event: HomeUiEvent) {

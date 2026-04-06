@@ -20,7 +20,8 @@ data class HomeUiState(
     val stepGoalSheetState: StepGoalSheetState = StepGoalSheetState(),
     val stepEditorState: StepEditorState = StepEditorState(),
     val dateSelectorState: DateSelectorState = DateSelectorState(),
-    val metricDataState: MetricDataState = MetricDataState()
+    val metricDataState: MetricDataState = MetricDataState(),
+    val weeklyAnalyticState: WeeklyAnalyticState = WeeklyAnalyticState()
 ) : UiState {
 
     @Stable
@@ -63,4 +64,27 @@ data class HomeUiState(
         val activityDurationSeconds: Int = 0,
         val time: Int = 0
     )
+
+    @Stable
+    data class WeeklyAnalyticState(
+        val weeklyStats: List<DayStats> = emptyList(),
+    ) {
+        val dailyAverageSteps: Int
+            get() = if (weeklyStats.isEmpty()) 0
+            else weeklyStats.sumOf { it.steps } / weeklyStats.size
+    }
+}
+
+data class DayStats(
+    val dayLabel: String,
+    val steps: Int,
+    val goalAtThatDay: Int,
+    val isCurrentDay: Boolean = false
+) {
+
+    val progress: Float
+        get() = if (goalAtThatDay > 0)
+            (steps.toFloat() / goalAtThatDay).coerceAtMost(1f)
+        else
+            0f
 }

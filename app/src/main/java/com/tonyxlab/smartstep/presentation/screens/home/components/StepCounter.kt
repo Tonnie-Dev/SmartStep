@@ -50,7 +50,6 @@ fun StepCounterCard(
     onEvent: (HomeUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-
     val stepsGoal = uiState.stepGoalSheetState.selectedStepsGoal
     val currentSteps = uiState.currentSteps
     val progress = if (stepsGoal > 0) currentSteps.toFloat() / stepsGoal else 0f
@@ -182,22 +181,22 @@ private fun MetricSection(
 ) {
     Row(
             modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceMedium)
+            horizontalArrangement = Arrangement.SpaceBetween
     ) {
         MetadataItem(
-                modifier = Modifier.weight(1f),
+               // modifier = Modifier.weight(1f),
                 iconRes = R.drawable.ic_pin,
                 value = MetadataValue.Decimal(value = distanceTraveled),
                 unit = "km",
         )
         MetadataItem(
-                modifier = Modifier.weight(1f),
+                //modifier = Modifier.weight(1f),
                 iconRes = R.drawable.ic_weight,
                 value = MetadataValue.WholeNumber(value = caloriesBurnt),
                 unit = "kcal",
         )
         MetadataItem(
-                modifier = Modifier.weight(1f),
+               // modifier = Modifier.weight(1f),
                 iconRes = R.drawable.ic_clock,
                 value = MetadataValue.WholeNumber(value = time),
                 unit = "min",
