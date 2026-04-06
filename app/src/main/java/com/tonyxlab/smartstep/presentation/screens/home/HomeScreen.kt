@@ -7,7 +7,9 @@ import android.os.Build
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -45,6 +47,7 @@ import com.tonyxlab.smartstep.presentation.screens.home.components.ResetStepsDia
 import com.tonyxlab.smartstep.presentation.screens.home.components.StepCounterCard
 import com.tonyxlab.smartstep.presentation.screens.home.components.StepGoalPicker
 import com.tonyxlab.smartstep.presentation.screens.home.components.StepsEditor
+import com.tonyxlab.smartstep.presentation.screens.home.components.WeeklyAnalyticsSection
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
@@ -192,11 +195,18 @@ fun HomeScreenContent(
                     .padding(all = MaterialTheme.spacing.spaceMedium),
             contentAlignment = Alignment.Center
     ) {
-        StepCounterCard(
-                modifier = Modifier.widthIn(max = maxWidth1),
-                uiState = uiState,
-                onEvent = onEvent
-        )
+        Column (verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)){
+            StepCounterCard(
+                    modifier = Modifier.widthIn(max = maxWidth1),
+                    uiState = uiState,
+                    onEvent = onEvent
+            )
+
+            WeeklyAnalyticsSection(
+                    modifier = Modifier,
+                    uiState = uiState
+            )
+        }
 
         PermissionUiHandler(
                 isDeviceWide = isDeviceWide,
