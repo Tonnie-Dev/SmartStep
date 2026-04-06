@@ -28,12 +28,10 @@ class HomeViewModel(
     private val onboardingDataStore: OnboardingDataStore
 ) : HomeBaseViewModel() {
 
-    // Handlers
     private val stepsHandler = StepsHandler()
     private val permissionHandler = PermissionHandler()
     private val resetExitHandler = ResetExitHandler()
 
-    // Timer
     private var activityTimerJob: Job? = null
     private var lastStepTimestampMillis: Long = 0L
     private var isActivityOngoing: Boolean = false
@@ -63,11 +61,16 @@ class HomeViewModel(
 
             HomeUiEvent.OpenPermissionsSettings -> openPermissionsSettings()
             HomeUiEvent.Continue -> handleContinue()
-            is HomeUiEvent.BackgroundAccessChanged -> updateState {
-                permissionHandler.updateBackgroundAccessState(
-                        state = it,
-                        granted = event.granted
-                )
+
+            is HomeUiEvent.BackgroundAccessChanged -> {
+                updateState {
+                    permissionHandler.updateBackgroundAccessState(
+                            state = it,
+                            granted = event.granted
+                    )
+                }
+
+                refreshMetricsFromCurrentSteps()
             }
 
             HomeUiEvent.PhysicalActivityPermissionRequested -> physicalActivityPermissionRequested()
@@ -76,6 +79,7 @@ class HomeViewModel(
 
             // Navigation Drawer
             HomeUiEvent.OpenNavigationDrawer -> Unit
+
             HomeUiEvent.FixCountIssue -> updateState {
                 permissionHandler.showPermissionSheet(
                         state = it,
@@ -86,6 +90,7 @@ class HomeViewModel(
             HomeUiEvent.OpenPersonalSettings -> openPersonalSettings()
             HomeUiEvent.ResetSteps -> updateState { resetExitHandler.showResetDialog(it) }
             HomeUiEvent.SaveStepGoal -> saveStepGoalPicker()
+
             is HomeUiEvent.SelectStepGoal -> updateState {
                 stepsHandler.onSelectStepGoal(
                         state = it,
@@ -93,13 +98,16 @@ class HomeViewModel(
                 )
             }
 
-            HomeUiEvent.ShowExitDialog -> updateState { resetExitHandler.showExitDialog(it) }
+            HomeUiEvent.ShowExitDialog -> updateState {
+                resetExitHandler.showExitDialog(it)
+            }
 
             // Steps Editor
             HomeUiEvent.EditSteps -> updateState { stepsHandler.showStepEditor(it) }
+
             HomeUiEvent.ConfirmStepEditorValues -> updateState { state ->
                 val updatedState = stepsHandler.confirmStepEditor(state)
-                stepsHandler.recalculateMetrics(updatedState)
+                stepsHandler.recalculateDistanceAndCalories(updatedState)
             }
 
             HomeUiEvent.DismissStepEditor -> updateState {
@@ -110,56 +118,44 @@ class HomeViewModel(
             }
 
             HomeUiEvent.ShowDateSelector -> updateState {
-                stepsHandler.showDateSelector(
-                        currentState
-                )
+                stepsHandler.showDateSelector(currentState)
             }
 
-            HomeUiEvent.PauseStepCounting ->  {
-            updateState { stepsHandler.pauseStepCounting(it) }
+            HomeUiEvent.PauseStepCounting -> {
+                updateState { stepsHandler.pauseStepCounting(it) }
 
-            if (currentState.stepEditorState.paused) {
-                activityTimerJob?.cancel()
-                isActivityOngoing = false
+                if (currentState.stepEditorState.paused) {
+                    activityTimerJob?.cancel()
+                    isActivityOngoing = false
+                }
             }
-        }
+
             // Date Selector
             is HomeUiEvent.OnDaySelected -> updateState {
-                stepsHandler.onDaySelected(
-                        currentState,
-                        event.value
-                )
+                stepsHandler.onDaySelected(currentState, event.value)
             }
 
             is HomeUiEvent.OnMonthSelected -> updateState {
-                stepsHandler.onMonthSelected(
-                        currentState,
-                        event.value
-                )
+                stepsHandler.onMonthSelected(currentState, event.value)
             }
 
             is HomeUiEvent.OnYearSelected -> updateState {
-                stepsHandler.onYearSelected(
-                        currentState,
-                        event.value
-                )
+                stepsHandler.onYearSelected(currentState, event.value)
             }
 
             HomeUiEvent.ConfirmDateSelection -> updateState {
-                stepsHandler.confirmDateSelection(
-                        currentState
-                )
+                stepsHandler.confirmDateSelection(currentState)
             }
 
             HomeUiEvent.DismissDateSelector -> updateState {
-                stepsHandler.dismissDateSelector(
-                        currentState
-                )
+                stepsHandler.dismissDateSelector(currentState)
             }
 
             // Goal Picker
             HomeUiEvent.ShowStepGoalSheet -> showStepGoalPicker()
-            HomeUiEvent.DismissStepGoalSheet -> updateState { stepsHandler.closeStepGoalSheet(it) }
+            HomeUiEvent.DismissStepGoalSheet -> updateState {
+                stepsHandler.closeStepGoalSheet(it)
+            }
 
             // Motion
             HomeUiEvent.OnMotionDetected -> onStepDetected()
@@ -173,30 +169,20 @@ class HomeViewModel(
                 updateState { state ->
                     val updatedState = resetExitHandler.confirmResetDialog(state)
                     val resetTimeState = stepsHandler.resetActivityTime(updatedState)
-                    stepsHandler.recalculateMetrics(resetTimeState)
+                    stepsHandler.recalculateDistanceAndCalories(resetTimeState)
                 }
             }
 
-            HomeUiEvent.DismissResetDialog -> updateState { resetExitHandler.dismissResetDialog(it) }
+            HomeUiEvent.DismissResetDialog -> updateState {
+                resetExitHandler.dismissResetDialog(it)
+            }
 
             // Exit Dialog
             HomeUiEvent.ConfirmExitDialog -> confirmExitDialog()
-            HomeUiEvent.DismissExitDialog -> updateState { resetExitHandler.closeExitDialog(it) }
+            HomeUiEvent.DismissExitDialog -> updateState {
+                resetExitHandler.closeExitDialog(it)
+            }
         }
-    }
-
-    // Navigation Drawer
-    private fun showStepGoalPicker() {
-        updateState {
-            it.copy(
-                    stepGoalSheetState = currentState.stepGoalSheetState
-                            .copy(pickerSheetVisible = true)
-            )
-        }
-    }
-
-    private fun openPersonalSettings() {
-        sendActionEvent(HomeActionEvent.OpenAppSettings)
     }
 
     private fun observePermissionStates() {
@@ -219,29 +205,36 @@ class HomeViewModel(
 
             combine(heightFlow, weightFlow) { height, weight ->
                 height to weight
-            }.collect {
-
+            }.collect { (height, weight) ->
                 updateState { state ->
-                    state.copy(
+                    val updatedState = state.copy(
                             metricDataState = state.metricDataState.copy(
-                                    heightInCm = it.first,
-                                    weightInKg = it.second
+                                    heightInCm = height,
+                                    weightInKg = weight
                             )
                     )
+                    stepsHandler.recalculateDistanceAndCalories(updatedState)
                 }
             }
         }
-
     }
 
-
     private fun onStepDetected() {
+        if (currentState.stepEditorState.paused) return
+
         val now = System.currentTimeMillis()
         lastStepTimestampMillis = now
 
         updateState { state ->
+            val previousSteps = state.currentSteps
             val incrementedState = stepsHandler.incrementSteps(state)
-            stepsHandler.recalculateMetrics(incrementedState)
+            val newSteps = incrementedState.currentSteps
+
+            if (stepsHandler.shouldUpdateDistanceAndCalories(previousSteps, newSteps)) {
+                stepsHandler.recalculateDistanceAndCalories(incrementedState)
+            } else {
+                incrementedState
+            }
         }
 
         if (!isActivityOngoing) {
@@ -249,7 +242,6 @@ class HomeViewModel(
             startActivityTimer()
         }
     }
-
 
     private fun startActivityTimer() {
         activityTimerJob?.cancel()
@@ -263,8 +255,8 @@ class HomeViewModel(
 
                 if (secondsSinceLastStep <= ACTIVITY_TIMEOUT_IN_SECONDS) {
                     updateState { state ->
-                        val updatedState = stepsHandler.addActivitySecond(state)
-                        stepsHandler.recalculateMetrics(updatedState)
+                        val withNewSecond = stepsHandler.addActivitySecond(state)
+                        stepsHandler.updateDisplayedTime(withNewSecond)
                     }
                 } else {
                     isActivityOngoing = false
@@ -274,7 +266,28 @@ class HomeViewModel(
         }
     }
 
-    // Permissions
+    private fun refreshMetricsFromCurrentSteps() {
+        if (currentState.stepEditorState.paused) return
+
+        updateState { state ->
+            stepsHandler.recalculateDistanceAndCalories(state)
+        }
+    }
+
+    private fun showStepGoalPicker() {
+        updateState {
+            it.copy(
+                    stepGoalSheetState = currentState.stepGoalSheetState.copy(
+                            pickerSheetVisible = true
+                    )
+            )
+        }
+    }
+
+    private fun openPersonalSettings() {
+        sendActionEvent(HomeActionEvent.OpenAppSettings)
+    }
+
     private fun openPermissionsSettings() {
         updateState { permissionHandler.closePermissionSheet(it) }
         sendActionEvent(HomeActionEvent.OpenAppSettings)
@@ -291,19 +304,16 @@ class HomeViewModel(
         }
     }
 
-    // Step Goal Picker
     private fun saveStepGoalPicker() {
         launch {
             val selectedSteps = currentState.stepGoalSheetState.selectedStepsGoal
             onboardingDataStore.setDailyStepGoal(stepGoal = selectedSteps)
         }
+
         updateState { stepsHandler.closeStepGoalSheet(it) }
     }
 
-    fun confirmExitDialog() {
+    private fun confirmExitDialog() {
         sendActionEvent(HomeActionEvent.CloseApp)
     }
 }
-
-
-

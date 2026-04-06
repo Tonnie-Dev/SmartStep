@@ -10,27 +10,37 @@ import java.time.LocalDate
 @RequiresApi(Build.VERSION_CODES.O)
 class StepsHandler {
 
-    // Calculations
-    fun recalculateMetrics(state: HomeUiState): HomeUiState {
+    // Distance + Calories only
+    fun recalculateDistanceAndCalories(state: HomeUiState): HomeUiState {
         val heightInCm = state.metricDataState.heightInCm
         val weightInKg = state.metricDataState.weightInKg
-        val activitySeconds = state.metricDataState.activityDurationSeconds
 
         val distance = UnitConverter.stepsToKm(
                 heightInCm = heightInCm,
                 steps = state.currentSteps
         )
+
         val caloriesBurnt = UnitConverter.stepsToCalories(
                 steps = state.currentSteps,
                 weight = weightInKg,
                 gender = state.metricDataState.gender
         )
 
-        val activityDisplayMinutes = UnitConverter.secondsToDisplayMinutes(activitySeconds)
         return state.copy(
                 metricDataState = state.metricDataState.copy(
                         distance = distance,
-                        calories = caloriesBurnt,
+                        calories = caloriesBurnt
+                )
+        )
+    }
+
+    // Time only
+    fun updateDisplayedTime(state: HomeUiState): HomeUiState {
+        val activitySeconds = state.metricDataState.activityDurationSeconds
+        val activityDisplayMinutes = UnitConverter.secondsToDisplayMinutes(activitySeconds)
+
+        return state.copy(
+                metricDataState = state.metricDataState.copy(
                         time = activityDisplayMinutes
                 )
         )
@@ -42,14 +52,18 @@ class StepsHandler {
         return state.copy(currentSteps = state.currentSteps + 1)
     }
 
+    fun shouldUpdateDistanceAndCalories(previousSteps: Int, newSteps: Int): Boolean {
+        if (newSteps <= previousSteps) return false
+        return (previousSteps / 10) != (newSteps / 10)
+    }
+
     // Timer
     fun addActivitySecond(state: HomeUiState): HomeUiState {
         val updatedSeconds = state.metricDataState.activityDurationSeconds + 1
 
         return state.copy(
                 metricDataState = state.metricDataState.copy(
-                        activityDurationSeconds = updatedSeconds,
-                        time = UnitConverter.secondsToDisplayMinutes(updatedSeconds)
+                        activityDurationSeconds = updatedSeconds
                 )
         )
     }
@@ -66,15 +80,17 @@ class StepsHandler {
     // Step Goal Picker
     fun onSelectStepGoal(state: HomeUiState, selectedSteps: Int): HomeUiState {
         return state.copy(
-                stepGoalSheetState = state.stepGoalSheetState
-                        .copy(selectedStepsGoal = selectedSteps)
+                stepGoalSheetState = state.stepGoalSheetState.copy(
+                        selectedStepsGoal = selectedSteps
+                )
         )
     }
 
     fun closeStepGoalSheet(state: HomeUiState): HomeUiState {
         return state.copy(
-                stepGoalSheetState = state.stepGoalSheetState
-                        .copy(pickerSheetVisible = false)
+                stepGoalSheetState = state.stepGoalSheetState.copy(
+                        pickerSheetVisible = false
+                )
         )
     }
 
@@ -104,7 +120,6 @@ class StepsHandler {
 
         val steps = stepsText.toIntOrNull() ?: 0
 
-
         return state.copy(
                 currentSteps = steps,
                 stepEditorState = state.stepEditorState.copy(
@@ -132,25 +147,19 @@ class StepsHandler {
 
     fun onDaySelected(state: HomeUiState, day: Int): HomeUiState {
         return state.copy(
-                dateSelectorState = state.dateSelectorState.copy(
-                        day = day
-                )
+                dateSelectorState = state.dateSelectorState.copy(day = day)
         )
     }
 
     fun onMonthSelected(state: HomeUiState, month: Int): HomeUiState {
         return state.copy(
-                dateSelectorState = state.dateSelectorState.copy(
-                        month = month
-                )
+                dateSelectorState = state.dateSelectorState.copy(month = month)
         )
     }
 
     fun onYearSelected(state: HomeUiState, year: Int): HomeUiState {
         return state.copy(
-                dateSelectorState = state.dateSelectorState.copy(
-                        year = year
-                )
+                dateSelectorState = state.dateSelectorState.copy(year = year)
         )
     }
 
@@ -172,10 +181,11 @@ class StepsHandler {
     }
 
     fun pauseStepCounting(state: HomeUiState): HomeUiState {
-
         val currentPauseState = state.stepEditorState.paused
-        return state.copy(stepEditorState = state.stepEditorState.copy(paused = !currentPauseState))
+        return state.copy(
+                stepEditorState = state.stepEditorState.copy(
+                        paused = !currentPauseState
+                )
+        )
     }
 }
-
-
