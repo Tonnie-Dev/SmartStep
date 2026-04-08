@@ -22,6 +22,7 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -34,7 +35,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonyxlab.smartstep.R
-import com.tonyxlab.smartstep.data.local.motion.MotionStepDetector
+import com.tonyxlab.smartstep.data.motion.MotionStepDetector
+import com.tonyxlab.smartstep.data.notification.StepNotificationHelper
 import com.tonyxlab.smartstep.presentation.core.base.BaseContentLayout
 import com.tonyxlab.smartstep.presentation.core.components.AppTopBar
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
@@ -57,6 +59,8 @@ import com.tonyxlab.smartstep.utils.isIgnoringBatteryOptimizations
 import com.tonyxlab.smartstep.utils.openAppSettings
 import com.tonyxlab.smartstep.utils.rememberIsDeviceWide
 import com.tonyxlab.smartstep.utils.requestIgnoreBatteryOptimizations
+import com.tonyxlab.smartstep.utils.startStepCounterService
+import com.tonyxlab.smartstep.utils.stopStepCounterService
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -70,6 +74,7 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     ModalNavigationDrawer(
             drawerState = drawerState,
@@ -145,6 +150,18 @@ fun HomeScreen(
                         HomeActionEvent.CloseApp -> {
                             activity.exitSmartStep()
                         }
+
+                        HomeActionEvent.StartStepCounterService -> {
+                            context.startStepCounterService(
+                                    steps = uiState.currentSteps,
+                                    calories = uiState.metricDataState.calories,
+                                    goal = uiState.stepGoalSheetState.selectedStepsGoal
+                            )
+
+                        }
+                        HomeActionEvent.StopStepCounterService -> {
+                            context.stopStepCounterService()
+                        }
                     }
                 }
         ) { uiState ->
@@ -152,6 +169,20 @@ fun HomeScreen(
                     uiState = uiState,
                     onEvent = viewModel::onEvent
             )
+
+            LaunchedEffect(
+                    uiState.currentSteps,
+                    uiState.metricDataState.calories,
+                    uiState.stepGoalSheetState.selectedStepsGoal
+            ) {
+                StepNotificationHelper.updateNotification(
+                        context = context,
+                        steps = uiState.currentSteps,
+                        calories = uiState.metricDataState.calories,
+                        goal = uiState.stepGoalSheetState.selectedStepsGoal,
+                        timeLabel = "now"
+                )
+            }
         }
     }
 }

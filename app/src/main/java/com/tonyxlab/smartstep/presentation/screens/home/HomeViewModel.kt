@@ -79,6 +79,12 @@ class HomeViewModel(
                 }
 
                 refreshMetricsFromCurrentSteps()
+
+                if (event.granted) {
+                    sendActionEvent(HomeActionEvent.StartStepCounterService)
+                } else {
+                    sendActionEvent(HomeActionEvent.StopStepCounterService)
+                }
             }
 
             HomeUiEvent.PhysicalActivityPermissionRequested -> physicalActivityPermissionRequested()

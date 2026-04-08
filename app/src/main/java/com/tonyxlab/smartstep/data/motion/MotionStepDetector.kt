@@ -1,4 +1,4 @@
-package com.tonyxlab.smartstep.data.local.motion
+package com.tonyxlab.smartstep.data.motion
 
 import android.content.Context
 import android.hardware.Sensor

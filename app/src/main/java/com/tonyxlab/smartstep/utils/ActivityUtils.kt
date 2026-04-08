@@ -11,6 +11,7 @@ import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
@@ -18,6 +19,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.tonyxlab.smartstep.data.service.StepCounterService
 
 fun Activity.openAppSettings() {
     val intent = Intent(
@@ -62,4 +64,24 @@ fun OnResumeEffect( onResume:()-> Unit){
             lifeCycleOwner.lifecycle.removeObserver(observer)
         }
     }
+}
+
+fun Context.startStepCounterService(
+    steps: Int,
+    calories: Int,
+    goal: Int
+) {
+    val intent = Intent(this, StepCounterService::class.java).apply {
+        putExtra("steps", steps)
+        putExtra("calories", calories)
+        putExtra("goal", goal)
+        putExtra("timeLabel", "now")
+    }
+    ContextCompat.startForegroundService(this, intent)
+}
+
+
+fun Context.stopStepCounterService() {
+    val intent = Intent(this, StepCounterService::class.java)
+    stopService(intent)
 }

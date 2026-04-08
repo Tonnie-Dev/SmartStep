@@ -6,4 +6,6 @@ sealed interface HomeActionEvent : ActionEvent{
     data object OpenAppSettings : HomeActionEvent
     data object RequestBatteryOptimization : HomeActionEvent
     data object CloseApp : HomeActionEvent
+    data object StartStepCounterService : HomeActionEvent
+    data object StopStepCounterService : HomeActionEvent
 }

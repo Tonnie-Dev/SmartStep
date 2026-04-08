@@ -121,4 +121,8 @@
     <string name="day_thu">Thu</string>
     <string name="day_fri">Fri</string>
     <string name="day_sat">Sat</string>
+    <string name="notification_title">Smart Step Counter</string>
+    <string name="notification_time">2m</string>
+    <string name="notification_steps_value">7,842</string>
+    <string name="notification_calories_value">342</string>
 </resources>
