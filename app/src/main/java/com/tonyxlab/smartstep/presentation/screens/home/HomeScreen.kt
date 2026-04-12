@@ -2,7 +2,10 @@
 
 package com.tonyxlab.smartstep.presentation.screens.home
 
+import android.Manifest
 import android.app.Activity
+import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
@@ -33,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.data.motion.MotionStepDetector
@@ -175,13 +179,15 @@ fun HomeScreen(
                     uiState.metricDataState.calories,
                     uiState.stepGoalSheetState.selectedStepsGoal
             ) {
-                StepNotificationHelper.updateNotification(
-                        context = context,
-                        steps = uiState.currentSteps,
-                        calories = uiState.metricDataState.calories,
-                        goal = uiState.stepGoalSheetState.selectedStepsGoal,
-                        timeLabel = "now"
-                )
+                if (hasNotificationPermission(context)) {
+                    StepNotificationHelper.updateNotification(
+                            context = context,
+                            steps = uiState.currentSteps,
+                            calories = uiState.metricDataState.calories,
+                            goal = uiState.stepGoalSheetState.selectedStepsGoal,
+                            timeLabel = "now"
+                    )
+                }
             }
         }
     }
@@ -290,7 +296,16 @@ private fun Activity.exitSmartStep() {
 
     finishAndRemoveTask()
 }
-
+private fun hasNotificationPermission(context: Context): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+    } else {
+        true
+    }
+}
 @Preview(showBackground = true)
 @Composable
 private fun HomeScreenPreview() {
