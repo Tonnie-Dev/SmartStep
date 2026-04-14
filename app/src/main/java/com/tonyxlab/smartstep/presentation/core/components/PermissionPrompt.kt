@@ -120,6 +120,12 @@ fun ResolveSheetContent(
             )
         }
 
+        PermissionSheetType.NOTIFICATION_ACCESS -> {
+            BottomSheetContentNotification(
+                    onAllowAccessClick = { onEvent(HomeUiEvent.AllowAccess) }
+            )
+        }
+
         PermissionSheetType.BACKGROUND_ACCESS -> {
 
             BottomSheetContentThree(
@@ -272,6 +278,53 @@ fun BottomSheetContentThree(
                         .padding(bottom = MaterialTheme.spacing.spaceMedium),
                 onClick = onContinue,
                 buttonText = stringResource(id = R.string.button_text_continue),
+        )
+    }
+}
+
+@Composable
+fun BottomSheetContentNotification(
+    onAllowAccessClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+            modifier = modifier
+                    .fillMaxWidth()
+                    .padding(top = MaterialTheme.spacing.spaceMedium)
+                    .background(MaterialTheme.colorScheme.surface),
+            horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+                modifier = Modifier.size(MaterialTheme.spacing.spaceDoubleDp * 22),
+                painter = painterResource(id = R.drawable.ic_notification_circle_arrow),
+                contentDescription = null
+        )
+
+        Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceTwelve * 2))
+
+        Text(
+                modifier = Modifier.padding(horizontal = MaterialTheme.spacing.spaceExtraLarge),
+                text = stringResource(id = R.string.caption_text_notification_access),
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceSmall))
+        Text(
+                modifier = Modifier.padding(horizontal = MaterialTheme.spacing.spaceDoubleDp * 22),
+                text = stringResource(id = R.string.caption_text_notification_access_desc),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.BodyLargeRegular,
+                textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceTwelve * 2))
+
+        AppButton(
+                modifier = Modifier
+                        .padding(horizontal = MaterialTheme.spacing.spaceMedium)
+                        .padding(bottom = MaterialTheme.spacing.spaceMedium),
+                onClick = onAllowAccessClick,
+                buttonText = stringResource(id = R.string.button_text_allow_access),
         )
     }
 }

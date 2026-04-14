@@ -21,6 +21,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.isActive
+import timber.log.Timber
 
 typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeActionEvent>
 
@@ -303,12 +304,17 @@ class HomeViewModel(
     }
 
     private fun openPermissionsSettings() {
-        updateState { permissionHandler.closePermissionSheet(it) }
+        updateState { permissionHandler.dismissPermissionDialog(it) }
         sendActionEvent(HomeActionEvent.OpenAppSettings)
     }
 
     private fun handleContinue() {
-        updateState { permissionHandler.closePermissionSheet(it) }
+        updateState { permissionHandler.dismissPermissionDialog(it) }
+
+        val state = currentState.permissionUiState.permissionSheetVisible
+        val state2 = currentState.permissionUiState.permissionSheetType
+        Timber.tag("Perm Handler").i("Is Sheet Visible: $state")
+        Timber.tag("Perm Handler").i("Type: $state2")
         sendActionEvent(HomeActionEvent.RequestBatteryOptimization)
     }
 

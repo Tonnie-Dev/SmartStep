@@ -1,95 +1,5 @@
 @file:RequiresApi(Build.VERSION_CODES.Q)
 
-/*
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
-@Composable
-fun PermissionUiHandler(
-    isDeviceWide: Boolean,
-    uiState: HomeUiState,
-    onEvent: (HomeUiEvent) -> Unit,
-) {
-
-    val permissionState = rememberPermissionState(
-            permission = Manifest.permission.ACTIVITY_RECOGNITION
-    )
-    val activity = LocalActivity.current ?: return
-    val isBackgroundAccessGranted = activity.isIgnoringBatteryOptimizations()
-
-    // Disposable Effect to Observe
-    OnResumeEffect {
-        if (!permissionState.status.isGranted) {
-            onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.PERMANENT_DENIAL))
-        }
-    }
-
-    val permissionStatus = permissionState.status
-    val permissionUiState = uiState.permissionUiState
-    val physicalActivityPermissionRequested = permissionUiState
-            .physicalActivityPermissionRequested
-
-    // Launch the permission request only once when entering the screen for the first time
-    LaunchedEffect(Unit) {
-        if (!permissionStatus.isGranted && !physicalActivityPermissionRequested) {
-
-            onEvent(HomeUiEvent.PhysicalActivityPermissionRequested)
-            permissionState.launchPermissionRequest()
-        }
-    }
-
-    // React to permission result changes or app launch
-    LaunchedEffect(permissionStatus.isGranted, permissionStatus.shouldShowRationale) {
-        when {
-            permissionStatus.isGranted -> {
-                if (!isBackgroundAccessGranted
-
-                ) {
-                    onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.BACKGROUND_ACCESS))
-                }
-            }
-
-            permissionStatus.shouldShowRationale -> {
-                onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.INITIAL_DENIAL))
-            }
-
-            physicalActivityPermissionRequested -> {
-
-                // Not granted, no rationale, and we've requested before -> Permanent denial
-                onEvent(
-                        HomeUiEvent.ShowPermissionSheet(
-                                PermissionSheetType.PERMANENT_DENIAL
-                        )
-                )
-            }
-        }
-    }
-
-    PermissionPrompt(
-            isDeviceWide = isDeviceWide,
-            isSheetVisible = permissionUiState.permissionSheetVisible,
-            permissionSheetType = permissionUiState.permissionSheetType,
-            hasHandle = permissionUiState.permissionSheetType == PermissionSheetType.BACKGROUND_ACCESS,
-            onEvent = { event ->
-                when (event) {
-                    HomeUiEvent.AllowAccess -> {
-                        onEvent(HomeUiEvent.DismissPermissionDialog)
-                        permissionState.launchPermissionRequest()
-                    }
-
-                    HomeUiEvent.Continue -> {
-                        onEvent(HomeUiEvent.ShowBackgroundPermissionSheet)
-                        onEvent(event)
-                    }
-
-                    else -> {
-                        onEvent(event)
-                    }
-                }
-            }
-    )
-}
-*/
-
-
 package com.tonyxlab.smartstep.presentation.screens.home.components
 
 import android.Manifest
@@ -113,6 +23,7 @@ import timber.log.Timber
 enum class PermissionSheetType {
     INITIAL_DENIAL,
     PERMANENT_DENIAL,
+    NOTIFICATION_ACCESS,
     BACKGROUND_ACCESS
 }
 
@@ -123,55 +34,39 @@ fun PermissionUiHandler(
     uiState: HomeUiState,
     onEvent: (HomeUiEvent) -> Unit,
 ) {
-
     val activity = LocalActivity.current ?: return
 
     val activityPermissionState = rememberPermissionState(
-            permission = Manifest.permission.ACTIVITY_RECOGNITION
+        permission = Manifest.permission.ACTIVITY_RECOGNITION
     )
-    Timber.tag("PermHandler")
-            .i("Top Level - is activity perm Granted: ${activityPermissionState.status.isGranted}")
+
+    val notificationPermissionState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
+    } else {
+        null
+    }
+
     val isBackgroundAccessGranted = activity.isIgnoringBatteryOptimizations()
 
-    val notificationPermissionState =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
-        } else {
-            null
-        }
-
     val permissionUiState = uiState.permissionUiState
-    val physicalActivityPermissionRequested =
-        permissionUiState.physicalActivityPermissionRequested
+    val physicalActivityPermissionRequested = permissionUiState.physicalActivityPermissionRequested
 
     val activityGranted = activityPermissionState.status.isGranted
+    val notificationGranted = notificationPermissionState?.status?.isGranted ?: true
 
-    val notificationGranted =
-        notificationPermissionState?.status?.isGranted ?: true
+    // Report background access state to ViewModel for service management
+    LaunchedEffect(isBackgroundAccessGranted) {
+        onEvent(HomeUiEvent.BackgroundAccessChanged(isBackgroundAccessGranted))
+    }
 
+    // OnResume check for mandatory Activity permission
     OnResumeEffect {
-        when {
-            !activityGranted -> {
-
-                Timber.tag("PermHandler")
-                        .i("Act. Perm Status on Resume: ${activityPermissionState.status.isGranted}")
-                Timber.tag("PermHandler")
-                        .i("Checking Activity on Resume Effect")
-                onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.PERMANENT_DENIAL))
-            }
-
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                    notificationPermissionState?.status?.isGranted == false &&
-                    notificationPermissionState.status.shouldShowRationale -> {
-
-                Timber.tag("PermHandler")
-                        .i("Checking Notif on Resume Effect")
-                onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.INITIAL_DENIAL))
-            }
+        if (!activityGranted && physicalActivityPermissionRequested) {
+            onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.PERMANENT_DENIAL))
         }
     }
 
-    // First request activity recognition once
+    // 1. Initial request for Activity Recognition (Automatic on first launch)
     LaunchedEffect(Unit) {
         if (!activityGranted && !physicalActivityPermissionRequested) {
             onEvent(HomeUiEvent.PhysicalActivityPermissionRequested)
@@ -179,77 +74,81 @@ fun PermissionUiHandler(
         }
     }
 
-    // Once activity recognition is granted, request notifications on Android 13+
+    // 2. Initial request for Notifications (Automatic after Activity is granted on Android 13+)
     LaunchedEffect(activityGranted) {
-        if (
-            activityGranted &&
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            notificationPermissionState?.status?.isGranted == false
-        ) {
-            notificationPermissionState.launchPermissionRequest()
+        if (activityGranted && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            notificationPermissionState?.let {
+                if (!it.status.isGranted && !it.status.shouldShowRationale) {
+                    it.launchPermissionRequest()
+                }
+            }
         }
     }
 
-    // Decide what UI sheet to show next
+    // 3. Logic to show rationale or instruction sheets automatically
     LaunchedEffect(
-            activityGranted,
-            activityPermissionState.status.shouldShowRationale,
-            notificationGranted,
-            notificationPermissionState?.status?.shouldShowRationale,
-            isBackgroundAccessGranted
+        activityGranted,
+        activityPermissionState.status.shouldShowRationale,
+        notificationGranted,
+        notificationPermissionState?.status?.shouldShowRationale,
+        isBackgroundAccessGranted,
+        //permissionUiState.permissionSheetVisible
     ) {
+        // Skip if a sheet is already showing to avoid overlapping
+        if (permissionUiState.permissionSheetVisible) return@LaunchedEffect
+
         when {
-            !activityGranted && activityPermissionState.status.shouldShowRationale -> {
-                Timber.tag("PermHandler")
-                        .i("When Stub 1")
-                onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.INITIAL_DENIAL))
+            // Activity Recognition: Mandatory
+            !activityGranted -> {
+                if (activityPermissionState.status.shouldShowRationale) {
+                    onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.INITIAL_DENIAL))
+                } else if (physicalActivityPermissionRequested) {
+                    onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.PERMANENT_DENIAL))
+                }
             }
 
-            !activityGranted && physicalActivityPermissionRequested -> {
-
-                Timber.tag("PermHandler")
-                        .i("When Stub 2")
-                onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.PERMANENT_DENIAL))
+            // Notification: Recommended
+            !notificationGranted -> {
+                if (notificationPermissionState.status.shouldShowRationale) {
+                    onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.NOTIFICATION_ACCESS))
+                }
             }
 
-            activityGranted && notificationGranted && !isBackgroundAccessGranted -> {
-
-                Timber.tag("PermHandler")
-                        .i("When Stub 3")
+            // Background Access: Recommended for tracking reliability
+            !isBackgroundAccessGranted -> {
                 onEvent(HomeUiEvent.ShowPermissionSheet(PermissionSheetType.BACKGROUND_ACCESS))
             }
         }
     }
-
+Timber.tag("Perm Handler").i("About to Call PermissionPrompt, visibility is: ${permissionUiState.permissionSheetVisible}, Nullability is: ${permissionUiState.permissionSheetType}")
     PermissionPrompt(
-            isDeviceWide = isDeviceWide,
-            isSheetVisible = permissionUiState.permissionSheetVisible,
-            permissionSheetType = permissionUiState.permissionSheetType,
-            hasHandle = permissionUiState.permissionSheetType == PermissionSheetType.BACKGROUND_ACCESS,
-            onEvent = { event ->
-                when (event) {
-                    HomeUiEvent.AllowAccess -> {
-                        onEvent(HomeUiEvent.DismissPermissionDialog)
-
-                        when {
-                            !activityPermissionState.status.isGranted -> {
-                                activityPermissionState.launchPermissionRequest()
-                            }
-
-                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                                    notificationPermissionState?.status?.isGranted == false -> {
-                                notificationPermissionState.launchPermissionRequest()
-                            }
+        isDeviceWide = isDeviceWide,
+        isSheetVisible = permissionUiState.permissionSheetVisible,
+        permissionSheetType = permissionUiState.permissionSheetType,
+        hasHandle = permissionUiState.permissionSheetType == PermissionSheetType.BACKGROUND_ACCESS ||
+                   permissionUiState.permissionSheetType == PermissionSheetType.NOTIFICATION_ACCESS,
+        onEvent = { event ->
+            when (event) {
+                HomeUiEvent.AllowAccess -> {
+                    onEvent(HomeUiEvent.DismissPermissionDialog)
+                    when {
+                        !activityGranted -> {
+                            activityPermissionState.launchPermissionRequest()
+                        }
+                        !notificationGranted -> {
+                            notificationPermissionState.launchPermissionRequest()
                         }
                     }
-
-                    HomeUiEvent.Continue -> {
-                        onEvent(HomeUiEvent.ShowBackgroundPermissionSheet)
-                        onEvent(event)
-                    }
-
-                    else -> onEvent(event)
                 }
+
+                HomeUiEvent.Continue -> {
+
+                  onEvent(HomeUiEvent.DismissPermissionDialog)
+                    onEvent(event) // ViewModel handles RequestBatteryOptimization
+                }
+
+                else -> onEvent(event)
             }
+        }
     )
 }

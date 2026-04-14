@@ -29,7 +29,9 @@
     <string name="caption_text_personal_settings">Personal Settings</string>
     <string name="caption_text_calculate_distance">Used to calculate distance</string>
     <string name="caption_text_calculate_calories">Used to calculate calories</string>
-    <string name="caption_text_motion_sensors">To count your steps,Smart Step needs access to you motion sensors</string>
+    <string name="caption_text_motion_sensors">To count your steps, Smart Step needs access to your motion sensors</string>
+    <string name="caption_text_notification_access">Keep track of your progress</string>
+    <string name="caption_text_notification_access_desc">Allow notifications to see your real-time step count and stay motivated throughout the day.</string>
     <string name="caption_text_enable_access">Enable access manually</string>
     <string name="caption_text_track_step">To track your steps, please enable the permission in your device settings</string>
     <string name="caption_text_instruction_1">1. Open Permissions</string>

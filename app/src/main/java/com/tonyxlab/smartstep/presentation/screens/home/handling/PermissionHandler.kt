@@ -29,13 +29,13 @@ class PermissionHandler {
         )
     }
 
-    fun closePermissionSheet(state: HomeUiState): HomeUiState {
+   /* fun closePermissionSheet(state: HomeUiState): HomeUiState {
         return state.copy(
                 permissionUiState = state.permissionUiState.copy(
                         permissionSheetVisible = false
                 )
         )
-    }
+    }*/
 
     fun updateBackgroundAccessState(
         state: HomeUiState,
