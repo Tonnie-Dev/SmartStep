@@ -61,6 +61,7 @@ dependencies {
 
     // Material 3
     implementation(AndroidX.compose.material3)
+    implementation(AndroidX.cardView)
 
     // Window Size Class
     implementation(AndroidX.compose.material3.windowSizeClass)

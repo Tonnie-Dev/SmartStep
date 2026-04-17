@@ -94,7 +94,6 @@ object StepNotificationHelper {
 
 */
 
-
 @file:RequiresApi(Build.VERSION_CODES.O)
 
 package com.tonyxlab.smartstep.data.notification
@@ -106,10 +105,12 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Build
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import androidx.core.graphics.toColorInt
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.MainActivity
 import java.text.NumberFormat
@@ -168,7 +169,7 @@ object StepNotificationHelper {
         )
 
         return NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_pin)
+                .setSmallIcon(R.drawable.ic_steps)
                 .setContentIntent(pendingIntent)
                 .setOnlyAlertOnce(true)
                 .setSilent(true)
@@ -197,6 +198,7 @@ object StepNotificationHelper {
         manager.notify(NOTIFICATION_ID, notification)
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     @SuppressLint("RemoteViewLayout")
     private fun createCollapsedRemoteViews(
         context: Context,
@@ -205,8 +207,16 @@ object StepNotificationHelper {
         goal: Int,
         timeLabel: String
     ): RemoteViews {
+
+
+        // Detect current theme
+        val isNightMode = (context.resources.configuration.uiMode
+                and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+
+        val textColor = if (isNightMode) "#FFFFFF".toColorInt() else "#1F2024".toColorInt()
+        val iconTint = if (isNightMode) "#8C9EFF".toColorInt() else "#3A43B6".toColorInt()
+
         return RemoteViews(context.packageName, R.layout.notification_small).apply {
-            setTextViewText(R.id.txtTitle, "Smart Step Counter")
             setTextViewText(R.id.txtTime, timeLabel)
             setTextViewText(R.id.txtSteps, formatNumber(steps))
             setTextViewText(R.id.txtCalories, calories.toString())
@@ -216,7 +226,18 @@ object StepNotificationHelper {
                     steps.coerceIn(0, goal.coerceAtLeast(1)),
                     false
             )
+
+            // ✅ Correct way to set text color
+            setTextColor(R.id.txtSteps, textColor)
+            setTextColor(R.id.txtCalories, textColor)
+
+            // Icons tint — this is fine with setColorInt
+            setColorInt(R.id.imgSneakers, "setColorFilter", iconTint, iconTint)
+            setColorInt(R.id.imgWeight, "setColorFilter", iconTint, iconTint)
+            setColorInt(R.id.imgDivider, "setColorFilter", textColor, textColor)
+
         }
+
     }
 
     private fun createExpandedRemoteViews(
@@ -241,6 +262,7 @@ object StepNotificationHelper {
     }
 
     private fun formatNumber(value: Int): String {
-        return NumberFormat.getNumberInstance(Locale.US).format(value)
+        return NumberFormat.getNumberInstance(Locale.US)
+                .format(value)
     }
 }
