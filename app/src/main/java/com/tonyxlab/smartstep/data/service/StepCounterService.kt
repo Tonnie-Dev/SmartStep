@@ -1,4 +1,4 @@
-@file:RequiresApi(Build.VERSION_CODES.O)
+@file:RequiresApi(Build.VERSION_CODES.S)
 
 package com.tonyxlab.smartstep.data.service
 
@@ -11,6 +11,7 @@ import com.tonyxlab.smartstep.data.notification.StepNotificationHelper
 
 class StepCounterService : Service() {
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate() {
         super.onCreate()
         StepNotificationHelper.createChannel(this)
@@ -20,14 +21,12 @@ class StepCounterService : Service() {
         val steps = intent?.getIntExtra("steps", 0) ?: 0
         val calories = intent?.getIntExtra("calories", 0) ?: 0
         val goal = intent?.getIntExtra("goal", 10000) ?: 10000
-        val timeLabel = intent?.getStringExtra("timeLabel") ?: "now"
 
         val notification = StepNotificationHelper.buildNotification(
                 context = this,
                 steps = steps,
                 calories = calories,
                 goal = goal,
-                timeLabel = timeLabel
         )
 
         startForeground(StepNotificationHelper.NOTIFICATION_ID, notification)

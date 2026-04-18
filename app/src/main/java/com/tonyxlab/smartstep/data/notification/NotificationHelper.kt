@@ -1,100 +1,4 @@
-/*
-
-@file:RequiresApi(Build.VERSION_CODES.O)
-
-package com.tonyxlab.smartstep.data.notification
-
-import android.Manifest
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.annotation.RequiresPermission
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import com.tonyxlab.smartstep.R
-import com.tonyxlab.smartstep.data.notification.StepNotificationHelper.createCollapsedRemoteViews
-import com.tonyxlab.smartstep.data.notification.StepNotificationHelper.createExpandedRemoteViews
-import com.tonyxlab.smartstep.presentation.MainActivity
-
-object StepNotificationHelper {
-
-    const val CHANNEL_ID = "step_tracking_channel"
-
-
-    fun createChannel(context: Context) {
-        val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Step Tracking",
-                NotificationManager.IMPORTANCE_LOW // 🔥 IMPORTANT: silent
-        ).apply {
-            description = "Shows step tracking progress"
-            setSound(null, null)
-            enableVibration(false)
-        }
-
-        val manager = context.getSystemService(NotificationManager::class.java)
-        manager.createNotificationChannel(channel)
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun buildNotification(
-        context: Context,
-        steps: Int,
-        calories: Int,
-        progress: Int,
-        goal: Int
-    ): Notification {
-
-        val intent = Intent(context, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-                context,
-                0,
-                intent,
-                PendingIntent.FLAG_IMMUTABLE
-        )
-
-        return NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_pin)
-                .setContentTitle("Smart Step Counter")
-                .setContentText("$steps steps • $calories kcal")
-                .setContentIntent(pendingIntent)
-                .setOnlyAlertOnce(true) // 🔥 prevents re-alerting
-                .setOngoing(false) // allows swipe dismiss
-                .setSilent(true)
-                .setProgress(goal, progress, false)
-                .build()
-    }
-
-
-    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
-    fun updateNotification(
-        context: Context,
-        steps: Int,
-        calories: Int,
-        goal: Int
-    ) {
-        val manager = NotificationManagerCompat.from(context)
-
-        val notification = buildNotification(
-                context,
-                steps,
-                calories,
-                progress = steps,
-                goal = goal
-        )
-
-        manager.notify(1, notification)
-    }
-}
-
-*/
-
-@file:RequiresApi(Build.VERSION_CODES.O)
+@file:RequiresApi(Build.VERSION_CODES.S)
 
 package com.tonyxlab.smartstep.data.notification
 
@@ -117,7 +21,6 @@ import java.text.NumberFormat
 import java.util.Locale
 
 object StepNotificationHelper {
-
     const val CHANNEL_ID = "step_tracking_channel"
     const val NOTIFICATION_ID = 1
 
@@ -141,23 +44,20 @@ object StepNotificationHelper {
         steps: Int,
         calories: Int,
         goal: Int,
-        timeLabel: String = "now"
     ): Notification {
 
         val collapsedView = createCollapsedRemoteViews(
                 context = context,
                 steps = steps,
                 calories = calories,
-                goal = goal,
-                timeLabel = timeLabel
+                goal = goal
         )
 
         val expandedView = createExpandedRemoteViews(
                 context = context,
                 steps = steps,
                 calories = calories,
-                goal = goal,
-                timeLabel = timeLabel
+                goal = goal
         )
 
         val intent = Intent(context, MainActivity::class.java)
@@ -170,6 +70,7 @@ object StepNotificationHelper {
 
         return NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_steps)
+                .setContentTitle("we are us")
                 .setContentIntent(pendingIntent)
                 .setOnlyAlertOnce(true)
                 .setSilent(true)
@@ -184,40 +85,31 @@ object StepNotificationHelper {
         context: Context,
         steps: Int,
         calories: Int,
-        goal: Int,
-        timeLabel: String = "now"
+        goal: Int
     ) {
         val manager = context.getSystemService(NotificationManager::class.java)
         val notification = buildNotification(
                 context = context,
                 steps = steps,
                 calories = calories,
-                goal = goal,
-                timeLabel = timeLabel
+                goal = goal
         )
         manager.notify(NOTIFICATION_ID, notification)
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
     @SuppressLint("RemoteViewLayout")
     private fun createCollapsedRemoteViews(
         context: Context,
         steps: Int,
         calories: Int,
-        goal: Int,
-        timeLabel: String
+        goal: Int
     ): RemoteViews {
 
+        val (textColor, iconTint, dividerColor) = resolveColors(context)
 
-        // Detect current theme
-        val isNightMode = (context.resources.configuration.uiMode
-                and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-
-        val textColor = if (isNightMode) "#FFFFFF".toColorInt() else "#1F2024".toColorInt()
-        val iconTint = if (isNightMode) "#8C9EFF".toColorInt() else "#3A43B6".toColorInt()
 
         return RemoteViews(context.packageName, R.layout.notification_small).apply {
-            setTextViewText(R.id.txtTime, timeLabel)
+
             setTextViewText(R.id.txtSteps, formatNumber(steps))
             setTextViewText(R.id.txtCalories, calories.toString())
             setProgressBar(
@@ -227,29 +119,33 @@ object StepNotificationHelper {
                     false
             )
 
-            // ✅ Correct way to set text color
+            // Text Color
             setTextColor(R.id.txtSteps, textColor)
             setTextColor(R.id.txtCalories, textColor)
 
-            // Icons tint — this is fine with setColorInt
+            // Icons Tint
             setColorInt(R.id.imgSneakers, "setColorFilter", iconTint, iconTint)
             setColorInt(R.id.imgWeight, "setColorFilter", iconTint, iconTint)
-            setColorInt(R.id.imgDivider, "setColorFilter", textColor, textColor)
+
+            // Divider Color
+            setColorInt(R.id.imgDivider, "setColorFilter", dividerColor, dividerColor)
 
         }
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     private fun createExpandedRemoteViews(
         context: Context,
         steps: Int,
         calories: Int,
         goal: Int,
-        timeLabel: String
     ): RemoteViews {
+
+        val (textColor, iconTint, dividerColor) = resolveColors(context)
+
         return RemoteViews(context.packageName, R.layout.notification_large).apply {
-            setTextViewText(R.id.txtTitle, "Smart Step Counter")
-            setTextViewText(R.id.txtTime, timeLabel)
+
             setTextViewText(R.id.txtSteps, formatNumber(steps))
             setTextViewText(R.id.txtCalories, calories.toString())
             setProgressBar(
@@ -258,7 +154,29 @@ object StepNotificationHelper {
                     steps.coerceIn(0, goal.coerceAtLeast(1)),
                     false
             )
+
+            // Text Color
+            setTextColor(R.id.txtSteps, textColor)
+            setTextColor(R.id.txtCalories, textColor)
+
+            // Icons Tint
+            setColorInt(R.id.imgSneakers, "setColorFilter", iconTint, iconTint)
+            setColorInt(R.id.imgWeight, "setColorFilter", iconTint, iconTint)
+
+            // Divider Color
+            setColorInt(R.id.imgDivider, "setColorFilter", dividerColor, dividerColor)
         }
+    }
+
+    private fun resolveColors(context: Context): Triple<Int, Int, Int> {
+        val isNightMode = (context.resources.configuration.uiMode
+                and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+
+        val textColor = if (isNightMode) "#FFFFFF".toColorInt() else "#1F2024".toColorInt()
+        val iconTint = if (isNightMode) "#8C9EFF".toColorInt() else "#3A43B6".toColorInt()
+        val dividerColor = if (isNightMode) "#FFFFFF".toColorInt() else "#BFBFBF".toColorInt()
+
+        return Triple(textColor, iconTint, dividerColor)
     }
 
     private fun formatNumber(value: Int): String {

@@ -3,110 +3,104 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root"
     android:layout_width="match_parent"
-    android:layout_height="64dp"
+    android:layout_height="48dp"
     android:background="@android:color/transparent"
     android:gravity="center_vertical"
-    android:orientation="vertical"
-    android:paddingStart="12dp"
-    android:paddingEnd="12dp">
+    android:orientation="vertical">
 
-
-
-    <!-- Center: stats + progress
+    <!-- Stats row: two groups split equally with divider in between -->
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:gravity="center_vertical">-->
+        android:paddingBottom="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-        <!-- Stats row: two groups split equally with divider in between -->
+        <!-- Steps group — takes half the space, content centered -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
+            android:layout_weight="1"
+            android:gravity="center"
             android:orientation="horizontal">
 
-            <!-- Steps group — takes half the space, content centered -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/imgSneakers"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_sneakers"
-                    app:tint="@color/button_primary" />
-
-                <TextView
-                    android:id="@+id/txtSteps"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:text="7,842"
-                    android:textColor="#1F2024"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-            <!-- Vertical divider -->
             <ImageView
-                android:id="@+id/imgDivider"
-                android:layout_width="1dp"
-                android:layout_height="22dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:background="#E5E7EB"
+                android:id="@+id/imgSneakers"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:contentDescription="@null"
-                android:src="@android:color/black" />
+                android:src="@drawable/ic_sneakers"
+                app:tint="@color/button_primary" />
 
-            <!-- Calories group — takes the other half, content centered -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/txtSteps"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/imgWeight"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_weight" />
-
-                <TextView
-                    android:id="@+id/txtCalories"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:text="342"
-                    android:textColor="#1F2024"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
+                android:layout_marginStart="6dp"
+                android:textColor="#1F2024"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
         </LinearLayout>
 
-        <!-- Progress bar -->
+        <!-- Vertical divider -->
+        <ImageView
+            android:id="@+id/imgDivider"
+            android:layout_width="1dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="#E5E7EB"
+            android:contentDescription="@null"
+            android:src="@android:color/black" />
+
+        <!-- Calories group — takes the other half, content centered -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/imgWeight"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_weight" />
+
+            <TextView
+                android:id="@+id/txtCalories"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="342"
+                android:textColor="#1F2024"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Progress bar -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:background="@drawable/bg_progress_shell">
+
         <ProgressBar
             android:id="@+id/progressSteps"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="5dp"
-            android:layout_marginTop="5dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_vertical"
+            android:indeterminate="false"
             android:max="10000"
-            android:progress="2500"
-            android:progressBackgroundTint="#E7E8F5"
-            android:progressTint="#5C6BC0" />
+            android:progress="5000"
+            android:progressDrawable="@drawable/bg_progress_fill" />
+    </FrameLayout>
+    </LinearLayout>
 
-
-
-</LinearLayout>

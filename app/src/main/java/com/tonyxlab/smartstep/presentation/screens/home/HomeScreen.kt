@@ -185,7 +185,6 @@ fun HomeScreen(
                             steps = uiState.currentSteps,
                             calories = uiState.metricDataState.calories,
                             goal = uiState.stepGoalSheetState.selectedStepsGoal,
-                            timeLabel = "now"
                     )
                 }
             }
