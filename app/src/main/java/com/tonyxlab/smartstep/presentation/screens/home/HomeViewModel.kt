@@ -4,8 +4,10 @@ package com.tonyxlab.smartstep.presentation.screens.home
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.lifecycle.viewModelScope
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
+import com.tonyxlab.smartstep.domain.connectivity.ConnectivityObserver
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
 import com.tonyxlab.smartstep.presentation.screens.home.handling.AnalyticsHandler
@@ -20,6 +22,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import timber.log.Timber
 
@@ -27,7 +31,8 @@ typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeAction
 
 class HomeViewModel(
     private val permPrefsDataStore: PermPrefsDataStore,
-    private val onboardingDataStore: OnboardingDataStore
+    private val onboardingDataStore: OnboardingDataStore,
+    private val connectivityObserver: ConnectivityObserver
 ) : HomeBaseViewModel() {
 
     private val stepsHandler = StepsHandler()
@@ -45,11 +50,9 @@ class HomeViewModel(
     init {
         observePermissionStates()
         observeMetricData()
-
+        observeNetwork()
         updateState {
-
             analyticsHandler.populateStats(it)
-
         }
     }
 
@@ -234,6 +237,14 @@ class HomeViewModel(
         }
     }
 
+    private fun observeNetwork() {
+        connectivityObserver.isOnline()
+                .onEach { isOnline ->
+                    updateState { it.copy(isOnline = isOnline) }
+                }
+                .launchIn(viewModelScope)
+    }
+
     private fun onStepDetected() {
         if (currentState.stepEditorState.paused) return
 
@@ -310,11 +321,6 @@ class HomeViewModel(
 
     private fun handleContinue() {
         updateState { permissionHandler.dismissPermissionDialog(it) }
-
-        val state = currentState.permissionUiState.permissionSheetVisible
-        val state2 = currentState.permissionUiState.permissionSheetType
-        Timber.tag("Perm Handler").i("Is Sheet Visible: $state")
-        Timber.tag("Perm Handler").i("Type: $state2")
         sendActionEvent(HomeActionEvent.RequestBatteryOptimization)
     }
 

@@ -45,6 +45,7 @@ import com.tonyxlab.smartstep.presentation.core.base.BaseContentLayout
 import com.tonyxlab.smartstep.presentation.core.components.AppTopBar
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.navigation.Navigator
+import com.tonyxlab.smartstep.presentation.screens.home.components.AiInsightCard
 import com.tonyxlab.smartstep.presentation.screens.home.components.CloseAppDialog
 import com.tonyxlab.smartstep.presentation.screens.home.components.DateSelector
 import com.tonyxlab.smartstep.presentation.screens.home.components.NavigationDrawer
@@ -231,7 +232,7 @@ fun HomeScreenContent(
                     .fillMaxSize()
                     .background(color = MaterialTheme.colorScheme.background)
                     .padding(all = MaterialTheme.spacing.spaceMedium),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.TopCenter
     ) {
         Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -246,6 +247,11 @@ fun HomeScreenContent(
             WeeklyAnalyticsSection(
                     modifier = Modifier.widthIn(max = maxWidth1),
                     uiState = uiState
+            )
+
+            AiInsightCard(
+                    isOnline = uiState.isOnline,
+                    aiPrompt = "This is AI"
             )
         }
 

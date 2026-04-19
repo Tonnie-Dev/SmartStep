@@ -1,14 +1,18 @@
-
 @file:RequiresApi(Build.VERSION_CODES.Q)
 
 package com.tonyxlab.smartstep.di
 
+import android.net.ConnectivityManager
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
+import com.tonyxlab.smartstep.data.remote.connectivity.ConnectivityObserverImpl
+import com.tonyxlab.smartstep.domain.connectivity.ConnectivityObserver
 import com.tonyxlab.smartstep.presentation.screens.home.HomeViewModel
 import com.tonyxlab.smartstep.presentation.screens.onboarding.OnboardingViewModel
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -24,5 +28,15 @@ val dataStoreModule = module {
     singleOf(::PermPrefsDataStore)
 }
 
-@RequiresApi(Build.VERSION_CODES.Q)
-val appModule = listOf(viewModelModule, dataStoreModule)
+val connectivityModule = module {
+    single<ConnectivityManager>{
+        ContextCompat.getSystemService(
+                androidContext(),
+                ConnectivityManager::class.java
+        ) ?: error ("Connectivity Manager not available")
+    }
+
+    single<ConnectivityObserver> { ConnectivityObserverImpl(get()) }
+}
+
+val appModule = listOf(viewModelModule, dataStoreModule, connectivityModule)
