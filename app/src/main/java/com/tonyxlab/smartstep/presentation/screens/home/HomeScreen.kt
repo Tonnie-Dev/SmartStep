@@ -1,4 +1,4 @@
-@file:RequiresApi(Build.VERSION_CODES.Q)
+@file:RequiresApi(Build.VERSION_CODES.S)
 
 package com.tonyxlab.smartstep.presentation.screens.home
 
@@ -112,6 +112,7 @@ fun HomeScreen(
                                 HomeUiEvent.ShowExitDialog -> {
                                     viewModel.onEvent(event)
                                 }
+
                                 else -> Unit
                             }
                         }
@@ -163,6 +164,7 @@ fun HomeScreen(
                             )
 
                         }
+
                         HomeActionEvent.StopStepCounterService -> {
                             context.stopStepCounterService()
                         }
@@ -231,7 +233,10 @@ fun HomeScreenContent(
                     .padding(all = MaterialTheme.spacing.spaceMedium),
             contentAlignment = Alignment.Center
     ) {
-        Column (verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)){
+        Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)
+        ) {
             StepCounterCard(
                     modifier = Modifier.widthIn(max = maxWidth1),
                     uiState = uiState,
@@ -239,7 +244,7 @@ fun HomeScreenContent(
             )
 
             WeeklyAnalyticsSection(
-                    modifier = Modifier,
+                    modifier = Modifier.widthIn(max = maxWidth1),
                     uiState = uiState
             )
         }
@@ -261,6 +266,7 @@ fun HomeScreenContent(
 
         if (uiState.stepEditorState.isStepEditorVisible) {
             StepsEditor(
+                    modifier = Modifier.widthIn(max = maxWidth2),
                     uiState = uiState,
                     onEvent = onEvent
             )
@@ -275,14 +281,14 @@ fun HomeScreenContent(
             }
         }
 
-        if (uiState.showResetDialog){
+        if (uiState.showResetDialog) {
             ResetStepsDialog(
                     onEvent = onEvent
             )
         }
 
-        if (uiState.showExitDialog){
-            CloseAppDialog (onEvent = onEvent)
+        if (uiState.showExitDialog) {
+            CloseAppDialog(onEvent = onEvent)
         }
     }
 }
@@ -295,6 +301,7 @@ private fun Activity.exitSmartStep() {
 
     finishAndRemoveTask()
 }
+
 private fun hasNotificationPermission(context: Context): Boolean {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         ContextCompat.checkSelfPermission(
@@ -305,6 +312,7 @@ private fun hasNotificationPermission(context: Context): Boolean {
         true
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 private fun HomeScreenPreview() {

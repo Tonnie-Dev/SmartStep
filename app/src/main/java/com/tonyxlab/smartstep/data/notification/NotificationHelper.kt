@@ -70,7 +70,6 @@ object StepNotificationHelper {
 
         return NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_steps)
-                .setContentTitle("we are us")
                 .setContentIntent(pendingIntent)
                 .setOnlyAlertOnce(true)
                 .setSilent(true)
