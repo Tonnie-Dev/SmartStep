@@ -42,6 +42,7 @@
     <string name="caption_text_fully_close_app">The app will fully close and will not run in the background.</string>
     <string name="caption_text_recalculation">Calories, distance &amp; duration will be recalculated accordingly</string>
     <string name="caption_text_paused">Paused</string>
+    <string name="caption_text_connect_internet">📡 Connect to the internet to get AI insights.</string>
 
     <!--Label Texts-->
     <string name="label_text_gender">Gender</string>
@@ -75,6 +76,8 @@
     <string name="text_button_save">Save</string>
     <string name="text_button_cancel">Cancel</string>
     <string name="text_button_reset">Reset</string>
+    <string name="text_button_try_again">Try Again</string>
+    <string name="text_button_more">More</string>
 
     <!--Content Description Texts-->
     <string name="cds_text_check_mark">Check Mark</string>
