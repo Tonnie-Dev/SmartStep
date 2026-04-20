@@ -221,4 +221,8 @@ fabric.properties
 
 !/gradle/wrapper/gradle-wrapper.jar
 
+
+## API Key
+apikey.properties
+
 # End of https://www.toptal.com/developers/gitignore/api/androidstudio

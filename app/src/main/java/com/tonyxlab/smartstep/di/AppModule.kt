@@ -6,9 +6,12 @@ import android.net.ConnectivityManager
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import com.tonyxlab.smartstep.data.ai.AiClient
+import com.tonyxlab.smartstep.data.ai.AiCoachImpl
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
 import com.tonyxlab.smartstep.data.remote.connectivity.ConnectivityObserverImpl
+import com.tonyxlab.smartstep.domain.ai.AiCoach
 import com.tonyxlab.smartstep.domain.connectivity.ConnectivityObserver
 import com.tonyxlab.smartstep.presentation.screens.home.HomeViewModel
 import com.tonyxlab.smartstep.presentation.screens.onboarding.OnboardingViewModel
@@ -39,4 +42,8 @@ val connectivityModule = module {
     single<ConnectivityObserver> { ConnectivityObserverImpl(get()) }
 }
 
-val appModule = listOf(viewModelModule, dataStoreModule, connectivityModule)
+val aiCoachModule = module {
+    singleOf(::AiClient)
+    single<AiCoach> { AiCoachImpl(get()) }
+}
+val appModule = listOf(viewModelModule, dataStoreModule, connectivityModule,aiCoachModule)

@@ -125,6 +125,7 @@ fun HomeScreen(
                 topBar = {
                     AppTopBar(
                             titleText = stringResource(R.string.topbar_text_smart_step),
+                            background = MaterialTheme.colorScheme.background,
                             navigationIcon = {
                                 IconButton(
                                         onClick = {
@@ -211,6 +212,7 @@ fun HomeScreenContent(
     OnResumeEffect {
         val isBackgroundAccessGranted = activity.isIgnoringBatteryOptimizations()
         onEvent(HomeUiEvent.BackgroundAccessChanged(isBackgroundAccessGranted))
+        onEvent(HomeUiEvent.OnReturnFromBackground)
     }
     val context = LocalContext.current
 
@@ -251,7 +253,7 @@ fun HomeScreenContent(
 
             AiInsightCard(
                     isOnline = uiState.isOnline,
-                    aiPrompt = "This is AI"
+                    insight = uiState.insight
             )
         }
 

@@ -7,6 +7,8 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
+import com.tonyxlab.smartstep.domain.ai.AiCoach
+import com.tonyxlab.smartstep.domain.ai.InsightState
 import com.tonyxlab.smartstep.domain.connectivity.ConnectivityObserver
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
@@ -32,7 +34,8 @@ typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeAction
 class HomeViewModel(
     private val permPrefsDataStore: PermPrefsDataStore,
     private val onboardingDataStore: OnboardingDataStore,
-    private val connectivityObserver: ConnectivityObserver
+    private val connectivityObserver: ConnectivityObserver,
+    private val aiCoach: AiCoach
 ) : HomeBaseViewModel() {
 
     private val stepsHandler = StepsHandler()
@@ -44,6 +47,8 @@ class HomeViewModel(
     private var lastStepTimestampMillis: Long = 0L
     private var isActivityOngoing: Boolean = false
 
+    private var hasLaunchedOnce: Boolean = false
+
     override val initialState: HomeUiState
         get() = HomeUiState()
 
@@ -51,6 +56,8 @@ class HomeViewModel(
         observePermissionStates()
         observeMetricData()
         observeNetwork()
+        observerInsight()
+        refreshInsight()
         updateState {
             analyticsHandler.populateStats(it)
         }
@@ -107,7 +114,7 @@ class HomeViewModel(
 
             HomeUiEvent.OpenPersonalSettings -> openPersonalSettings()
             HomeUiEvent.ResetSteps -> updateState { resetExitHandler.showResetDialog(it) }
-            HomeUiEvent.SaveStepGoal -> saveStepGoalPicker()
+            HomeUiEvent.SaveStepGoal -> saveNewStepGoal()
 
             is HomeUiEvent.SelectStepGoal -> updateState {
                 stepsHandler.onSelectStepGoal(
@@ -178,6 +185,16 @@ class HomeViewModel(
             // Motion
             HomeUiEvent.OnMotionDetected -> onStepDetected()
 
+            // Return from Background
+            HomeUiEvent.OnReturnFromBackground -> {
+
+                if (!hasLaunchedOnce){
+                    hasLaunchedOnce = true
+                    return
+                }
+                refreshInsight()
+            }
+
             // Reset Dialog
             HomeUiEvent.ConfirmResetDialog -> {
                 activityTimerJob?.cancel()
@@ -245,6 +262,28 @@ class HomeViewModel(
                 .launchIn(viewModelScope)
     }
 
+    private fun observerInsight() {
+
+        aiCoach.insightState.onEach { state ->
+
+            Timber.tag("Insight")
+                    .i("The State is: $state")
+            when (state) {
+
+                is InsightState.Success -> {
+
+                    Timber.tag("Insight")
+                            .i("The Insight is: is ${state.insight}")
+                    updateState { it.copy(insight = state.insight) }
+                }
+
+                else -> Unit
+            }
+
+        }
+                .launchIn(viewModelScope)
+    }
+
     private fun onStepDetected() {
         if (currentState.stepEditorState.paused) return
 
@@ -261,6 +300,15 @@ class HomeViewModel(
             } else {
                 incrementedState
             }
+        }
+
+        // Trigger 3 - on reaching steps goal, generate an insight
+        val goal = currentState.stepGoalSheetState.selectedStepsGoal
+        val steps = currentState.currentSteps
+
+        if (steps >= goal && (steps - 1) < goal) {
+
+            refreshInsight()
         }
 
         if (!isActivityOngoing) {
@@ -330,13 +378,30 @@ class HomeViewModel(
         }
     }
 
-    private fun saveStepGoalPicker() {
+    private fun saveNewStepGoal() {
+        val selectedStepGoal = currentState.stepGoalSheetState.selectedStepsGoal
         launch {
-            val selectedSteps = currentState.stepGoalSheetState.selectedStepsGoal
-            onboardingDataStore.setDailyStepGoal(stepGoal = selectedSteps)
-        }
 
+            onboardingDataStore.setDailyStepGoal(stepGoal = selectedStepGoal)
+        }
+        refreshInsight(overrideGoal = selectedStepGoal)
         updateState { stepsHandler.closeStepGoalSheet(it) }
+    }
+
+    private fun refreshInsight(overrideGoal: Int? = null) {
+
+        val progress = currentState.currentSteps.toFloat() /
+                currentState.stepGoalSheetState.selectedStepsGoal.coerceAtLeast(1)
+        val goal = overrideGoal ?: currentState.stepGoalSheetState.selectedStepsGoal
+        launch {
+
+            aiCoach.refreshInsight(
+                    currentSteps = currentState.currentSteps,
+                    dailyGoal = goal,
+                    progress = progress,
+                    isOnline = currentState.isOnline
+            )
+        }
     }
 
     private fun confirmExitDialog() {

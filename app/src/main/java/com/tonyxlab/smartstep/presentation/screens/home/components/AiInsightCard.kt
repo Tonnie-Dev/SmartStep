@@ -31,12 +31,11 @@ import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 
 @Composable
 fun AiInsightCard(
-    offline: Boolean,
+    isOnline: Boolean,
     modifier: Modifier = Modifier,
-    aiPrompt: String = "You are slightly behind",
+    insight: String,
     onTryAgainClick: () -> Unit = {}
 ) {
-
     Card(
             modifier = modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.RoundedCornerShape24,
@@ -81,20 +80,7 @@ fun AiInsightCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    if (offline) {
-                        Text(
-                                text = stringResource(id = R.string.text_button_try_again),
-                                style = MaterialTheme.typography.BodyLargeMedium,
-                                color = MaterialTheme.colorScheme.primary
-                        )
-                        Icon(
-                                modifier = Modifier.size(MaterialTheme.spacing.spaceTwelve * 2),
-                                painter = painterResource(id = R.drawable.ic_refresh),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                        )
-                    } else {
-
+                    if (isOnline) {
                         Text(
                                 text = stringResource(id = R.string.text_button_more),
                                 style = MaterialTheme.typography.BodyLargeMedium,
@@ -106,13 +92,26 @@ fun AiInsightCard(
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary
                         )
-
+                    } else {
+                        Text(
+                                text = stringResource(id = R.string.text_button_try_again),
+                                style = MaterialTheme.typography.BodyLargeMedium,
+                                color = MaterialTheme.colorScheme.primary
+                        )
+                        Icon(
+                                modifier = Modifier.size(MaterialTheme.spacing.spaceTwelve * 2),
+                                painter = painterResource(id = R.drawable.ic_refresh),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
             }
 
             Text(
-                    text = if (offline) stringResource(id = R.string.caption_text_connect_internet) else aiPrompt,
+                    text = if (isOnline)
+                        insight
+                    else stringResource(id = R.string.caption_text_connect_internet),
                     style = MaterialTheme.typography.BodyLargeRegular,
                     color = MaterialTheme.colorScheme.onSurface
             )
@@ -133,8 +132,8 @@ private fun AiInsightCardPreview() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceMedium)
             ) {
-                AiInsightCard(offline = true)
-                AiInsightCard(offline = false)
+                AiInsightCard(isOnline = true, insight = "This is AI")
+                AiInsightCard(isOnline = false, insight = "This is AI")
             }
         }
     }

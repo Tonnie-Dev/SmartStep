@@ -41,6 +41,10 @@ sealed interface HomeUiEvent : UiEvent {
     data object DismissDateSelector : HomeUiEvent
     data object ShowDateSelector : HomeUiEvent
     data object PauseStepCounting : HomeUiEvent
+
+    // Background Resumption
+    data object OnReturnFromBackground: HomeUiEvent
+
     // Motion
     data object OnMotionDetected : HomeUiEvent
 

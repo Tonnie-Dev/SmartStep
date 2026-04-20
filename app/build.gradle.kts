@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -23,6 +25,18 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val keystoreFile = project.rootProject.file("apikey.properties")
+        val properties = Properties()
+        properties.load(keystoreFile.inputStream())
+
+        val apiKey = properties.getProperty("GEMINI_API_KEY") ?: ""
+
+        buildConfigField(
+                type = "String",
+                name = "GEMINI_API_KEY",
+                value  = apiKey
+        )
     }
 
     buildTypes {
@@ -96,10 +110,8 @@ dependencies {
     // Logging
     implementation(JakeWharton.timber)
 
-    // Firebase
-    // implementation(platform(Google.firebase.bom))
-    // implementation(Google.firebase.authentication)
-    // implementation(Google.firebase.cloudFirestore)
+    // Gemini Sdk
+    implementation(libs.generativeai)
 
     // Coroutines Play Services
     implementation(KotlinX.coroutines.playServices)

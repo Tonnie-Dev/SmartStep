@@ -16,6 +16,7 @@ data class HomeUiState(
     val currentSteps: Int = 0,
     val showExitDialog: Boolean = false,
     val showResetDialog: Boolean = false,
+    val insight: String = "",
     val isOnline: Boolean = false,
     val permissionUiState: PermissionUiState = PermissionUiState(),
     val stepGoalSheetState: StepGoalSheetState = StepGoalSheetState(),
