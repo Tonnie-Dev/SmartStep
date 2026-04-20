@@ -23,6 +23,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 
 typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeActionEvent>
@@ -205,6 +206,12 @@ class HomeViewModel(
 
             HomeUiEvent.DismissResetDialog -> updateState {
                 resetExitHandler.dismissResetDialog(it)
+            }
+
+            // AI Coach
+            HomeUiEvent.Retry -> retryInsight()
+            HomeUiEvent.GetMoreInsights -> {
+                sendActionEvent(HomeActionEvent.NavigateToChat)
             }
 
             // Exit Dialog
@@ -392,6 +399,20 @@ class HomeViewModel(
                     progress = progress,
                     isOnline = currentState.insightMessageState.isOnline
             )
+        }
+    }
+
+    private fun retryInsight() {
+        launch {
+            val isOnline = connectivityObserver.isOnline()
+                    .first()
+            updateState {
+                it.copy(insightMessageState = it.insightMessageState.copy(isOnline = isOnline))
+            }
+
+            if (!isOnline) return@launch
+
+            refreshInsight()
         }
     }
 

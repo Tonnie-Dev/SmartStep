@@ -125,7 +125,7 @@ fun HomeScreen(
                 topBar = {
                     AppTopBar(
                             titleText = stringResource(R.string.topbar_text_smart_step),
-                            background = MaterialTheme.colorScheme.background,
+                            backgroundColor = MaterialTheme.colorScheme.background,
                             navigationIcon = {
                                 IconButton(
                                         onClick = {
@@ -135,7 +135,7 @@ fun HomeScreen(
                                         }
                                 ) {
                                     Icon(
-                                            painter = painterResource(id = R.drawable.ic_menu),
+                                          painter = painterResource(R.drawable.ic_menu),
                                             contentDescription = stringResource(id = R.string.cds_open_drawer)
                                     )
                                 }
@@ -169,6 +169,10 @@ fun HomeScreen(
 
                         HomeActionEvent.StopStepCounterService -> {
                             context.stopStepCounterService()
+                        }
+
+                        HomeActionEvent.NavigateToChat -> {
+                            navigator.navigateToChat()
                         }
                     }
                 }

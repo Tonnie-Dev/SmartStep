@@ -48,7 +48,6 @@ fun AiInsightCard(
     uiState: HomeUiState,
     onEvent: (HomeUiEvent) -> Unit,
     modifier: Modifier = Modifier,
-    onTryAgainClick: () -> Unit = {}
 ) {
     Card(
             modifier = modifier.fillMaxWidth(),
@@ -88,7 +87,14 @@ fun AiInsightCard(
 
                 Row(
                         modifier = Modifier
-                                .clickable(onClick = onTryAgainClick)
+                                .clickable{
+                                        onEvent(
+                                                if (uiState.insightMessageState.isOnline)
+                                                    HomeUiEvent.GetMoreInsights
+                                                else
+                                                    HomeUiEvent.Retry
+                                        )
+                                }
                                 .padding(horizontal = MaterialTheme.spacing.spaceMedium)
                                 .padding(vertical = MaterialTheme.spacing.spaceTen),
                         verticalAlignment = Alignment.CenterVertically,

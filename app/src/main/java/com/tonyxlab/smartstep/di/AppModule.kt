@@ -13,6 +13,7 @@ import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
 import com.tonyxlab.smartstep.data.remote.connectivity.ConnectivityObserverImpl
 import com.tonyxlab.smartstep.domain.ai.AiCoach
 import com.tonyxlab.smartstep.domain.connectivity.ConnectivityObserver
+import com.tonyxlab.smartstep.presentation.screens.chat.ChatViewModel
 import com.tonyxlab.smartstep.presentation.screens.home.HomeViewModel
 import com.tonyxlab.smartstep.presentation.screens.home.handling.AnalyticsHandler
 import com.tonyxlab.smartstep.presentation.screens.home.handling.InsightHandler
@@ -28,6 +29,7 @@ import org.koin.dsl.module
 val viewModelModule = module {
     viewModelOf(::OnboardingViewModel)
     viewModelOf(::HomeViewModel)
+    viewModelOf(::ChatViewModel)
 }
 
 val dataStoreModule = module {

@@ -52,6 +52,10 @@ sealed interface HomeUiEvent : UiEvent {
     data object ConfirmResetDialog : HomeUiEvent
     data object DismissResetDialog : HomeUiEvent
 
+    // AI Coach
+    data object Retry : HomeUiEvent
+    data object GetMoreInsights : HomeUiEvent
+
     // Exit Dialog
     data object ConfirmExitDialog : HomeUiEvent
     data object DismissExitDialog : HomeUiEvent

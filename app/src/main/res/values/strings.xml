@@ -18,6 +18,7 @@
     <!-- Top Bar Texts-->
     <string name="topbar_text_my_profile">My Profile</string>
     <string name="topbar_text_smart_step">Smart Step</string>
+    <string name="topbar_text_ai_coach">AI Coach</string>
 
     <!--Header Texts-->
     <string name="header_text_edit_steps">Edit steps</string>

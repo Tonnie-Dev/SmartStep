@@ -5,7 +5,6 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 class Navigator(private val backStack: SnapshotStateList<NavDestination>) {
 
     private fun push(destination: NavDestination) {
-
         backStack.add(destination)
     }
 
@@ -16,9 +15,11 @@ class Navigator(private val backStack: SnapshotStateList<NavDestination>) {
 
     fun navigateToOnboarding(){
        push(OnboardingDestination())
-
     }
 
+    fun navigateToChat(){
+        push(ChatDestination)
+    }
     fun popBackStack() {
         if (backStack.size > 1) {
             backStack.removeLastOrNull()

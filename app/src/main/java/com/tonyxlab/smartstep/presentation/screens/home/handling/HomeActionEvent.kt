@@ -8,4 +8,5 @@ sealed interface HomeActionEvent : ActionEvent{
     data object CloseApp : HomeActionEvent
     data object StartStepCounterService : HomeActionEvent
     data object StopStepCounterService : HomeActionEvent
+    data object NavigateToChat : HomeActionEvent
 }

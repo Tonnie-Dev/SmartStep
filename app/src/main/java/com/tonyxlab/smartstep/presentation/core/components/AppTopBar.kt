@@ -29,7 +29,7 @@ import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 fun AppTopBar(
     titleText: String,
     modifier: Modifier = Modifier,
-    background: Color = MaterialTheme.colorScheme.surface,
+    backgroundColor: Color = MaterialTheme.colorScheme.surface,
     navigationIcon: @Composable (() -> Unit)? = null,
     actionText: String? = null,
     onActionClick: () -> Unit = {},
@@ -59,7 +59,7 @@ fun AppTopBar(
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = background
+                    containerColor = backgroundColor
             )
     )
 }

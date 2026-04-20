@@ -13,3 +13,5 @@ data class OnboardingDestination(val instanceId: Long = System.currentTimeMillis
 data object HomeDestination : NavDestination
 
 
+@Serializable
+data object ChatDestination: NavDestination
