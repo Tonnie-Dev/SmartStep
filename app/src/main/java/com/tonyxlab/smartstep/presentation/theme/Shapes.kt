@@ -32,16 +32,12 @@ object ExtendedShapes {
 
     val EndVerticalRoundedCornerShape16 =
         RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp)
-    /*
-        val HorizontalRoundedCornerShape16 = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
 
-        val HorizontalRoundedCornerShape24 = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+    val AssistantChatBubbleShape =
+        RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp, bottomStart = 16.dp, bottomEnd = 16.dp)
 
-
-
-        val VerticalRoundedCornerShape16 = RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp)
-
-        val TopLeftShape16 = RoundedCornerShape(topStart = 16.dp)*/
+    val UserChatBubbleShape =
+        RoundedCornerShape(topStart = 16.dp, topEnd = 6.dp, bottomStart = 16.dp, bottomEnd = 16.dp)
 }
 
 val Shapes.RoundedCornerShape4
@@ -80,3 +76,10 @@ val Shapes.HorizontalRoundedCornerShape28
     @Composable
     get() = ExtendedShapes.HorizontalRoundedCornerShape28
 
+val Shapes.AssistantChatBubbleShape
+    @Composable
+    get() = ExtendedShapes.AssistantChatBubbleShape
+
+val Shapes.UserChatBubbleShape
+    @Composable
+    get() = ExtendedShapes.UserChatBubbleShape

@@ -12,7 +12,6 @@
     <string name="start">Start</string>
 
 
-
     <!-- Blank Text-->
     <string name="blank_text" />
 
@@ -57,6 +56,11 @@
     <string name="label_steps">Steps</string>
     <string name="label_text_date">Date</string>
     <string name="label_step_goal">Step Goal</string>
+    <string name="label_step_quick_suggestions">Quick Suggestions</string>
+    <string name="label_step_ask_anything">Ask me anything</string>
+    <string name="label_step_suggestion_1">Recommend workout</string>
+    <string name="label_step_suggestion_2">Explain today\'s trend</string>
+    <string name="label_step_suggestion_3">How to reach today\'s goal?</string>
 
     <!--Menu Texts-->
     <string name="menu_text_male">Male</string>
@@ -130,4 +134,11 @@
     <string name="notification_time">2m</string>
     <string name="notification_steps_value">7,842</string>
     <string name="notification_calories_value">342</string>
+
+    <!-- Chat Messages -->
+    <string name="chat_message_1">Hello! I\'m your AI fitness coach. I\'ve noticed your activity
+        levels are a bit lower than usual today. I\'m here to help you get back on track and
+        answer any questions you might have about your fitness journey.</string>
+    <string name="chat_message_2">What should I do to increase my activity today?</string>
+
 </resources>
