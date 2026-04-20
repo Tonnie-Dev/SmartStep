@@ -16,14 +16,14 @@ data class HomeUiState(
     val currentSteps: Int = 0,
     val showExitDialog: Boolean = false,
     val showResetDialog: Boolean = false,
-    val insight: String = "",
-    val isOnline: Boolean = false,
+
     val permissionUiState: PermissionUiState = PermissionUiState(),
     val stepGoalSheetState: StepGoalSheetState = StepGoalSheetState(),
     val stepEditorState: StepEditorState = StepEditorState(),
     val dateSelectorState: DateSelectorState = DateSelectorState(),
     val metricDataState: MetricDataState = MetricDataState(),
-    val weeklyAnalyticState: WeeklyAnalyticState = WeeklyAnalyticState()
+    val weeklyAnalyticState: WeeklyAnalyticState = WeeklyAnalyticState(),
+    val insightMessageState: InsightMessageState = InsightMessageState()
 ) : UiState {
 
     @Stable
@@ -75,6 +75,13 @@ data class HomeUiState(
             get() = if (weeklyStats.isEmpty()) 0
             else weeklyStats.sumOf { it.steps } / weeklyStats.size
     }
+
+    @Stable
+    data class InsightMessageState(
+        val isInsightLoading: Boolean = false,
+        val isOnline: Boolean = false,
+        val insightMessage: String = "",
+    )
 }
 
 data class DayStats(

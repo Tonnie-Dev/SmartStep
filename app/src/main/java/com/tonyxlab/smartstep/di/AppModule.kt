@@ -14,12 +14,16 @@ import com.tonyxlab.smartstep.data.remote.connectivity.ConnectivityObserverImpl
 import com.tonyxlab.smartstep.domain.ai.AiCoach
 import com.tonyxlab.smartstep.domain.connectivity.ConnectivityObserver
 import com.tonyxlab.smartstep.presentation.screens.home.HomeViewModel
+import com.tonyxlab.smartstep.presentation.screens.home.handling.AnalyticsHandler
+import com.tonyxlab.smartstep.presentation.screens.home.handling.InsightHandler
+import com.tonyxlab.smartstep.presentation.screens.home.handling.PermissionHandler
+import com.tonyxlab.smartstep.presentation.screens.home.handling.ResetExitHandler
+import com.tonyxlab.smartstep.presentation.screens.home.handling.StepsHandler
 import com.tonyxlab.smartstep.presentation.screens.onboarding.OnboardingViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
-
 
 val viewModelModule = module {
     viewModelOf(::OnboardingViewModel)
@@ -32,11 +36,11 @@ val dataStoreModule = module {
 }
 
 val connectivityModule = module {
-    single<ConnectivityManager>{
+    single<ConnectivityManager> {
         ContextCompat.getSystemService(
                 androidContext(),
                 ConnectivityManager::class.java
-        ) ?: error ("Connectivity Manager not available")
+        ) ?: error("Connectivity Manager not available")
     }
 
     single<ConnectivityObserver> { ConnectivityObserverImpl(get()) }
@@ -46,4 +50,19 @@ val aiCoachModule = module {
     singleOf(::AiClient)
     single<AiCoach> { AiCoachImpl(get()) }
 }
-val appModule = listOf(viewModelModule, dataStoreModule, connectivityModule,aiCoachModule)
+
+val handlersModule = module {
+    singleOf(::StepsHandler)
+    singleOf(::PermissionHandler)
+    singleOf(::ResetExitHandler)
+    singleOf(::AnalyticsHandler)
+    singleOf(::InsightHandler)
+}
+
+val appModule = listOf(
+        viewModelModule,
+        dataStoreModule,
+        connectivityModule,
+        aiCoachModule,
+        handlersModule
+)

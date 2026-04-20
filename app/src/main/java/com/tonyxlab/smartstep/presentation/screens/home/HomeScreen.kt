@@ -252,8 +252,9 @@ fun HomeScreenContent(
             )
 
             AiInsightCard(
-                    isOnline = uiState.isOnline,
-                    insight = uiState.insight
+                    modifier = Modifier,
+                    uiState = uiState,
+                    onEvent = onEvent
             )
         }
 

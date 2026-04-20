@@ -4,11 +4,9 @@ package com.tonyxlab.smartstep.presentation.screens.home
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.viewModelScope
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
 import com.tonyxlab.smartstep.domain.ai.AiCoach
-import com.tonyxlab.smartstep.domain.ai.InsightState
 import com.tonyxlab.smartstep.domain.connectivity.ConnectivityObserver
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
@@ -16,6 +14,7 @@ import com.tonyxlab.smartstep.presentation.screens.home.handling.AnalyticsHandle
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
+import com.tonyxlab.smartstep.presentation.screens.home.handling.InsightHandler
 import com.tonyxlab.smartstep.presentation.screens.home.handling.PermissionHandler
 import com.tonyxlab.smartstep.presentation.screens.home.handling.ResetExitHandler
 import com.tonyxlab.smartstep.presentation.screens.home.handling.StepsHandler
@@ -24,10 +23,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
-import timber.log.Timber
 
 typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeActionEvent>
 
@@ -35,13 +31,13 @@ class HomeViewModel(
     private val permPrefsDataStore: PermPrefsDataStore,
     private val onboardingDataStore: OnboardingDataStore,
     private val connectivityObserver: ConnectivityObserver,
-    private val aiCoach: AiCoach
+    private val aiCoach: AiCoach,
+    private val stepsHandler: StepsHandler,
+    private val permissionHandler: PermissionHandler,
+    private val resetExitHandler: ResetExitHandler,
+    private val analyticsHandler: AnalyticsHandler,
+    private val insightHandler: InsightHandler,
 ) : HomeBaseViewModel() {
-
-    private val stepsHandler = StepsHandler()
-    private val permissionHandler = PermissionHandler()
-    private val resetExitHandler = ResetExitHandler()
-    private val analyticsHandler = AnalyticsHandler()
 
     private var activityTimerJob: Job? = null
     private var lastStepTimestampMillis: Long = 0L
@@ -55,8 +51,7 @@ class HomeViewModel(
     init {
         observePermissionStates()
         observeMetricData()
-        observeNetwork()
-        observerInsight()
+        observeInsight()
         refreshInsight()
         updateState {
             analyticsHandler.populateStats(it)
@@ -188,7 +183,7 @@ class HomeViewModel(
             // Return from Background
             HomeUiEvent.OnReturnFromBackground -> {
 
-                if (!hasLaunchedOnce){
+                if (!hasLaunchedOnce) {
                     hasLaunchedOnce = true
                     return
                 }
@@ -254,34 +249,30 @@ class HomeViewModel(
         }
     }
 
-    private fun observeNetwork() {
-        connectivityObserver.isOnline()
-                .onEach { isOnline ->
-                    updateState { it.copy(isOnline = isOnline) }
-                }
-                .launchIn(viewModelScope)
-    }
+    private fun observeInsight() {
 
-    private fun observerInsight() {
-
-        aiCoach.insightState.onEach { state ->
-
-            Timber.tag("Insight")
-                    .i("The State is: $state")
-            when (state) {
-
-                is InsightState.Success -> {
-
-                    Timber.tag("Insight")
-                            .i("The Insight is: is ${state.insight}")
-                    updateState { it.copy(insight = state.insight) }
-                }
-
-                else -> Unit
+        launch {
+            combine(
+                    aiCoach.insightState,
+                    connectivityObserver.isOnline()
+            ) { insightState, isOnline ->
+                insightState to isOnline
             }
+                    .collect { (insightState, isOnline) ->
+                        updateState { uiState ->
+                            val handledState = insightHandler.handleInsight(
+                                    state = uiState,
+                                    insightState = insightState
+                            )
 
+                            handledState.copy(
+                                    insightMessageState = handledState.insightMessageState.copy(
+                                            isOnline = isOnline
+                                    )
+                            )
+                        }
+                    }
         }
-                .launchIn(viewModelScope)
     }
 
     private fun onStepDetected() {
@@ -399,7 +390,7 @@ class HomeViewModel(
                     currentSteps = currentState.currentSteps,
                     dailyGoal = goal,
                     progress = progress,
-                    isOnline = currentState.isOnline
+                    isOnline = currentState.insightMessageState.isOnline
             )
         }
     }
