@@ -1,28 +1,23 @@
-
 @file:RequiresApi(Build.VERSION_CODES.O)
+
 package com.tonyxlab.smartstep.data.ai
 
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.tonyxlab.smartstep.domain.ai.AiCoach
-import com.tonyxlab.smartstep.domain.ai.InsightState
 import com.tonyxlab.smartstep.domain.ai.ChatMessage
 import com.tonyxlab.smartstep.domain.ai.ChatRole
+import com.tonyxlab.smartstep.domain.ai.ChatState
+import com.tonyxlab.smartstep.domain.ai.InsightState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlin.collections.map
 
-class AiCoachImpl(private val aiClient: AiClient): AiCoach {
+class AiCoachImpl(private val aiClient: AiClient) : AiCoach {
 
     private val _insightState = MutableStateFlow<InsightState>(InsightState.Idle)
     override val insightState: StateFlow<InsightState>
-        get() = _insightState
-
-    // --- Insight block state ---
-
-
-
+        get() = _insightState.asStateFlow()
 
     // Cache so we don't regenerate on minor step changes
     private var lastInsight: String? = null
@@ -30,10 +25,16 @@ class AiCoachImpl(private val aiClient: AiClient): AiCoach {
     // --- Chat state ---
 
     private val _chatMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
-    val chatMessages: StateFlow<List<ChatMessage>> = _chatMessages.asStateFlow()
+    override val chatMessages: StateFlow<List<ChatMessage>>
+        get() = _chatMessages.asStateFlow()
 
-    private val _chatLoading = MutableStateFlow(false)
-    val chatLoading: StateFlow<Boolean> = _chatLoading.asStateFlow()
+    private val _chatState = MutableStateFlow<ChatState>(ChatState.Idle)
+    override val chatState: StateFlow<ChatState>
+        get() = _chatState.asStateFlow()
+
+    /*   private val _chatLoading = MutableStateFlow(false)
+       override val chatLoading: StateFlow<Boolean>
+           get() = _chatLoading.asStateFlow()*/
 
     override suspend fun refreshInsight(
         currentSteps: Int,
@@ -63,66 +64,84 @@ class AiCoachImpl(private val aiClient: AiClient): AiCoach {
                 }
     }
 
-
-   override suspend fun startChatSession(
+    override suspend fun startChatSession(
         currentSteps: Int,
         dailyGoal: Int,
-        progress: Float
+        progress: Float,
+        isOnline: Boolean
     ) {
-        _chatMessages.value = emptyList()
-        _chatLoading.value = true
+        if (_chatMessages.value.isNotEmpty()) return
 
-        aiClient.generateChatReply(
-                currentSteps = currentSteps,
-                dailyGoal = dailyGoal,
-                progress = progress,
-                conversationHistory = emptyList(),
-                userMessage = "Start the session with a greeting and ask how you can help."
-        ).onSuccess { reply ->
-            appendMessage(ChatMessage(role = ChatRole.ASSISTANT, text = reply))
-        }.onFailure {
-            appendMessage(
-                    ChatMessage(
-                            role = ChatRole.ASSISTANT,
-                            text = "Hi! I'm your AI coach. How can I help you today?"
-                    )
-            )
+        if (!isOnline) {
+            _chatState.value = ChatState.Offline
+            return
         }
 
-        _chatLoading.value = false
+        _chatState.value = ChatState.Loading
+
+        aiClient.generateInitialChatMessage(
+                currentSteps = currentSteps,
+                dailyGoal = dailyGoal,
+                progress = progress
+        )
+                .onSuccess { reply ->
+                    appendMessage(
+                            ChatMessage(
+                                    role = ChatRole.ASSISTANT,
+                                    text = reply
+                            )
+                    )
+                }
+                .onFailure {
+                    appendMessage(
+                            ChatMessage(
+                                    role = ChatRole.ASSISTANT,
+                                    text = "Hello! I'm your fitness coach. You're getting started today. How can I help?"
+                            )
+                    )
+                    _chatState.value = ChatState.Error(it.message)
+                }
+
     }
 
     override suspend fun sendMessage(
         userMessage: String,
         currentSteps: Int,
         dailyGoal: Int,
-        progress: Float
+        progress: Float,
+        isOnline: Boolean
     ) {
+
+        if (!isOnline) {
+            _chatState.value = ChatState.Offline
+            return
+        }
+
+        val historyBeforeNewMessage = _chatMessages.value.map { it.role to it.text }
+
         // Add user message immediately so the UI feels responsive
         appendMessage(ChatMessage(role = ChatRole.USER, text = userMessage))
-        _chatLoading.value = true
-
-        val history = _chatMessages.value
-                .map { it.role to it.text }
+        _chatState.value = ChatState.Loading
 
         aiClient.generateChatReply(
                 currentSteps = currentSteps,
                 dailyGoal = dailyGoal,
                 progress = progress,
-                conversationHistory = history,
+                conversationHistory = historyBeforeNewMessage,
                 userMessage = userMessage
-        ).onSuccess { reply ->
-            appendMessage(ChatMessage(role = ChatRole.ASSISTANT, text = reply))
-        }.onFailure {
-            appendMessage(
-                    ChatMessage(
-                            role = ChatRole.ASSISTANT,
-                            text = "Sorry, I couldn't respond. Please try again."
+        )
+                .onSuccess { reply ->
+                    appendMessage(ChatMessage(role = ChatRole.ASSISTANT, text = reply))
+                }
+                .onFailure {
+                    appendMessage(
+                            ChatMessage(
+                                    role = ChatRole.ASSISTANT,
+                                    text = "Sorry, I couldn't respond. Please try again."
+                            )
                     )
-            )
-        }
-
-        _chatLoading.value = false
+                    _chatState.value = ChatState.Error(it.message)
+                }
     }
 
     override fun clearChatSession() {
