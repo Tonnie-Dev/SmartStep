@@ -1,21 +1,26 @@
-package com.tonyxlab.smartstep.utils
+@file:OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 
+package com.tonyxlab.smartstep.utils
 import android.app.Activity
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 
 inline fun Modifier.ifThen(flag: Boolean, modifierBuilder: Modifier.() -> Modifier): Modifier =
@@ -66,7 +71,6 @@ fun Modifier.clickableWithoutRipple(onClick: () -> Unit): Modifier =
         )
     })
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun rememberIsDeviceWide(): Boolean {
     val activity = LocalActivity.current ?: return false
@@ -74,3 +78,9 @@ fun rememberIsDeviceWide(): Boolean {
     val deviceType = DeviceType.fromWindowSizeClass(windowClass)
     return remember(windowClass) { deviceType != DeviceType.MOBILE_PORTRAIT }
 }
+
+@Composable
+fun borderStroke(outlineColor: Color = MaterialTheme.colorScheme.outline) = BorderStroke(
+        width = 1.dp,
+        color = outlineColor
+)

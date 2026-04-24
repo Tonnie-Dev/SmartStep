@@ -87,13 +87,16 @@ fun AiInsightCard(
 
                 Row(
                         modifier = Modifier
-                                .clickable{
-                                        onEvent(
-                                                if (uiState.insightMessageState.isOnline)
-                                                    HomeUiEvent.GetMoreInsights
-                                                else
-                                                    HomeUiEvent.Retry
-                                        )
+                                .clickable {
+                                    onEvent(
+                                            if (uiState.insightMessageState.isOnline)
+                                                HomeUiEvent.GetMoreInsights
+                                            else
+
+                                                HomeUiEvent.GetMoreInsights
+                                            // TODO: Rectify this
+                                            //   HomeUiEvent.Retry
+                                    )
                                 }
                                 .padding(horizontal = MaterialTheme.spacing.spaceMedium)
                                 .padding(vertical = MaterialTheme.spacing.spaceTen),

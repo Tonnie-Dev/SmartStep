@@ -114,10 +114,11 @@ class ChatViewModel(
     }
 
     private fun sendMessage() {
-
         val userMessage = currentState.textFieldState.text
                 .toString()
                 .trim()
+
+
         if (userMessage.isBlank()) return
         launch {
             with(currentState) {

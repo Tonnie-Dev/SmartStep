@@ -183,6 +183,7 @@ obj/
 .idea/jarRepositories.xml
 .idea/navEditor.xml
 .idea/deploymentTargetSelector.xml
+.idea/inspectionProfiles/Project_Default.xml
 
 # Legacy Eclipse project files
 .classpath
@@ -226,3 +227,8 @@ fabric.properties
 apikey.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/androidstudio
+
+.idea/inspectionProfiles/Project_Default.xml
+.idea/inspectionProfiles/Project_Default.xml
+.idea/inspectionProfiles/Project_Default.xml
+/.idea/inspectionProfiles

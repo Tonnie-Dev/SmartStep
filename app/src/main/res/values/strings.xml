@@ -43,6 +43,7 @@
     <string name="caption_text_recalculation">Calories, distance &amp; duration will be recalculated accordingly</string>
     <string name="caption_text_paused">Paused</string>
     <string name="caption_text_connect_internet">📡 Connect to the internet to get AI insights.</string>
+    <string name="caption_text_connection_required">Online connection required</string>
 
     <!--Label Texts-->
     <string name="label_text_gender">Gender</string>
@@ -58,7 +59,7 @@
     <string name="label_text_date">Date</string>
     <string name="label_step_goal">Step Goal</string>
     <string name="label_step_quick_suggestions">Quick Suggestions</string>
-    <string name="label_step_ask_anything">Ask me anything</string>
+    <string name="label_step_ask_anything">Ask me anything…</string>
     <string name="label_step_suggestion_1">Recommend workout</string>
     <string name="label_step_suggestion_2">Explain today\'s trend</string>
     <string name="label_step_suggestion_3">How to reach today\'s goal?</string>

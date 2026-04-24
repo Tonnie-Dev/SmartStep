@@ -40,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -65,6 +66,7 @@ import com.tonyxlab.smartstep.presentation.theme.TextPrimary
 import com.tonyxlab.smartstep.presentation.theme.TextWhite
 import com.tonyxlab.smartstep.presentation.theme.UserChatBubbleShape
 import com.tonyxlab.smartstep.utils.borderStroke
+import com.tonyxlab.smartstep.utils.ifThen
 
 @Composable
 fun ChatWindow(
@@ -106,6 +108,8 @@ private fun ChatBubble(
     modifier: Modifier = Modifier
 ) {
     val isAssistant = chatMessage.role == ChatRole.ASSISTANT
+    val screenWidth = LocalWindowInfo.current.containerSize.width.dp
+
     Row(
             modifier = modifier.fillMaxWidth(),
             horizontalArrangement = if (isAssistant) Arrangement.Start else Arrangement.End,
@@ -125,21 +129,27 @@ private fun ChatBubble(
                         tint = TextWhite
                 )
             }
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(MaterialTheme.spacing.spaceSmall))
         }
 
         Surface(
+                modifier = Modifier
+                        .ifThen(isAssistant) {
+                            weight(1f)
+                        }
+                        .ifThen(isAssistant.not()) {
+                            widthIn(max = screenWidth * .75f)
+                        },
                 shape = if (isAssistant)
                     MaterialTheme.shapes.AssistantChatBubbleShape
                 else
                     MaterialTheme.shapes.UserChatBubbleShape,
                 color = if (isAssistant) Color.Transparent else ButtonPrimary,
-                border = if (isAssistant) borderStroke() else null,
-                modifier = Modifier.widthIn(max = 280.dp)
+                border = if (isAssistant) borderStroke() else null
         ) {
             Text(
                     text = chatMessage.text,
-                    modifier = Modifier.padding(12.dp),
+                    modifier = Modifier.padding(MaterialTheme.spacing.spaceMedium),
                     style = if (isAssistant) {
                         MaterialTheme.typography.BodyMediumRegular.copy(color = TextPrimary)
                     } else {
@@ -155,8 +165,11 @@ private fun ChatInputSection(
     uiState: ChatUiState,
     onEvent: (ChatUiEvent) -> Unit,
     modifier: Modifier = Modifier,
-    ) {
-
+) {
+    val canSend = uiState.isOnline &&
+            uiState.textFieldState.text.toString()
+                    .trim()
+                    .isNotEmpty()
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
 
@@ -194,8 +207,9 @@ private fun ChatInputSection(
                     )
                 }
                 SendButton(
-                        isOnline = true,
+                        enabled = canSend,
                         onSend = {
+                            if (!canSend) return@SendButton
                             onEvent(ChatUiEvent.SendChatMessage)
                             focusManager.clearFocus(force = true)
                             keyboardController?.hide()
@@ -226,7 +240,7 @@ private fun ChatInputSection(
                         )
                     }
                 }
-                SendButton(isOnline = false)
+                SendButton(enabled = false)
             }
         }
     }
@@ -313,18 +327,18 @@ private fun QuickSuggestionsSection(
 
 @Composable
 private fun SendButton(
-    isOnline: Boolean,
+    enabled: Boolean,
     onSend: () -> Unit = {}
 ) {
-    val buttonBackground = remember(isOnline) {
-        if (isOnline) ButtonPrimary else ButtonSecondary
+    val buttonBackground = remember(enabled) {
+        if (enabled) ButtonPrimary else ButtonSecondary
     }
     Box(
             modifier = Modifier
                     .size(MaterialTheme.spacing.spaceDoubleDp * 22)
                     .clip(CircleShape)
                     .background(color = buttonBackground)
-                    .clickable(enabled = isOnline) { onSend() },
+                    .clickable(enabled = enabled) { onSend() },
             contentAlignment = Alignment.Center
     ) {
         Icon(

@@ -8,6 +8,7 @@ import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
 import com.tonyxlab.smartstep.domain.ai.AiCoach
 import com.tonyxlab.smartstep.domain.connectivity.ConnectivityObserver
+import com.tonyxlab.smartstep.domain.repository.ActivityStats
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
 import com.tonyxlab.smartstep.presentation.screens.home.handling.AnalyticsHandler
@@ -38,6 +39,7 @@ class HomeViewModel(
     private val resetExitHandler: ResetExitHandler,
     private val analyticsHandler: AnalyticsHandler,
     private val insightHandler: InsightHandler,
+    private val activityStats: ActivityStats
 ) : HomeBaseViewModel() {
 
     private var activityTimerJob: Job? = null
@@ -109,7 +111,11 @@ class HomeViewModel(
             }
 
             HomeUiEvent.OpenPersonalSettings -> openPersonalSettings()
-            HomeUiEvent.ResetSteps -> updateState { resetExitHandler.showResetDialog(it) }
+            HomeUiEvent.ResetSteps -> {
+                updateState { resetExitHandler.showResetDialog(it) }
+                syncStepsToRepository(currentState.currentSteps)
+            }
+
             HomeUiEvent.SaveStepGoal -> saveNewStepGoal()
 
             is HomeUiEvent.SelectStepGoal -> updateState {
@@ -128,6 +134,7 @@ class HomeViewModel(
 
             HomeUiEvent.ConfirmStepEditorValues -> updateState { state ->
                 val updatedState = stepsHandler.confirmStepEditor(state)
+                syncStepsToRepository(currentState.currentSteps)
                 stepsHandler.recalculateDistanceAndCalories(updatedState)
             }
 
@@ -300,6 +307,7 @@ class HomeViewModel(
             }
         }
 
+        syncStepsToRepository(currentState.currentSteps)
         // Trigger 3 - on reaching steps goal, generate an insight
         val goal = currentState.stepGoalSheetState.selectedStepsGoal
         val steps = currentState.currentSteps
@@ -382,6 +390,7 @@ class HomeViewModel(
 
             onboardingDataStore.setDailyStepGoal(stepGoal = selectedStepGoal)
         }
+        syncGoalToRepository(goal = selectedStepGoal)
         refreshInsight(overrideGoal = selectedStepGoal)
         updateState { stepsHandler.closeStepGoalSheet(it) }
     }
@@ -393,12 +402,12 @@ class HomeViewModel(
         val goal = overrideGoal ?: currentState.stepGoalSheetState.selectedStepsGoal
         launch {
 
-            aiCoach.refreshInsight(
-                    currentSteps = currentState.currentSteps,
-                    dailyGoal = goal,
-                    progress = progress,
-                    isOnline = currentState.insightMessageState.isOnline
-            )
+            /*     aiCoach.refreshInsight(
+                         currentSteps = currentState.currentSteps,
+                         dailyGoal = goal,
+                         progress = progress,
+                         isOnline = currentState.insightMessageState.isOnline
+                 )*/
         }
     }
 
@@ -413,6 +422,18 @@ class HomeViewModel(
             if (!isOnline) return@launch
 
             refreshInsight()
+        }
+    }
+
+    private fun syncStepsToRepository(steps: Int) {
+        launch {
+            activityStats.updateStepCount(steps = steps)
+        }
+    }
+
+    private fun syncGoalToRepository(goal: Int) {
+        launch {
+            activityStats.updateDailyGoal(dailyGoal = goal)
         }
     }
 

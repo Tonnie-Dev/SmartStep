@@ -151,13 +151,7 @@ private fun EditorInputField(
                 style = MaterialTheme.typography.BodySmallRegular,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            AppInputField(textFieldState = textFieldState)
-        }
+        AppInputField(textFieldState = textFieldState)
     }
 }
 

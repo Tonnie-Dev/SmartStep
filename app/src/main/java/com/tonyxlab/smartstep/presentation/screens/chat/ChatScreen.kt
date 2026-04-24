@@ -15,9 +15,10 @@ import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.base.BaseContentLayout
 import com.tonyxlab.smartstep.presentation.core.components.AppTopBar
 import com.tonyxlab.smartstep.presentation.navigation.Navigator
-import com.tonyxlab.smartstep.presentation.screens.chat.components.ChatSection
+import com.tonyxlab.smartstep.presentation.screens.chat.components.ChatWindow
 import com.tonyxlab.smartstep.presentation.screens.chat.handling.ChatActionEvent
 import com.tonyxlab.smartstep.presentation.screens.chat.handling.ChatUiEvent
+import com.tonyxlab.smartstep.presentation.screens.chat.handling.ChatUiState
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 import org.koin.androidx.compose.koinViewModel
 
@@ -58,30 +59,43 @@ fun ChatScreen(
             }
     ) { uiState ->
 
-        ChatScreenContent()
+        ChatScreenContent(
+                uiState = uiState,
+                onEvent = viewModel::onEvent
+        )
 
     }
 
 }
 
 @Composable
-fun ChatScreenContent(modifier: Modifier = Modifier) {
+fun ChatScreenContent(
+    uiState: ChatUiState,
+    onEvent: (ChatUiEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Box(
-            modifier = Modifier
+            modifier = modifier
                     .fillMaxSize()
-            //.background(color = MaterialTheme.colorScheme.surfaceVariant)
     ) {
 
-        ChatSection()
+        ChatWindow(
+                modifier = Modifier,
+                uiState = uiState,
+                onEvent = onEvent
+        )
     }
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
 private fun ChatScreen_Preview() {
     SmartStepTheme {
         Column {
-            ChatScreenContent()
+            ChatScreenContent(
+                    uiState = ChatUiState(),
+                    onEvent = {}
+            )
         }
     }
 }
