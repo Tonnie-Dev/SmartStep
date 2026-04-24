@@ -148,8 +148,13 @@ class ChatViewModel(
     }
 
     private fun selectPrompt(prompt: String) {
-        updateState { it.copy(textFieldState = TextFieldState(initialText = prompt)) }
-        updateState { it.copy(suggestionsExpanded = false) }
+        updateState {
+            it.copy(
+                    textFieldState = TextFieldState(initialText = prompt),
+                    suggestionsExpanded = false
+            )
+        }
+        sendMessage()
     }
 
     private fun calculateProgress(
@@ -164,6 +169,7 @@ class ChatViewModel(
     private fun exitChat() {
         aiCoach.clearChatSession()
         hasStartedChatSession = false
+        updateState { ChatUiState() }
         sendActionEvent(ChatActionEvent.NavigateToHome)
     }
 }
