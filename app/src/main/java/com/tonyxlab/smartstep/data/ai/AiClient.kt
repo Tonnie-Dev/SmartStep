@@ -11,7 +11,7 @@ import com.tonyxlab.smartstep.utils.getTimeOfTheDay
 class AiClient {
 
     private val model = GenerativeModel(
-            modelName = "gemini-3-flash-preview",
+            modelName = "gemini-3.1-flash-lite-preview",
             apiKey = BuildConfig.GEMINI_API_KEY
     )
 

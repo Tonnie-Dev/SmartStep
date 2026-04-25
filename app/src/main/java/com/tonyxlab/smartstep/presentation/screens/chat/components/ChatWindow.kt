@@ -1,5 +1,6 @@
 package com.tonyxlab.smartstep.presentation.screens.chat.components
 
+import android.R.attr.text
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,6 +38,10 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -148,7 +153,13 @@ private fun ChatBubble(
                 border = if (isAssistant) borderStroke() else null
         ) {
             Text(
-                    text = chatMessage.text,
+                      text = if (isAssistant) {
+                        remember(chatMessage.text) {
+                            markdownToAnnotatedString(chatMessage.text)
+                        }
+                    } else {
+                        AnnotatedString(chatMessage.text)
+                    },
                     modifier = Modifier.padding(MaterialTheme.spacing.spaceMedium),
                     style = if (isAssistant) {
                         MaterialTheme.typography.BodyMediumRegular.copy(color = TextPrimary)
@@ -287,6 +298,31 @@ private fun ChatInputSection(
     }
 }
 
+
+
+private fun markdownToAnnotatedString(markdown: String): AnnotatedString {
+    return buildAnnotatedString {
+        val cleanedText = markdown
+                .replace(Regex("^\\s*\\*\\s+", RegexOption.MULTILINE), "• ")
+
+        val boldRegex = Regex("\\*\\*(.*?)\\*\\*")
+        var currentIndex = 0
+
+        boldRegex.findAll(cleanedText).forEach { match ->
+            append(cleanedText.substring(currentIndex, match.range.first))
+
+            val boldText = match.groupValues[1]
+
+            pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
+            append(boldText)
+            pop()
+
+            currentIndex = match.range.last + 1
+        }
+
+        append(cleanedText.substring(currentIndex))
+    }
+}
 @Preview(showBackground = true)
 @Composable
 private fun ChatWindowPreview() {
