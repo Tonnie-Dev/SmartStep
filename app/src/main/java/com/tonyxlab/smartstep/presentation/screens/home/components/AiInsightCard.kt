@@ -35,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tonyxlab.smartstep.R
+import com.tonyxlab.smartstep.presentation.core.components.ShimmerEffect
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
@@ -133,7 +134,7 @@ fun AiInsightCard(
 
             with(uiState.insightMessageState) {
                 if (this.isInsightLoading) {
-                    InsightLoadingContent()
+                    ShimmerEffect()
                 } else {
                     Text(
                             text = if (isOnline)
@@ -145,61 +146,6 @@ fun AiInsightCard(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun InsightLoadingContent(modifier: Modifier = Modifier) {
-
-    val infiniteTransition = rememberInfiniteTransition(label = "insight_loading")
-
-    val alpha by infiniteTransition.animateFloat(
-            initialValue = .3f,
-            targetValue = .8f,
-            animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 700),
-                    repeatMode = RepeatMode.Reverse
-            ),
-            label = "insight_loading_alpha"
-    )
-
-    Column(
-            modifier = modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceTen)
-    ) {
-
-        Box(
-                modifier = Modifier
-                        .fillMaxWidth(.9f)
-                        .height(MaterialTheme.spacing.spaceTen * 2)
-                        .clip(MaterialTheme.shapes.small)
-                        .background(
-                                color = MaterialTheme.colorScheme.onSurface
-                                        .copy(alpha = alpha * .18f)
-                        )
-        )
-
-        Box(
-                modifier = Modifier
-                        .fillMaxWidth(.7f)
-                        .height(MaterialTheme.spacing.spaceTen * 2)
-                        .clip(MaterialTheme.shapes.small)
-                        .background(
-                                color = MaterialTheme.colorScheme.onSurface
-                                        .copy(alpha = alpha * .18f)
-                        )
-        )
-
-        Box(
-                modifier = Modifier
-                        .fillMaxWidth(.5f)
-                        .height(MaterialTheme.spacing.spaceTen * 2)
-                        .clip(MaterialTheme.shapes.small)
-                        .background(
-                                color = MaterialTheme.colorScheme.onSurface
-                                        .copy(alpha = alpha * .18f)
-                        )
-        )
     }
 }
 

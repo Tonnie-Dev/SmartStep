@@ -12,6 +12,8 @@ import com.tonyxlab.smartstep.domain.ai.InsightState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import timber.log.Timber
 
 class AiCoachImpl(private val aiClient: AiClient) : AiCoach {
 
@@ -31,10 +33,6 @@ class AiCoachImpl(private val aiClient: AiClient) : AiCoach {
     private val _chatState = MutableStateFlow<ChatState>(ChatState.Idle)
     override val chatState: StateFlow<ChatState>
         get() = _chatState.asStateFlow()
-
-    /*   private val _chatLoading = MutableStateFlow(false)
-       override val chatLoading: StateFlow<Boolean>
-           get() = _chatLoading.asStateFlow()*/
 
     override suspend fun refreshInsight(
         currentSteps: Int,
@@ -91,6 +89,7 @@ class AiCoachImpl(private val aiClient: AiClient) : AiCoach {
                                     text = reply
                             )
                     )
+                    _chatState.value = ChatState.Idle
                 }
                 .onFailure {
                     appendMessage(
@@ -99,6 +98,7 @@ class AiCoachImpl(private val aiClient: AiClient) : AiCoach {
                                     text = "Hello! I'm your fitness coach. You're getting started today. How can I help?"
                             )
                     )
+                    Timber.tag("AiCoachImpl").i("${it.message}")
                     _chatState.value = ChatState.Error(it.message)
                 }
 
@@ -132,6 +132,7 @@ class AiCoachImpl(private val aiClient: AiClient) : AiCoach {
         )
                 .onSuccess { reply ->
                     appendMessage(ChatMessage(role = ChatRole.ASSISTANT, text = reply))
+                    _chatState.value = ChatState.Idle
                 }
                 .onFailure {
                     appendMessage(

@@ -1,11 +1,5 @@
 package com.tonyxlab.smartstep.presentation.screens.chat.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -46,17 +40,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastForEach
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.domain.ai.ChatMessage
 import com.tonyxlab.smartstep.domain.ai.ChatRole
+import com.tonyxlab.smartstep.domain.ai.ChatState
 import com.tonyxlab.smartstep.presentation.core.components.AppInputField
+import com.tonyxlab.smartstep.presentation.core.components.ShimmerEffect
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.screens.chat.handling.ChatUiEvent
 import com.tonyxlab.smartstep.presentation.screens.chat.handling.ChatUiState
 import com.tonyxlab.smartstep.presentation.theme.AssistantChatBubbleShape
 import com.tonyxlab.smartstep.presentation.theme.BodyLargeRegular
-import com.tonyxlab.smartstep.presentation.theme.BodyMediumMedium
 import com.tonyxlab.smartstep.presentation.theme.BodyMediumRegular
 import com.tonyxlab.smartstep.presentation.theme.ButtonPrimary
 import com.tonyxlab.smartstep.presentation.theme.ButtonSecondary
@@ -89,6 +83,12 @@ fun ChatWindow(
         ) {
             items(uiState.chatMessages) { message ->
                 ChatBubble(chatMessage = message)
+            }
+
+            if (uiState.chatState == ChatState.Loading) {
+                item {
+                    AssistantTypingBubble()
+                }
             }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outline)
@@ -160,6 +160,47 @@ private fun ChatBubble(
     }
 }
 
+@Composable
+private fun AssistantTypingBubble(
+    modifier: Modifier = Modifier
+) {
+    Row(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.Top
+    ) {
+        Box(
+                modifier = Modifier
+                        .size(MaterialTheme.spacing.spaceLarge)
+                        .clip(CircleShape)
+                        .background(ButtonPrimary),
+                contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                    painter = painterResource(R.drawable.ic_robot),
+                    contentDescription = null,
+                    tint = TextWhite
+            )
+        }
+
+        Spacer(modifier = Modifier.width(MaterialTheme.spacing.spaceSmall))
+
+        Surface(
+                modifier = Modifier.weight(1f),
+                shape = MaterialTheme.shapes.AssistantChatBubbleShape,
+                color = Color.Transparent,
+                border = borderStroke()
+        ) {
+            Box(
+                    modifier = Modifier.padding(MaterialTheme.spacing.spaceMedium)
+            ) {
+                ShimmerEffect(
+                        modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+}
 @Composable
 private fun ChatInputSection(
     uiState: ChatUiState,
@@ -243,139 +284,6 @@ private fun ChatInputSection(
                 SendButton(enabled = false)
             }
         }
-    }
-}
-
-@Composable
-private fun QuickSuggestionsSection(
-    expanded: Boolean,
-    onToggleSuggestionsDrawer: () -> Unit,
-    onSelectPrompt: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-
-    val suggestions = remember {
-        listOf(
-                R.string.label_step_suggestion_1,
-                R.string.label_step_suggestion_2,
-                R.string.label_step_suggestion_3
-        )
-    }
-
-    Column(
-            modifier = modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-    ) {
-
-        Column(
-                modifier = Modifier
-                        .padding(horizontal = MaterialTheme.spacing.spaceMedium)
-        ) {
-            Row(
-                    modifier = Modifier.clickable { onToggleSuggestionsDrawer() },
-                    verticalAlignment = Alignment.CenterVertically,
-            ) {
-
-                Text(
-                        text = stringResource(R.string.label_step_quick_suggestions),
-                        style = MaterialTheme.typography.BodyMediumMedium,
-                        color = TextPrimary
-                )
-
-                Icon(
-                        modifier = Modifier
-                                .padding(horizontal = MaterialTheme.spacing.spaceSmall)
-                                .padding(vertical = MaterialTheme.spacing.spaceTen),
-                        painter = painterResource(
-                                id = if (expanded)
-                                    R.drawable.ic_chevron_down
-                                else
-                                    R.drawable.ic_chevron_up
-                        ),
-                        contentDescription = null,
-                        tint = TextPrimary
-                )
-            }
-
-            AnimatedVisibility(
-                    visible = expanded,
-                    enter = expandVertically(
-                            animationSpec = tween(250),
-                            expandFrom = Alignment.Top
-                    ) + fadeIn(animationSpec = tween(250)),
-                    exit = shrinkVertically(
-                            animationSpec = tween(200),
-                            shrinkTowards = Alignment.Top
-                    ) + fadeOut(animationSpec = tween(200))
-            ) {
-                Column(
-                        modifier = Modifier.padding(bottom = MaterialTheme.spacing.spaceMedium),
-                        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)
-                ) {
-                    suggestions.fastForEach {
-                        SuggestionItem(
-                                text = stringResource(it),
-                                onSelectPromptItem = onSelectPrompt
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SendButton(
-    enabled: Boolean,
-    onSend: () -> Unit = {}
-) {
-    val buttonBackground = remember(enabled) {
-        if (enabled) ButtonPrimary else ButtonSecondary
-    }
-    Box(
-            modifier = Modifier
-                    .size(MaterialTheme.spacing.spaceDoubleDp * 22)
-                    .clip(CircleShape)
-                    .background(color = buttonBackground)
-                    .clickable(enabled = enabled) { onSend() },
-            contentAlignment = Alignment.Center
-    ) {
-        Icon(
-                painter = painterResource(R.drawable.ic_send),
-                contentDescription = null,
-
-                tint = TextWhite
-        )
-    }
-}
-
-@Composable
-private fun SuggestionItem(
-    text: String,
-    modifier: Modifier = Modifier,
-    onSelectPromptItem: (String) -> Unit
-) {
-    Box(
-            modifier = modifier
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .border(
-                            width = MaterialTheme.spacing.spaceSingleDp,
-                            color = MaterialTheme.colorScheme.outline,
-                            shape = MaterialTheme.shapes.medium
-                    )
-                    .fillMaxWidth()
-                    .clickable {
-                        onSelectPromptItem(text)
-                    }
-                    .padding(horizontal = MaterialTheme.spacing.spaceMedium)
-                    .padding(vertical = MaterialTheme.spacing.spaceTwelve)
-    ) {
-        Text(
-                text = text,
-                style = MaterialTheme.typography.BodyMediumMedium,
-                color = TextPrimary
-        )
     }
 }
 
