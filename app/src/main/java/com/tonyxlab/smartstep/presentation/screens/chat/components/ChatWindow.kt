@@ -1,9 +1,6 @@
 package com.tonyxlab.smartstep.presentation.screens.chat.components
 
-import android.R.attr.text
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,8 +17,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,39 +28,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.domain.ai.ChatMessage
 import com.tonyxlab.smartstep.domain.ai.ChatRole
 import com.tonyxlab.smartstep.domain.ai.ChatState
-import com.tonyxlab.smartstep.presentation.core.components.AppInputField
 import com.tonyxlab.smartstep.presentation.core.components.ShimmerEffect
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.screens.chat.handling.ChatUiEvent
 import com.tonyxlab.smartstep.presentation.screens.chat.handling.ChatUiState
 import com.tonyxlab.smartstep.presentation.theme.AssistantChatBubbleShape
-import com.tonyxlab.smartstep.presentation.theme.BodyLargeRegular
 import com.tonyxlab.smartstep.presentation.theme.BodyMediumRegular
 import com.tonyxlab.smartstep.presentation.theme.ButtonPrimary
-import com.tonyxlab.smartstep.presentation.theme.ButtonSecondary
-import com.tonyxlab.smartstep.presentation.theme.RoundedCornerShape10
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 import com.tonyxlab.smartstep.presentation.theme.TextPrimary
 import com.tonyxlab.smartstep.presentation.theme.TextWhite
 import com.tonyxlab.smartstep.presentation.theme.UserChatBubbleShape
 import com.tonyxlab.smartstep.utils.borderStroke
 import com.tonyxlab.smartstep.utils.ifThen
+import com.tonyxlab.smartstep.utils.rememberIsDeviceWide
 
 @Composable
 fun ChatWindow(
@@ -97,7 +85,7 @@ fun ChatWindow(
             }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outline)
-        ChatInputSection(
+        BottomChatSection(
                 modifier = Modifier
                         .imePadding()
                         .padding(bottom = MaterialTheme.spacing.spaceSmall),
@@ -106,14 +94,20 @@ fun ChatWindow(
         )
     }
 }
-
+/*
+Hi Coach, is swimming a good exercise which kind of muscle does it exercise and is
+good for people looking to reduce weight.
+*/
 @Composable
 private fun ChatBubble(
     chatMessage: ChatMessage,
     modifier: Modifier = Modifier
 ) {
     val isAssistant = chatMessage.role == ChatRole.ASSISTANT
+
     val screenWidth = LocalWindowInfo.current.containerSize.width.dp
+
+    val isDeviceWide = rememberIsDeviceWide()
 
     Row(
             modifier = modifier.fillMaxWidth(),
@@ -144,6 +138,9 @@ private fun ChatBubble(
                         }
                         .ifThen(isAssistant.not()) {
                             widthIn(max = screenWidth * .75f)
+                        }
+                        .ifThen(isDeviceWide) {
+                            widthIn(max = 400.dp)
                         },
                 shape = if (isAssistant)
                     MaterialTheme.shapes.AssistantChatBubbleShape
@@ -153,7 +150,7 @@ private fun ChatBubble(
                 border = if (isAssistant) borderStroke() else null
         ) {
             Text(
-                      text = if (isAssistant) {
+                    text = if (isAssistant) {
                         remember(chatMessage.text) {
                             markdownToAnnotatedString(chatMessage.text)
                         }
@@ -212,93 +209,6 @@ private fun AssistantTypingBubble(
         }
     }
 }
-@Composable
-private fun ChatInputSection(
-    uiState: ChatUiState,
-    onEvent: (ChatUiEvent) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val canSend = uiState.isOnline &&
-            uiState.textFieldState.text.toString()
-                    .trim()
-                    .isNotEmpty()
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val focusManager = LocalFocusManager.current
-
-    Column(modifier = modifier) {
-
-        QuickSuggestionsSection(
-                modifier = Modifier,
-                expanded = uiState.suggestionsExpanded,
-                onToggleSuggestionsDrawer = { onEvent(ChatUiEvent.ToggleSuggestionsDrawer) },
-                onSelectPrompt = { onEvent(ChatUiEvent.SelectPrompt((it))) }
-        )
-
-        Row(
-                modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = MaterialTheme.spacing.spaceMedium),
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)
-        ) {
-
-            if (uiState.isOnline) {
-
-                Column(
-                        modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth()
-                ) {
-                    AppInputField(
-                            modifier = Modifier,
-                            textFieldState = uiState.textFieldState,
-                            height = MaterialTheme.spacing.spaceLarge,
-                            placeholderText = stringResource(id = R.string.label_step_ask_anything),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                            lineLimits = TextFieldLineLimits.MultiLine(maxHeightInLines = 5),
-                            isChatInputField = true
-                    )
-                }
-                SendButton(
-                        enabled = canSend,
-                        onSend = {
-                            if (!canSend) return@SendButton
-                            onEvent(ChatUiEvent.SendChatMessage)
-                            focusManager.clearFocus(force = true)
-                            keyboardController?.hide()
-                        }
-                )
-            } else {
-                Box(
-                        modifier = Modifier
-                                .weight(1f)
-                                .clip(shape = MaterialTheme.shapes.RoundedCornerShape10)
-                                .border(border = borderStroke())
-                                .padding(all = MaterialTheme.spacing.spaceMedium)
-
-                ) {
-                    Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                                text = stringResource(id = R.string.caption_text_connection_required),
-                                style = MaterialTheme.typography.BodyLargeRegular,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        Icon(
-                                painter = painterResource(R.drawable.ic_no_internet),
-                                contentDescription = null
-                        )
-                    }
-                }
-                SendButton(enabled = false)
-            }
-        }
-    }
-}
-
-
 
 private fun markdownToAnnotatedString(markdown: String): AnnotatedString {
     return buildAnnotatedString {
@@ -308,21 +218,23 @@ private fun markdownToAnnotatedString(markdown: String): AnnotatedString {
         val boldRegex = Regex("\\*\\*(.*?)\\*\\*")
         var currentIndex = 0
 
-        boldRegex.findAll(cleanedText).forEach { match ->
-            append(cleanedText.substring(currentIndex, match.range.first))
+        boldRegex.findAll(cleanedText)
+                .forEach { match ->
+                    append(cleanedText.substring(currentIndex, match.range.first))
 
-            val boldText = match.groupValues[1]
+                    val boldText = match.groupValues[1]
 
-            pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
-            append(boldText)
-            pop()
+                    pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
+                    append(boldText)
+                    pop()
 
-            currentIndex = match.range.last + 1
-        }
+                    currentIndex = match.range.last + 1
+                }
 
         append(cleanedText.substring(currentIndex))
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 private fun ChatWindowPreview() {

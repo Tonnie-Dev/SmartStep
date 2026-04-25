@@ -6,7 +6,6 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.delete
 import androidx.lifecycle.viewModelScope
 import com.tonyxlab.smartstep.domain.ai.AiCoach
-import com.tonyxlab.smartstep.domain.ai.ChatRole
 import com.tonyxlab.smartstep.domain.connectivity.ConnectivityObserver
 import com.tonyxlab.smartstep.domain.repository.ActivityStats
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
@@ -14,9 +13,7 @@ import com.tonyxlab.smartstep.presentation.screens.chat.handling.ChatActionEvent
 import com.tonyxlab.smartstep.presentation.screens.chat.handling.ChatUiEvent
 import com.tonyxlab.smartstep.presentation.screens.chat.handling.ChatUiState
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -69,7 +66,7 @@ class ChatViewModel(
                     updateState { it.copy(stepCount = steps, dailyGoal = goal) }
                     if (!hasStartedChatSession && goal > 0) {
                         hasStartedChatSession = true
-                       startChatSession()
+                        //startChatSession()
                     }
                 }
                 .launchIn(viewModelScope)
@@ -91,7 +88,6 @@ class ChatViewModel(
                     .launchIn(viewModelScope)
         }
     }
-
 
     private fun startChatSession() {
 

@@ -210,8 +210,9 @@ fun HomeScreenContent(
 
     val activity = LocalActivity.current ?: return
     val isDeviceWide = rememberIsDeviceWide()
-    val maxWidth1 = if (isDeviceWide) 394.dp else Dp.Unspecified
-    val maxWidth2 = if (isDeviceWide) 312.dp else Dp.Unspecified
+
+    val maxWidth394 = if (isDeviceWide) 394.dp else Dp.Unspecified
+    val maxWidth312 = if (isDeviceWide) 312.dp else Dp.Unspecified
 
     OnResumeEffect {
         val isBackgroundAccessGranted = activity.isIgnoringBatteryOptimizations()
@@ -245,18 +246,18 @@ fun HomeScreenContent(
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)
         ) {
             StepCounterCard(
-                    modifier = Modifier.widthIn(max = maxWidth1),
+                    modifier = Modifier.widthIn(max = maxWidth394),
                     uiState = uiState,
                     onEvent = onEvent
             )
 
             WeeklyAnalyticsSection(
-                    modifier = Modifier.widthIn(max = maxWidth1),
+                    modifier = Modifier.widthIn(max = maxWidth394),
                     uiState = uiState
             )
 
             AiInsightCard(
-                    modifier = Modifier,
+                    modifier = Modifier.widthIn(max = maxWidth394),
                     uiState = uiState,
                     onEvent = onEvent
             )
@@ -270,7 +271,7 @@ fun HomeScreenContent(
 
         if (uiState.stepGoalSheetState.pickerSheetVisible) {
             StepGoalPicker(
-                    modifier = Modifier.widthIn(max = maxWidth2),
+                    modifier = Modifier.widthIn(max = maxWidth312),
                     isDeviceWide = isDeviceWide,
                     selectedStep = uiState.stepGoalSheetState.selectedStepsGoal,
                     onEvent = onEvent
@@ -279,7 +280,7 @@ fun HomeScreenContent(
 
         if (uiState.stepEditorState.isStepEditorVisible) {
             StepsEditor(
-                    modifier = Modifier.widthIn(max = maxWidth2),
+                    modifier = Modifier.widthIn(max = maxWidth312),
                     uiState = uiState,
                     onEvent = onEvent
             )

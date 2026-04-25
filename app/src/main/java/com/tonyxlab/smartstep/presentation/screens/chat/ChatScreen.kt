@@ -3,14 +3,18 @@ package com.tonyxlab.smartstep.presentation.screens.chat
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.base.BaseContentLayout
 import com.tonyxlab.smartstep.presentation.core.components.AppTopBar
@@ -20,6 +24,7 @@ import com.tonyxlab.smartstep.presentation.screens.chat.handling.ChatActionEvent
 import com.tonyxlab.smartstep.presentation.screens.chat.handling.ChatUiEvent
 import com.tonyxlab.smartstep.presentation.screens.chat.handling.ChatUiState
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
+import com.tonyxlab.smartstep.utils.rememberIsDeviceWide
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -74,10 +79,9 @@ fun ChatScreenContent(
     onEvent: (ChatUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
-            modifier = modifier
-                    .fillMaxSize()
-    ) {
+    val isDeviceWide = rememberIsDeviceWide()
+
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
 
         ChatWindow(
                 modifier = Modifier,
