@@ -406,12 +406,14 @@ class HomeViewModel(
         val goal = overrideGoal ?: currentState.stepGoalSheetState.selectedStepsGoal
         launch {
 
+/*
                  aiCoach.refreshInsight(
                          currentSteps = currentState.currentSteps,
                          dailyGoal = goal,
                          progress = progress,
                          isOnline = currentState.insightMessageState.isOnline
                  )
+*/
         }
     }
 

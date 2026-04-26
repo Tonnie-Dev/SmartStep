@@ -17,4 +17,8 @@ class ReportViewModel : ReportBaseViewModel() {
             ReportUiEvent.OnBackClick -> sendActionEvent(ReportActionEvent.NavigateBack)
         }
     }
+
+    private fun exitReport() {
+
+    }
 }

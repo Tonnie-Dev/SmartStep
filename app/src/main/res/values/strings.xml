@@ -19,6 +19,7 @@
     <string name="topbar_text_my_profile">My Profile</string>
     <string name="topbar_text_smart_step">Smart Step</string>
     <string name="topbar_text_ai_coach">AI Coach</string>
+    <string name="topbar_text_report">Report</string>
 
     <!--Header Texts-->
     <string name="header_text_edit_steps">Edit steps</string>
@@ -63,6 +64,12 @@
     <string name="label_step_suggestion_1">Recommend workout</string>
     <string name="label_step_suggestion_2">Explain today\'s trend</string>
     <string name="label_step_suggestion_3">How to reach today\'s goal?</string>
+    <string name="label_text_steps">Steps</string>
+    <string name="label_text_calories">Calories</string>
+    <string name="label_text_minutes">Minutes</string>
+    <string name="label_text_kilometers">Kilometers</string>
+    <string name="label_text_this_week">This Week</string>
+    <string name="label_text_daily_average">Daily average: %1$d steps</string>
 
     <!--Menu Texts-->
     <string name="menu_text_male">Male</string>
@@ -89,6 +96,7 @@
     <string name="cds_text_check_mark">Check Mark</string>
     <string name="cds_shoe_icon">Shoe Icon</string>
     <string name="cds_open_drawer">Open Drawer</string>
+    <string name="cds_open_back">Back</string>
 
     <!--Snackbar Texts-->
     <string name="snack_text_item_added_to_cart">Item Added to Cart</string>

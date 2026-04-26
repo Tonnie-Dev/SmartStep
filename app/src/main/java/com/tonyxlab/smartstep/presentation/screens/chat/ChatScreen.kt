@@ -43,24 +43,21 @@ fun ChatScreen(
                         titleText = stringResource(R.string.topbar_text_ai_coach),
                         backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
                         navigationIcon = {
-
                             IconButton(
                                     onClick = { viewModel.onEvent(event = ChatUiEvent.ExitChat) }) {
                                 Icon(
                                         painter = painterResource(R.drawable.ic_chevron_left),
-                                        contentDescription = "Menu"
+                                        contentDescription = stringResource(id = R.string.cds_open_back)
+
                                 )
                             }
-
                         }
                 )
             },
             actionEventHandler = { _, action ->
                 when (action) {
-
                     ChatActionEvent.NavigateToHome -> navigator.navigateToHome()
                 }
-
             }
     ) { uiState ->
 
@@ -68,9 +65,7 @@ fun ChatScreen(
                 uiState = uiState,
                 onEvent = viewModel::onEvent
         )
-
     }
-
 }
 
 @Composable
@@ -79,7 +74,6 @@ fun ChatScreenContent(
     onEvent: (ChatUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isDeviceWide = rememberIsDeviceWide()
 
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
 
