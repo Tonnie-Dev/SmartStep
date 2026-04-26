@@ -51,7 +51,7 @@ import com.tonyxlab.smartstep.presentation.screens.home.components.DateSelector
 import com.tonyxlab.smartstep.presentation.screens.home.components.NavigationDrawer
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionUiHandler
 import com.tonyxlab.smartstep.presentation.screens.home.components.ResetStepsDialog
-import com.tonyxlab.smartstep.presentation.screens.home.components.StepCounterCard
+import com.tonyxlab.smartstep.presentation.screens.home.components.OverviewCard
 import com.tonyxlab.smartstep.presentation.screens.home.components.StepGoalPicker
 import com.tonyxlab.smartstep.presentation.screens.home.components.StepsEditor
 import com.tonyxlab.smartstep.presentation.screens.home.components.WeeklyAnalyticsSection
@@ -245,7 +245,7 @@ fun HomeScreenContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)
         ) {
-            StepCounterCard(
+            OverviewCard(
                     modifier = Modifier.widthIn(max = maxWidth394),
                     uiState = uiState,
                     onEvent = onEvent

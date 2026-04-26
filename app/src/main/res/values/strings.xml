@@ -125,6 +125,7 @@
 
     <!-- Weekly Analytics -->
     <string name="label_daily_average">Daily Average: %1$s steps</string>
+    <string name="label_reports">Reports</string>
     <string name="day_sun">Sun</string>
     <string name="day_mon">Mon</string>
     <string name="day_tue">Tue</string>

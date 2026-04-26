@@ -40,7 +40,10 @@ sealed interface HomeUiEvent : UiEvent {
     data object DismissStepEditor : HomeUiEvent
     data object DismissDateSelector : HomeUiEvent
     data object ShowDateSelector : HomeUiEvent
+
+    //Overview Card
     data object PauseStepCounting : HomeUiEvent
+    data object ViewReports : HomeUiEvent
 
     // Background Resumption
     data object OnReturnFromBackground: HomeUiEvent

@@ -66,7 +66,7 @@ class ChatViewModel(
                     updateState { it.copy(stepCount = steps, dailyGoal = goal) }
                     if (!hasStartedChatSession && goal > 0) {
                         hasStartedChatSession = true
-                        //startChatSession()
+                       startChatSession()
                     }
                 }
                 .launchIn(viewModelScope)

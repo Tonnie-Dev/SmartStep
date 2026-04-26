@@ -61,14 +61,20 @@ fun ChatWindow(
     uiState: ChatUiState,
     onEvent: (ChatUiEvent) -> Unit
 ) {
+
+    val isDeviceWide = rememberIsDeviceWide()
     Column(
             modifier = modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+            horizontalAlignment = Alignment.CenterHorizontally
 
     ) {
         LazyColumn(
                 modifier = Modifier
+                        .ifThen(isDeviceWide){
+                            width(600.dp)
+                        }
                         .weight(1f)
                         .fillMaxWidth(),
                 contentPadding = PaddingValues(all = MaterialTheme.spacing.spaceMedium),
@@ -94,10 +100,8 @@ fun ChatWindow(
         )
     }
 }
-/*
-Hi Coach, is swimming a good exercise which kind of muscle does it exercise and is
-good for people looking to reduce weight.
-*/
+
+
 @Composable
 private fun ChatBubble(
     chatMessage: ChatMessage,

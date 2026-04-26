@@ -149,6 +149,7 @@ class HomeViewModel(
                 stepsHandler.showDateSelector(currentState)
             }
 
+            // Overview Card
             HomeUiEvent.PauseStepCounting -> {
                 updateState { stepsHandler.pauseStepCounting(it) }
 
@@ -158,6 +159,9 @@ class HomeViewModel(
                 }
             }
 
+            HomeUiEvent.ViewReports -> {
+                // TODO: Navigates to Reports 
+            }
             // Date Selector
             is HomeUiEvent.OnDaySelected -> updateState {
                 stepsHandler.onDaySelected(currentState, event.value)
@@ -402,12 +406,12 @@ class HomeViewModel(
         val goal = overrideGoal ?: currentState.stepGoalSheetState.selectedStepsGoal
         launch {
 
-            /*     aiCoach.refreshInsight(
+                 aiCoach.refreshInsight(
                          currentSteps = currentState.currentSteps,
                          dailyGoal = goal,
                          progress = progress,
                          isOnline = currentState.insightMessageState.isOnline
-                 )*/
+                 )
         }
     }
 
