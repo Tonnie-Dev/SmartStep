@@ -23,6 +23,7 @@ import com.tonyxlab.smartstep.presentation.screens.home.handling.PermissionHandl
 import com.tonyxlab.smartstep.presentation.screens.home.handling.ResetExitHandler
 import com.tonyxlab.smartstep.presentation.screens.home.handling.StepsHandler
 import com.tonyxlab.smartstep.presentation.screens.onboarding.OnboardingViewModel
+import com.tonyxlab.smartstep.presentation.screens.report.ReportViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
@@ -32,6 +33,7 @@ val viewModelModule = module {
     viewModelOf(::OnboardingViewModel)
     viewModelOf(::HomeViewModel)
     viewModelOf(::ChatViewModel)
+    viewModelOf(::ReportViewModel)
 }
 
 val dataStoreModule = module {

@@ -174,6 +174,10 @@ fun HomeScreen(
                         HomeActionEvent.NavigateToChat -> {
                             navigator.navigateToChat()
                         }
+
+                        HomeActionEvent.NavigateToReports -> {
+                            navigator.navigateToReports()
+                        }
                     }
                 }
         ) { uiState ->

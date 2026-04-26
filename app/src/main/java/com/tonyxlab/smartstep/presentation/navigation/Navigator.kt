@@ -20,6 +20,11 @@ class Navigator(private val backStack: SnapshotStateList<NavDestination>) {
     fun navigateToChat(){
         push(ChatDestination)
     }
+
+    fun navigateToReports(){
+        push(ReportDestination)
+    }
+
     fun popBackStack() {
         if (backStack.size > 1) {
             backStack.removeLastOrNull()

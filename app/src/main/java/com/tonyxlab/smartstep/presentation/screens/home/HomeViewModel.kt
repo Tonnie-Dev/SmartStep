@@ -160,7 +160,7 @@ class HomeViewModel(
             }
 
             HomeUiEvent.ViewReports -> {
-                // TODO: Navigates to Reports 
+                sendActionEvent(HomeActionEvent.NavigateToReports)
             }
             // Date Selector
             is HomeUiEvent.OnDaySelected -> updateState {

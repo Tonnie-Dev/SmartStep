@@ -15,3 +15,6 @@ data object HomeDestination : NavDestination
 
 @Serializable
 data object ChatDestination: NavDestination
+
+@Serializable
+data object ReportDestination: NavDestination

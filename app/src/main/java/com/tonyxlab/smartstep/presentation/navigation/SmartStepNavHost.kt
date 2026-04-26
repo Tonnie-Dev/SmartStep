@@ -13,8 +13,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.tonyxlab.smartstep.presentation.screens.chat.ChatScreen
 import com.tonyxlab.smartstep.presentation.screens.home.HomeScreen
 import com.tonyxlab.smartstep.presentation.screens.onboarding.OnboardingScreen
-
-
+import com.tonyxlab.smartstep.presentation.screens.report.ReportScreen
 
 @Composable
 fun SmartStepNavHost(startDestination: NavDestination) {
@@ -37,6 +36,11 @@ fun SmartStepNavHost(startDestination: NavDestination) {
 
         entry< ChatDestination> {
             ChatScreen(navigator = navigator)
+        }
+
+        entry < ReportDestination> {
+
+            ReportScreen(navigator = navigator)
         }
     }
 
