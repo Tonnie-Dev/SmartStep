@@ -70,6 +70,10 @@
     <string name="label_text_kilometers">Kilometers</string>
     <string name="label_text_this_week">This Week</string>
     <string name="label_text_daily_average">Daily average: %1$d steps</string>
+    <string name="label_text_no_data">No data</string>
+    <string name="label_text_activity_type">%1$s</string>
+    <string name="label_text_metric_value">%1$d</string>
+    <string name="label_text_step_goal">Goal: %1$d steps</string>
 
     <!--Menu Texts-->
     <string name="menu_text_male">Male</string>

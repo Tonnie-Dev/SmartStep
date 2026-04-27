@@ -30,4 +30,22 @@ data class ReportUiState(
 
 }
 
-enum class MetricType { STEPS, CALORIES, TIME, DISTANCE }
+enum class MetricType { STEPS, CALORIES, TIME, DISTANCE;
+    override fun toString(): String {
+        return when(this){
+            STEPS -> "Steps"
+            CALORIES -> "calories"
+            TIME -> "minutes"
+            DISTANCE -> "kilometers"
+        }
+    }
+}
+
+
+/*
+sealed interface MetricType{
+    data class Steps(val stepCount: Int): MetricType
+    data class Calories(val calories: Int): MetricType
+    data class Time(val minutes: Int): MetricType
+    data class Distance(val kms: Double): MetricType
+}*/
