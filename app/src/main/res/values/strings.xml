@@ -66,6 +66,8 @@
     <string name="label_step_suggestion_3">How to reach today\'s goal?</string>
     <string name="label_text_steps">Steps</string>
     <string name="label_text_calories">Calories</string>
+    <string name="label_text_time">Time</string>
+    <string name="label_text_distance">Distance</string>
     <string name="label_text_minutes">Minutes</string>
     <string name="label_text_kilometers">Kilometers</string>
     <string name="label_text_this_week">This Week</string>

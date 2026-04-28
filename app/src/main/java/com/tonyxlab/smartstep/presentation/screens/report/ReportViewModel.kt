@@ -23,6 +23,7 @@ class ReportViewModel : ReportBaseViewModel() {
             ReportUiEvent.OnBackClick -> sendActionEvent(ReportActionEvent.NavigateBack)
             ReportUiEvent.ViewPreviousWeek -> viewPreviousWeek()
             ReportUiEvent.ViewNextWeek -> viewNextWeek()
+            is ReportUiEvent.SelectMetricType -> {}
         }
     }
 

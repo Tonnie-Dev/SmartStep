@@ -6,4 +6,5 @@ sealed interface ReportUiEvent : UiEvent {
     data object OnBackClick : ReportUiEvent
     data object ViewPreviousWeek : ReportUiEvent
     data object ViewNextWeek : ReportUiEvent
+    data class SelectMetricType(val metricType: MetricType) : ReportUiEvent
 }
