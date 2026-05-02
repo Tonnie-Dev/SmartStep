@@ -31,9 +31,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
-import com.tonyxlab.smartstep.presentation.screens.report.handling.MetricType
 import com.tonyxlab.smartstep.presentation.screens.report.handling.ReportUiEvent
 import com.tonyxlab.smartstep.presentation.screens.report.handling.ReportUiState
+import com.tonyxlab.smartstep.presentation.screens.report.model.MetricType
 import com.tonyxlab.smartstep.presentation.theme.BodyMediumMedium
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 import com.tonyxlab.smartstep.utils.borderStroke

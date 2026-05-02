@@ -6,6 +6,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
+import com.tonyxlab.smartstep.data.motion.StepCounterManager
 import com.tonyxlab.smartstep.domain.ai.AiCoach
 import com.tonyxlab.smartstep.domain.connectivity.ConnectivityObserver
 import com.tonyxlab.smartstep.domain.repository.ActivityStats
@@ -34,12 +35,14 @@ class HomeViewModel(
     private val onboardingDataStore: OnboardingDataStore,
     private val connectivityObserver: ConnectivityObserver,
     private val aiCoach: AiCoach,
+    private val stepManager: StepCounterManager,
     private val stepsHandler: StepsHandler,
     private val permissionHandler: PermissionHandler,
     private val resetExitHandler: ResetExitHandler,
     private val analyticsHandler: AnalyticsHandler,
     private val insightHandler: InsightHandler,
-    private val activityStats: ActivityStats
+    private val activityStats: ActivityStats,
+
 ) : HomeBaseViewModel() {
 
     private var activityTimerJob: Job? = null
@@ -52,6 +55,7 @@ class HomeViewModel(
         get() = HomeUiState()
 
     init {
+        stepManager.start()
         observePermissionStates()
         observeMetricData()
         observeInsight()

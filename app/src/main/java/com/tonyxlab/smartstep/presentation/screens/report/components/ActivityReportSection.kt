@@ -3,6 +3,7 @@
 package com.tonyxlab.smartstep.presentation.screens.report.components
 
 import android.os.Build
+import android.text.format.DateUtils.isToday
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,9 +27,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight.Companion.W600
 import androidx.compose.ui.tooling.preview.Preview
+import com.google.android.gms.common.data.DataBufferUtils.hasData
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
-import com.tonyxlab.smartstep.presentation.screens.report.handling.MetricType
+import com.tonyxlab.smartstep.presentation.screens.report.model.DayState
+import com.tonyxlab.smartstep.presentation.screens.report.model.MetricType
 import com.tonyxlab.smartstep.presentation.theme.BodyLargeMedium
 import com.tonyxlab.smartstep.presentation.theme.BodySmallRegular
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
@@ -40,16 +43,18 @@ fun ActivityItem(
     metricValue: Int,
     day: String,
     stepGoal: Int,
-    hasData: Boolean,
-    isToday: Boolean,
+    dayState: DayState,
     metricType: MetricType,
     modifier: Modifier = Modifier
 ) {
 
+    val isToday = dayState == DayState.IN_PROGRESS
     Column(
             modifier = modifier
                     .clip(shape = MaterialTheme.shapes.medium)
-                    .border(border = borderStroke(), shape = MaterialTheme.shapes.medium)
+                    .ifThen (isToday.not()){
+                        border(border = borderStroke(), shape = MaterialTheme.shapes.medium)
+                    }
                     .ifThen(isToday) {
                         border(
                                 border = borderStroke(outlineColor = MaterialTheme.colorScheme.primary),
@@ -72,29 +77,30 @@ fun ActivityItem(
                     style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = W600
                     ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = if (isToday)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Box(
                     modifier = Modifier
                             .clip(shape = CircleShape)
                             .background(color = MaterialTheme.colorScheme.secondary)
-                            .ifThen(!hasData) {
+                            .ifThen(dayState == DayState.NO_DATA) {
                                 background(color = MaterialTheme.colorScheme.tertiary)
                             }
                             .size(MaterialTheme.spacing.spaceTwelve * 2),
                     contentAlignment = Alignment.Center) {
                 Icon(
-
                         painter = painterResource(
-                                id = when {
-                                    hasData && !isToday -> R.drawable.ic_checkmark
-                                    isToday && hasData -> R.drawable.ic_clock
-                                    else -> R.drawable.ic_minus
+                                id = when (dayState){
+                                    DayState.PAST_DAY -> R.drawable.ic_checkmark
+                                    DayState.IN_PROGRESS -> R.drawable.ic_clock_2
+                                   DayState.NO_DATA -> R.drawable.ic_minus
                                 }
                         ),
-                        contentDescription = null,
-
+                        contentDescription = null
                         )
             }
         }
@@ -116,7 +122,7 @@ fun ActivityItem(
                                 metricValue
                         ),
                         style = MaterialTheme.typography.BodyLargeMedium,
-                        color = if (isToday)
+                        color = if (dayState == DayState.IN_PROGRESS)
                             MaterialTheme.colorScheme.primary
                         else
                             MaterialTheme.colorScheme.onSurfaceVariant
@@ -133,26 +139,29 @@ fun ActivityItem(
             }
 
 
-            if (metricType == MetricType.STEPS) {
-                Text(
+            if (metricType == MetricType.STEPS || dayState == DayState.NO_DATA) {
 
-                        text = stringResource(
-                                id = R.string.label_text_step_goal,
-                                stepGoal
-                        ),
-                        style = MaterialTheme.typography.BodySmallRegular,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                if (dayState == DayState.NO_DATA){
+
+                    Text(
+                            text = stringResource(id = R.string.label_text_no_data),
+                            style = MaterialTheme.typography.BodySmallRegular,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                }else {
+
+                    Text(
+
+                            text = stringResource(
+                                    id = R.string.label_text_step_goal,
+                                    stepGoal
+                            ),
+                            style = MaterialTheme.typography.BodySmallRegular,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
-
-            if (hasData.not()) {
-                Text(
-                        text = stringResource(id = R.string.label_text_no_data),
-                        style = MaterialTheme.typography.BodySmallRegular,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
         }
     }
 }
@@ -173,8 +182,7 @@ private fun ActivityItem_Preview() {
                     metricValue = 300,
                     day = "Monday",
                     stepGoal = 3000,
-                    hasData = true,
-                    isToday = false,
+                    dayState = DayState.PAST_DAY,
                     metricType = MetricType.STEPS,
             )
 
@@ -182,8 +190,15 @@ private fun ActivityItem_Preview() {
                     metricValue = 300,
                     day = "Thursday",
                     stepGoal = 3000,
-                    hasData = true,
-                    isToday = true,
+                    dayState = DayState.IN_PROGRESS,
+                    metricType = MetricType.STEPS,
+            )
+
+            ActivityItem(
+                    metricValue = 0,
+                    day = "Thursday",
+                    stepGoal = 3000,
+                    dayState = DayState.IN_PROGRESS,
                     metricType = MetricType.STEPS,
             )
 
@@ -191,11 +206,9 @@ private fun ActivityItem_Preview() {
                     metricValue = 300,
                     day = "Thursday",
                     stepGoal = 3000,
-                    hasData = false,
-                    isToday = false,
+                    dayState = DayState.NO_DATA,
                     metricType = MetricType.STEPS,
             )
-
 
         }
     }

@@ -1,5 +1,9 @@
+@file:RequiresApi(Build.VERSION_CODES.O)
+
 package com.tonyxlab.smartstep.presentation.screens.report.components
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,8 +22,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
-import com.tonyxlab.smartstep.presentation.screens.report.handling.MetricType
 import com.tonyxlab.smartstep.presentation.screens.report.handling.ReportUiState
+import com.tonyxlab.smartstep.presentation.screens.report.model.MetricType
 import com.tonyxlab.smartstep.presentation.theme.BodyLargeMedium
 import com.tonyxlab.smartstep.presentation.theme.BodyMediumRegular
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
@@ -46,7 +50,7 @@ fun SummaryCard(
         ) {
             Text(
                     text = when(uiState.selectedMetricType) {
-                       MetricType.STEPS -> stringResource(id = R.string.label_steps) 
+                       MetricType.STEPS -> stringResource(id = R.string.label_steps)
                        MetricType.CALORIES -> stringResource(id = R.string.label_text_calories)
                        MetricType.TIME -> stringResource(id = R.string.label_text_minutes)
                        else -> stringResource(id = R.string.label_text_kilometers)
@@ -81,6 +85,7 @@ fun SummaryCard(
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
