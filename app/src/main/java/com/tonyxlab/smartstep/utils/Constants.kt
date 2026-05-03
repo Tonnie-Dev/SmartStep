@@ -1,6 +1,8 @@
 package com.tonyxlab.smartstep.utils
 
+
 object AppDefaults {
+    const val DATABASE_NAME = "smart_step_database"
     const val DEFAULT_HEIGHT_CM = 175
     const val DEFAULT_HEIGHT_FT = 5
     const val DEFAULT_HEIGHT_IN = 6

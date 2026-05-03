@@ -6,8 +6,11 @@ import android.net.ConnectivityManager
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.room.Room
 import com.tonyxlab.smartstep.data.ai.AiClient
 import com.tonyxlab.smartstep.data.ai.AiCoachImpl
+import com.tonyxlab.smartstep.data.local.database.SmartStepDatabase
+import com.tonyxlab.smartstep.data.local.database.dao.MetricsDao
 import com.tonyxlab.smartstep.data.local.datastore.BaselineDataStore
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
@@ -26,10 +29,10 @@ import com.tonyxlab.smartstep.presentation.screens.home.handling.ResetExitHandle
 import com.tonyxlab.smartstep.presentation.screens.home.handling.StepsHandler
 import com.tonyxlab.smartstep.presentation.screens.onboarding.OnboardingViewModel
 import com.tonyxlab.smartstep.presentation.screens.report.ReportViewModel
+import com.tonyxlab.smartstep.utils.AppDefaults
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import okhttp3.Dispatcher
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
@@ -46,10 +49,25 @@ val repositoryModule = module {
     single<ActivityStats> { ActivityStatsImpl() }
 }
 
-
 val coroutineScopeModule = module {
-    single<CoroutineScope> { CoroutineScope(SupervisorJob() + Dispatchers .Default) }
+    single<CoroutineScope> { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
 }
+
+val databaseModule = module {
+    single {
+        Room.databaseBuilder(
+                context = androidContext(),
+                klass = SmartStepDatabase::class.java,
+                name = AppDefaults.DATABASE_NAME
+        )
+                .fallbackToDestructiveMigration(dropAllTables = true)
+                .build()
+    }
+    single<MetricsDao> {
+        get<SmartStepDatabase>().metricsDao
+    }
+}
+
 val dataStoreModule = module {
     singleOf(::OnboardingDataStore)
     singleOf(::PermPrefsDataStore)
@@ -93,6 +111,7 @@ val handlersModule = module {
 val appModule = listOf(
         viewModelModule,
         dataStoreModule,
+        databaseModule,
         connectivityModule,
         aiCoachModule,
         repositoryModule,
