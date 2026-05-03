@@ -1,9 +1,5 @@
-@file:RequiresApi(Build.VERSION_CODES.O)
-
 package com.tonyxlab.smartstep.data.local.database.mapper
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.tonyxlab.smartstep.data.local.database.entity.DailyMetricEntity
 import com.tonyxlab.smartstep.domain.model.DailyMetric
 import java.time.LocalDate
