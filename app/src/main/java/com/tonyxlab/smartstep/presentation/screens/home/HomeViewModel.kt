@@ -55,7 +55,7 @@ class HomeViewModel(
         get() = HomeUiState()
 
     init {
-        stepManager.start()
+        observeStepCounter()
         observePermissionStates()
         observeMetricData()
         observeInsight()
@@ -194,7 +194,7 @@ class HomeViewModel(
             }
 
             // Motion
-            HomeUiEvent.OnMotionDetected -> onStepDetected()
+            HomeUiEvent.OnMotionDetected -> {/*onStepDetected()*/}
 
             // Return from Background
             HomeUiEvent.OnReturnFromBackground -> {
@@ -304,7 +304,8 @@ class HomeViewModel(
         lastStepTimestampMillis = now
 
         updateState { state ->
-            val previousSteps = state.currentSteps
+            stepsHandler.incrementSteps(state)
+           /* val previousSteps = state.currentSteps
             val incrementedState = stepsHandler.incrementSteps(state)
             val newSteps = incrementedState.currentSteps
 
@@ -312,7 +313,7 @@ class HomeViewModel(
                 stepsHandler.recalculateDistanceAndCalories(incrementedState)
             } else {
                 incrementedState
-            }
+            }*/
         }
 
         syncStepsToRepository(currentState.currentSteps)
@@ -446,7 +447,36 @@ class HomeViewModel(
             activityStats.updateDailyGoal(dailyGoal = goal)
         }
     }
+    private fun observeStepCounter() {
+        launch {
+            stepManager.steps.collect { steps ->
 
+                if (currentState.stepEditorState.paused) return@collect
+
+                val previousSteps = currentState.currentSteps
+
+                updateState { state ->
+                    val updatedState = state.copy(
+                            currentSteps = steps
+                    )
+                    stepsHandler.recalculateDistanceAndCalories(updatedState)
+                  /*  if (stepsHandler.shouldUpdateDistanceAndCalories(previousSteps, steps)) {
+
+                    } else {
+                        updatedState
+                    }*/
+                }
+
+                syncStepsToRepository(steps)
+
+                val goal = currentState.stepGoalSheetState.selectedStepsGoal
+
+                if (steps >= goal && previousSteps < goal) {
+                    refreshInsight()
+                }
+            }
+        }
+    }
     private fun confirmExitDialog() {
         sendActionEvent(HomeActionEvent.CloseApp)
     }

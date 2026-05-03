@@ -30,7 +30,7 @@ class StepCounterManager(
         sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
     private var baselineSteps: Float? = null
-    private var isBaselineStepsLoaded: Boolean = false
+
 
     private val _steps = MutableStateFlow<Int>(0)
     val steps = _steps.asStateFlow()
@@ -38,7 +38,6 @@ class StepCounterManager(
     fun isSensorAvailable(): Boolean = stepSensor != null
 
     fun start() {
-
         val sensor = stepSensor ?: return
 
         sensorManager.registerListener(
@@ -46,24 +45,11 @@ class StepCounterManager(
                 sensor,
                 SensorManager.SENSOR_DELAY_UI
         )
-
     }
 
     fun stop() {
         sensorManager.unregisterListener(this)
     }
-
-    /*    fun resetForNewDay() {
-
-            scope.launch {
-
-                baselineSteps?.let { baselineDataStore.setBaselineStepCount(it) }
-                baselineDataStore.clearBaselineStepCount()
-                baselineSteps = null
-                isBaselineStepsLoaded = false
-
-            }
-        }*/
 
     override fun onSensorChanged(event: SensorEvent) {
         val sensorCurrentStepsTotal = event.values[0]
@@ -81,35 +67,14 @@ class StepCounterManager(
                     )
                 }
             }
+
+            updateSteps(sensorCurrentStepsTotal)
         }
-
-        updateSteps(sensorCurrentStepsTotal)
-
-        /*      if (!isBaselineStepsLoaded) {
-
-                  isBaselineStepsLoaded = true
-
-                  scope.launch {
-
-                      val (savedSteps, savedEpochDay) = baselineDataStore.getBaseline()
-                      val today = LocalDate.now()
-
-                      if (savedEpochDay == today.toEpochDay() && savedSteps > 0) {
-
-                          baselineSteps = savedSteps
-                      } else {
-                          baselineSteps = currentSensorTotal
-                          baselineDataStore.saveBaseline(currentSensorTotal, today)
-                      }
-                  }
-                  updateSteps(totalSteps = currentSensorTotal)
-              } else {
-                  updateSteps(totalSteps = currentSensorTotal)
-              }*/
     }
 
     private fun updateSteps(totalSteps: Float) {
-        val todaySteps = (totalSteps - (baselineSteps ?: totalSteps)).toInt()
+        val todaySteps = (totalSteps - (baselineSteps ?: totalSteps))
+                .toInt()
                 .coerceAtLeast(0)
 
         _steps.value = todaySteps

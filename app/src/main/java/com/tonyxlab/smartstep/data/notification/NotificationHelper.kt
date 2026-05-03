@@ -22,7 +22,7 @@ import java.util.Locale
 
 object StepNotificationHelper {
     const val CHANNEL_ID = "step_tracking_channel"
-    const val NOTIFICATION_ID = 1
+    const val NOTIFICATION_ID = 1001
 
     fun createChannel(context: Context) {
         val channel = NotificationChannel(

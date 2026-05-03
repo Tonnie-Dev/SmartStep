@@ -225,7 +225,7 @@ fun HomeScreenContent(
     }
     val context = LocalContext.current
 
-    DisposableEffect(uiState.stepEditorState.paused) {
+    /*DisposableEffect(uiState.stepEditorState.paused) {
         val detector = MotionStepDetector(context) {
             onEvent(HomeUiEvent.OnMotionDetected)
         }
@@ -237,7 +237,7 @@ fun HomeScreenContent(
         onDispose {
             detector.stop()
         }
-    }
+    }*/
     Box(
             modifier = modifier
                     .fillMaxSize()

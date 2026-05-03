@@ -52,10 +52,10 @@ class StepsHandler {
         return state.copy(currentSteps = state.currentSteps + 1)
     }
 
-    fun shouldUpdateDistanceAndCalories(previousSteps: Int, newSteps: Int): Boolean {
+  /*  fun shouldUpdateDistanceAndCalories(previousSteps: Int, newSteps: Int): Boolean {
         if (newSteps <= previousSteps) return false
         return (previousSteps / 10) != (newSteps / 10)
-    }
+    }*/
 
     // Timer
     fun addActivitySecond(state: HomeUiState): HomeUiState {

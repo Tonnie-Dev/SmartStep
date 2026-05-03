@@ -1,3 +1,5 @@
+
+@file:RequiresApi(Build.VERSION_CODES.S)
 @file:SuppressLint("BatteryLife")
 
 package com.tonyxlab.smartstep.utils
@@ -7,8 +9,10 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.core.content.ContextCompat
@@ -66,6 +70,7 @@ fun OnResumeEffect( onResume:()-> Unit){
     }
 }
 
+
 fun Context.startStepCounterService(
     steps: Int,
     calories: Int,
@@ -77,7 +82,12 @@ fun Context.startStepCounterService(
         putExtra("goal", goal)
         putExtra("timeLabel", "now")
     }
-    ContextCompat.startForegroundService(this, intent)
+
+    if (!StepCounterService.isRunning) {
+
+        ContextCompat.startForegroundService(this, intent)
+    }
+
 }
 
 
