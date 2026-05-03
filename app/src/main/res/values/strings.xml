@@ -109,6 +109,7 @@
 
     <!--Toast Texts-->
     <string name="toast_text_copied">Copied to Clipboard</string>
+    <string name="toast_text_no_sensor">Step sensor is not available on this device</string>
 
     <!--Dialog Texts-->
     <string name="dialog_text_log_out">Are you sure you want to log out?</string>

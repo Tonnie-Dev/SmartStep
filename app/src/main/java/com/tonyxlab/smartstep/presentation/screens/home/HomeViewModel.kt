@@ -4,6 +4,7 @@ package com.tonyxlab.smartstep.presentation.screens.home
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
 import com.tonyxlab.smartstep.data.motion.StepCounterManager
@@ -43,7 +44,7 @@ class HomeViewModel(
     private val insightHandler: InsightHandler,
     private val activityStats: ActivityStats,
 
-) : HomeBaseViewModel() {
+    ) : HomeBaseViewModel() {
 
     private var activityTimerJob: Job? = null
     private var lastStepTimestampMillis: Long = 0L
@@ -84,6 +85,10 @@ class HomeViewModel(
             HomeUiEvent.Continue -> handleContinue()
 
             is HomeUiEvent.BackgroundAccessChanged -> {
+                val wasGranted = currentState.permissionUiState.isBackgroundAccessGranted
+
+                if (wasGranted == event.granted) return
+
                 updateState {
                     permissionHandler.updateBackgroundAccessState(
                             state = it,
@@ -94,7 +99,15 @@ class HomeViewModel(
                 refreshMetricsFromCurrentSteps()
 
                 if (event.granted) {
-                    sendActionEvent(HomeActionEvent.StartStepCounterService)
+                    if (stepManager.isSensorAvailable()) {
+                        sendActionEvent(HomeActionEvent.StartStepCounterService)
+                    } else {
+                        sendActionEvent(
+                                HomeActionEvent.ShowToastMessage(
+                                        messageRes = R.string.toast_text_no_sensor
+                                )
+                        )
+                    }
                 } else {
                     sendActionEvent(HomeActionEvent.StopStepCounterService)
                 }
@@ -194,7 +207,8 @@ class HomeViewModel(
             }
 
             // Motion
-            HomeUiEvent.OnMotionDetected -> {/*onStepDetected()*/}
+            HomeUiEvent.OnMotionDetected -> {/*onStepDetected()*/
+            }
 
             // Return from Background
             HomeUiEvent.OnReturnFromBackground -> {
@@ -305,15 +319,15 @@ class HomeViewModel(
 
         updateState { state ->
             stepsHandler.incrementSteps(state)
-           /* val previousSteps = state.currentSteps
-            val incrementedState = stepsHandler.incrementSteps(state)
-            val newSteps = incrementedState.currentSteps
+            /* val previousSteps = state.currentSteps
+             val incrementedState = stepsHandler.incrementSteps(state)
+             val newSteps = incrementedState.currentSteps
 
-            if (stepsHandler.shouldUpdateDistanceAndCalories(previousSteps, newSteps)) {
-                stepsHandler.recalculateDistanceAndCalories(incrementedState)
-            } else {
-                incrementedState
-            }*/
+             if (stepsHandler.shouldUpdateDistanceAndCalories(previousSteps, newSteps)) {
+                 stepsHandler.recalculateDistanceAndCalories(incrementedState)
+             } else {
+                 incrementedState
+             }*/
         }
 
         syncStepsToRepository(currentState.currentSteps)
@@ -411,14 +425,14 @@ class HomeViewModel(
         val goal = overrideGoal ?: currentState.stepGoalSheetState.selectedStepsGoal
         launch {
 
-/*
-                 aiCoach.refreshInsight(
-                         currentSteps = currentState.currentSteps,
-                         dailyGoal = goal,
-                         progress = progress,
-                         isOnline = currentState.insightMessageState.isOnline
-                 )
-*/
+            /*
+                             aiCoach.refreshInsight(
+                                     currentSteps = currentState.currentSteps,
+                                     dailyGoal = goal,
+                                     progress = progress,
+                                     isOnline = currentState.insightMessageState.isOnline
+                             )
+            */
         }
     }
 
@@ -447,6 +461,7 @@ class HomeViewModel(
             activityStats.updateDailyGoal(dailyGoal = goal)
         }
     }
+
     private fun observeStepCounter() {
         launch {
             stepManager.steps.collect { steps ->
@@ -454,20 +469,21 @@ class HomeViewModel(
                 if (currentState.stepEditorState.paused) return@collect
 
                 val previousSteps = currentState.currentSteps
+                val hasMoved = steps > previousSteps
 
                 updateState { state ->
                     val updatedState = state.copy(
                             currentSteps = steps
                     )
-                    stepsHandler.recalculateDistanceAndCalories(updatedState)
-                  /*  if (stepsHandler.shouldUpdateDistanceAndCalories(previousSteps, steps)) {
 
-                    } else {
-                        updatedState
-                    }*/
+                    stepsHandler.recalculateDistanceAndCalories(updatedState)
                 }
 
                 syncStepsToRepository(steps)
+
+                if (hasMoved) {
+                    onStepActivityDetected()
+                }
 
                 val goal = currentState.stepGoalSheetState.selectedStepsGoal
 
@@ -475,6 +491,15 @@ class HomeViewModel(
                     refreshInsight()
                 }
             }
+        }
+    }
+    private fun onStepActivityDetected() {
+        val now = System.currentTimeMillis()
+        lastStepTimestampMillis = now
+
+        if (!isActivityOngoing) {
+            isActivityOngoing = true
+            startActivityTimer()
         }
     }
     private fun confirmExitDialog() {

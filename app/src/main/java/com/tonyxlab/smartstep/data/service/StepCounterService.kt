@@ -9,7 +9,6 @@ import android.os.IBinder
 import androidx.annotation.RequiresApi
 import com.tonyxlab.smartstep.data.motion.StepCounterManager
 import com.tonyxlab.smartstep.data.notification.StepNotificationHelper
-import com.tonyxlab.smartstep.data.service.StepCounterService.Companion.STEP_NOTIFICATION_ID
 import com.tonyxlab.smartstep.domain.repository.ActivityStats
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +23,6 @@ class StepCounterService : Service() {
     private val activityStats: ActivityStats by inject()
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-
 
     override fun onCreate() {
         super.onCreate()
@@ -56,17 +54,17 @@ class StepCounterService : Service() {
         }
     }
 
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    companion object {
+        var isRunning = false
+    }
+
+
     override fun onDestroy() {
         isRunning = false
         stepCounterManager.stop()
         serviceScope.cancel()
         super.onDestroy()
-    }
-
-    override fun onBind(intent: Intent?): IBinder? = null
-
-    companion object {
-        const val STEP_NOTIFICATION_ID = 1001
-        var isRunning = false
     }
 }

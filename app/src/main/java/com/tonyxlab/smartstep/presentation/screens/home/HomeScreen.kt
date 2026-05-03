@@ -7,6 +7,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -177,6 +178,10 @@ fun HomeScreen(
 
                         HomeActionEvent.NavigateToReports -> {
                             navigator.navigateToReports()
+                        }
+
+                        is HomeActionEvent.ShowToastMessage -> {
+                            Toast.makeText(context,action.messageRes,Toast.LENGTH_SHORT).show()
                         }
                     }
                 }

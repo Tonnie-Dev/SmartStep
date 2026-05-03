@@ -31,8 +31,7 @@ class StepCounterManager(
 
     private var baselineSteps: Float? = null
 
-
-    private val _steps = MutableStateFlow<Int>(0)
+    private val _steps = MutableStateFlow(0)
     val steps = _steps.asStateFlow()
 
     fun isSensorAvailable(): Boolean = stepSensor != null
@@ -67,7 +66,6 @@ class StepCounterManager(
                     )
                 }
             }
-
             updateSteps(sensorCurrentStepsTotal)
         }
     }
