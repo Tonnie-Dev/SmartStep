@@ -13,9 +13,4 @@ enum class MetricType {
     }
 }
 
-data class DailyMetric(
-    val stepCount:Int,
-    val calories:Int,
-    val time: Int,
-    val distance: Double
-)
+
