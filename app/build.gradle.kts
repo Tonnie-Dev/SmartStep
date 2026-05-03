@@ -1,3 +1,4 @@
+import com.android.build.gradle.internal.utils.DESUGARED_DESUGAR_LIB
 import java.util.Properties
 
 plugins {
@@ -49,6 +50,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
@@ -121,6 +123,9 @@ dependencies {
 
     // Play Services
     implementation(Google.android.playServices.auth.apiPhone)
+
+    // Desugaring
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     // Testing
     testImplementation(libs.junit)
