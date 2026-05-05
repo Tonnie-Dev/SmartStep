@@ -10,7 +10,9 @@ import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
 import com.tonyxlab.smartstep.data.motion.StepCounterManager
 import com.tonyxlab.smartstep.domain.ai.AiCoach
 import com.tonyxlab.smartstep.domain.connectivity.ConnectivityObserver
-import com.tonyxlab.smartstep.domain.repository.ActivityStats
+import com.tonyxlab.smartstep.domain.model.DailyMetric
+import com.tonyxlab.smartstep.domain.repository.ActivityStatsRepository
+import com.tonyxlab.smartstep.domain.repository.MetricsRepository
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
 import com.tonyxlab.smartstep.presentation.screens.home.handling.AnalyticsHandler
@@ -22,35 +24,44 @@ import com.tonyxlab.smartstep.presentation.screens.home.handling.PermissionHandl
 import com.tonyxlab.smartstep.presentation.screens.home.handling.ResetExitHandler
 import com.tonyxlab.smartstep.presentation.screens.home.handling.StepsHandler
 import com.tonyxlab.smartstep.utils.MeasurementConstants.ACTIVITY_TIMEOUT_IN_SECONDS
+import com.tonyxlab.smartstep.utils.MeasurementConstants.METRIC_SAVE_INTERVAL_SECONDS
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
+import java.time.LocalDate
 
 typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeActionEvent>
 
 class HomeViewModel(
+    private val metricsRepository: MetricsRepository,
+    private val activityStatsRepository: ActivityStatsRepository,
     private val permPrefsDataStore: PermPrefsDataStore,
     private val onboardingDataStore: OnboardingDataStore,
     private val connectivityObserver: ConnectivityObserver,
     private val aiCoach: AiCoach,
-    private val stepManager: StepCounterManager,
+    private val stepCounterManager: StepCounterManager,
     private val stepsHandler: StepsHandler,
     private val permissionHandler: PermissionHandler,
     private val resetExitHandler: ResetExitHandler,
     private val analyticsHandler: AnalyticsHandler,
     private val insightHandler: InsightHandler,
-    private val activityStats: ActivityStats,
 
     ) : HomeBaseViewModel() {
 
+    private var persistMetricJob: Job? = null
     private var activityTimerJob: Job? = null
-    private var lastStepTimestampMillis: Long = 0L
-    private var isActivityOngoing: Boolean = false
 
     private var hasLaunchedOnce: Boolean = false
+    private var hasReceivedInitialStepReading: Boolean = false
+    private var currentMetricDate: LocalDate = LocalDate.now()
+
+    private var lastStepTimestampMillis: Long = 0L
+    private var isActivityOngoing: Boolean = false
 
     override val initialState: HomeUiState
         get() = HomeUiState()
@@ -61,6 +72,8 @@ class HomeViewModel(
         observeMetricData()
         observeInsight()
         refreshInsight()
+        observeActiveSeconds()
+        //updateUiTime()
         updateState {
             analyticsHandler.populateStats(it)
         }
@@ -99,7 +112,7 @@ class HomeViewModel(
                 refreshMetricsFromCurrentSteps()
 
                 if (event.granted) {
-                    if (stepManager.isSensorAvailable()) {
+                    if (stepCounterManager.isSensorAvailable()) {
                         sendActionEvent(HomeActionEvent.StartStepCounterService)
                     } else {
                         sendActionEvent(
@@ -149,10 +162,14 @@ class HomeViewModel(
             // Steps Editor
             HomeUiEvent.EditSteps -> updateState { stepsHandler.showStepEditor(it) }
 
-            HomeUiEvent.ConfirmStepEditorValues -> updateState { state ->
-                val updatedState = stepsHandler.confirmStepEditor(state)
+            HomeUiEvent.ConfirmStepEditorValues -> {
+                updateState { state ->
+                    val updatedState = stepsHandler.confirmStepEditor(state)
+                    stepsHandler.recalculateDistanceAndCalories(updatedState)
+                }
+
                 syncStepsToRepository(currentState.currentSteps)
-                stepsHandler.recalculateDistanceAndCalories(updatedState)
+                scheduleDailyMetricPersist()
             }
 
             HomeUiEvent.DismissStepEditor -> updateState {
@@ -230,6 +247,10 @@ class HomeViewModel(
                     val updatedState = resetExitHandler.confirmResetDialog(state)
                     val resetTimeState = stepsHandler.resetActivityTime(updatedState)
                     stepsHandler.recalculateDistanceAndCalories(resetTimeState)
+                }
+
+                launch {
+                    persistCurrentDailyMetric(allowDecreases = true)
                 }
             }
 
@@ -342,7 +363,7 @@ class HomeViewModel(
 
         if (!isActivityOngoing) {
             isActivityOngoing = true
-            startActivityTimer()
+           // startActivityTimer()
         }
     }
 
@@ -350,19 +371,32 @@ class HomeViewModel(
         activityTimerJob?.cancel()
 
         activityTimerJob = launch {
+            var lastPersistedSeconds = currentState.metricDataState.activityDurationSeconds
+
             while (isActive) {
-                delay(1000)
+                delay(1_000)
+
+                checkForDateRollover()
 
                 val now = System.currentTimeMillis()
-                val secondsSinceLastStep = (now - lastStepTimestampMillis) / 1000
+                val secondsSinceLastStep = (now - lastStepTimestampMillis) / 1_000
 
                 if (secondsSinceLastStep <= ACTIVITY_TIMEOUT_IN_SECONDS) {
                     updateState { state ->
-                        val withNewSecond = stepsHandler.addActivitySecond(state)
-                        stepsHandler.updateDisplayedTime(withNewSecond)
+                        val updatedState = stepsHandler.addActivitySecond(state)
+                        stepsHandler.updateDisplayedTime(updatedState)
+                    }
+
+                    val currentSeconds = currentState.metricDataState.activityDurationSeconds
+
+                    if (currentSeconds - lastPersistedSeconds >= METRIC_SAVE_INTERVAL_SECONDS) {
+                        lastPersistedSeconds = currentSeconds
+                        scheduleDailyMetricPersist()
                     }
                 } else {
                     isActivityOngoing = false
+                    persistMetricJob?.cancel()
+                    persistCurrentDailyMetric()
                     cancel()
                 }
             }
@@ -452,24 +486,30 @@ class HomeViewModel(
 
     private fun syncStepsToRepository(steps: Int) {
         launch {
-            activityStats.updateStepCount(steps = steps)
+            activityStatsRepository.updateStepCount(steps = steps)
         }
     }
 
     private fun syncGoalToRepository(goal: Int) {
         launch {
-            activityStats.updateDailyGoal(dailyGoal = goal)
+            activityStatsRepository.updateDailyGoal(dailyGoal = goal)
         }
     }
-
     private fun observeStepCounter() {
         launch {
-            stepManager.steps.collect { steps ->
+            stepCounterManager.steps.collect { steps ->
 
                 if (currentState.stepEditorState.paused) return@collect
 
+                checkForDateRollover()
+
+                val isInitialReading = hasReceivedInitialStepReading.not()
                 val previousSteps = currentState.currentSteps
                 val hasMoved = steps > previousSteps
+
+                if (isInitialReading) {
+                    hasReceivedInitialStepReading = true
+                }
 
                 updateState { state ->
                     val updatedState = state.copy(
@@ -481,8 +521,18 @@ class HomeViewModel(
 
                 syncStepsToRepository(steps)
 
+                /**
+                 * Save the first reading so today's step count can enter the database,
+                 * but do NOT start the activity timer from the first reading.
+                 */
+                if (isInitialReading) {
+                    scheduleDailyMetricPersist()
+                    return@collect
+                }
+
                 if (hasMoved) {
                     onStepActivityDetected()
+                    scheduleDailyMetricPersist()
                 }
 
                 val goal = currentState.stepGoalSheetState.selectedStepsGoal
@@ -493,6 +543,7 @@ class HomeViewModel(
             }
         }
     }
+
     private fun onStepActivityDetected() {
         val now = System.currentTimeMillis()
         lastStepTimestampMillis = now
@@ -500,6 +551,116 @@ class HomeViewModel(
         if (!isActivityOngoing) {
             isActivityOngoing = true
             startActivityTimer()
+        }
+    }
+
+    private fun scheduleDailyMetricPersist() {
+        persistMetricJob?.cancel()
+
+        persistMetricJob = launch {
+            delay(1_500)
+            persistCurrentDailyMetric()
+        }
+    }
+
+    private fun checkForDateRollover() {
+        val today = LocalDate.now()
+
+        if (today == currentMetricDate) return
+
+        val previousDate = currentMetricDate
+
+        launch {
+            persistCurrentDailyMetric(date = previousDate)
+        }
+
+        currentMetricDate = today
+
+        activityTimerJob?.cancel()
+        isActivityOngoing = false
+        lastStepTimestampMillis = 0L
+
+        updateState { state ->
+            val resetState = state.copy(
+                    currentSteps = 0
+            )
+            val resetTimeState = stepsHandler.resetActivityTime(resetState)
+            stepsHandler.recalculateDistanceAndCalories(resetTimeState)
+        }
+    }
+
+    private suspend fun persistCurrentDailyMetric(
+        date: LocalDate = LocalDate.now(),
+        allowDecreases: Boolean = false
+    ) {
+        val state = currentState
+        val savedMetric = withContext(Dispatchers.IO){
+            metricsRepository.getMetricForDate(date)
+
+        }
+
+        val stepCount = if (allowDecreases) {
+            state.currentSteps
+        } else {
+            maxOf(
+                    savedMetric?.stepCount ?: 0,
+                    state.currentSteps
+            )
+        }
+
+        val activeSeconds = if (allowDecreases) {
+            state.metricDataState.activityDurationSeconds
+        } else {
+            maxOf(
+                    savedMetric?.activeSeconds ?: 0,
+                    state.metricDataState.activityDurationSeconds
+            )
+        }
+
+        val metric = DailyMetric(
+                date = date,
+                stepCount = stepCount,
+                calories = state.metricDataState.calories,
+                activeSeconds = activeSeconds,
+                distanceKm = state.metricDataState.distance
+        )
+
+        metricsRepository.upsertDailyMetric(metric)
+    }
+    private fun observeActiveSeconds() {
+        launch {
+            metricsRepository.observeMetricForDate(LocalDate.now())
+                    .collect { metric ->
+                        val seconds = metric?.activeSeconds ?: return@collect
+                        updateState { state ->
+                            val updated = state.copy(
+                                    metricDataState = state.metricDataState.copy(
+                                            activityDurationSeconds = seconds
+                                    )
+                            )
+                            stepsHandler.updateDisplayedTime(updated)
+                        }
+                    }
+        }
+    }
+
+    private fun updateUiTime() {
+        launch {
+            val todayMetric = withContext(Dispatchers.IO) {
+                metricsRepository.getMetricForDate(LocalDate.now())
+            }
+
+            if (todayMetric != null) {
+                updateState { state ->
+                    val restoredState = state.copy(
+                            metricDataState = state.metricDataState.copy(
+                                    activityDurationSeconds = todayMetric.activeSeconds
+                            )
+                    )
+
+                    stepsHandler.updateDisplayedTime(restoredState)
+                }
+            }
         }
     }
     private fun confirmExitDialog() {

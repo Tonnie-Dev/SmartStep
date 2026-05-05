@@ -13,8 +13,8 @@ data class DailyMetricEntity(
     val stepCount: Int,
     @ColumnInfo(name = "calories")
     val calories: Int,
-    @ColumnInfo(name = "active_minutes")
-    val activeMinutes: Int,
+    @ColumnInfo(name = "active_seconds")
+    val activeSeconds: Int,
     @ColumnInfo(name = "distance_km")
     val distanceKm: Double
 )

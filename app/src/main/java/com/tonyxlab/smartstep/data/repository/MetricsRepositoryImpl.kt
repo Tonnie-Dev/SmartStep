@@ -28,4 +28,12 @@ class MetricsRepositoryImpl (private val dao: MetricsDao): MetricsRepository {
     override suspend fun upsertDailyMetric(dailyMetric: DailyMetric) {
        dao.upsertDailyMetric(dailyMetric.toEntity())
     }
+
+    override suspend fun getMetricForDate(date: LocalDate): DailyMetric? {
+        return dao.getMetricForDate(date.toEpochDay())?.toModel()
+    }
+
+    override fun observeMetricForDate(date: LocalDate): Flow<DailyMetric?> {
+        return dao.observeMetricForDate(date = date.toEpochDay()).map { entity -> entity?.toModel() }
+    }
 }

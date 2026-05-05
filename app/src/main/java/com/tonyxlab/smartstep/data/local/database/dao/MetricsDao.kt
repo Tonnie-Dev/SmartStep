@@ -25,4 +25,9 @@ interface MetricsDao{
    """)
     fun getWeeklyMetrics(startDate: Long, endDate:Long): Flow<List<DailyMetricEntity>>
 
+
+    @Query("SELECT * FROM daily_metrics_table WHERE date = :date LIMIT 1")
+    fun observeMetricForDate(date: Long): Flow<DailyMetricEntity?>
+    @Query("SELECT * FROM daily_metrics_table WHERE date =:date LIMIT 1")
+    fun getMetricForDate(date: Long): DailyMetricEntity?
 }

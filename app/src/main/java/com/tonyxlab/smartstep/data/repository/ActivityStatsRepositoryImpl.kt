@@ -1,13 +1,13 @@
 package com.tonyxlab.smartstep.data.repository
 
-import com.tonyxlab.smartstep.domain.repository.ActivityStats
+import com.tonyxlab.smartstep.domain.repository.ActivityStatsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class ActivityStatsImpl(
+class ActivityStatsRepositoryImpl(
 
-) : ActivityStats{
+) : ActivityStatsRepository{
 
     private val _stepCount = MutableStateFlow(0)
     override val stepCount: StateFlow<Int>

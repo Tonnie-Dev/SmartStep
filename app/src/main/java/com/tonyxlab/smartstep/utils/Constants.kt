@@ -24,5 +24,6 @@ object MeasurementConstants {
     const val CALORY_GENDER_FACTOR_MALE = 1.0
     const val CALORY_GENDER_FACTOR_FEMALE = 0.9
     const val ACTIVITY_TIMEOUT_IN_SECONDS = 5L
+    const val METRIC_SAVE_INTERVAL_SECONDS = 15
 }
 

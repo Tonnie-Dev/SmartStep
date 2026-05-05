@@ -9,7 +9,7 @@ fun DailyMetric.toEntity() =
             date = date.toEpochDay(),
             stepCount = stepCount,
             calories = calories,
-            activeMinutes = activeMinutes,
+            activeSeconds = activeSeconds,
             distanceKm = distanceKm
     )
 
@@ -18,6 +18,6 @@ fun DailyMetricEntity.toModel() =
             date = LocalDate.ofEpochDay(date),
             stepCount = stepCount,
             calories = calories,
-            activeMinutes = activeMinutes,
+            activeSeconds = activeSeconds,
             distanceKm = distanceKm
     )

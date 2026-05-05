@@ -16,11 +16,11 @@ import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
 import com.tonyxlab.smartstep.data.motion.StepCounterManager
 import com.tonyxlab.smartstep.data.remote.connectivity.ConnectivityObserverImpl
-import com.tonyxlab.smartstep.data.repository.ActivityStatsImpl
+import com.tonyxlab.smartstep.data.repository.ActivityStatsRepositoryImpl
 import com.tonyxlab.smartstep.data.repository.MetricsRepositoryImpl
 import com.tonyxlab.smartstep.domain.ai.AiCoach
 import com.tonyxlab.smartstep.domain.connectivity.ConnectivityObserver
-import com.tonyxlab.smartstep.domain.repository.ActivityStats
+import com.tonyxlab.smartstep.domain.repository.ActivityStatsRepository
 import com.tonyxlab.smartstep.domain.repository.MetricsRepository
 import com.tonyxlab.smartstep.presentation.screens.chat.ChatViewModel
 import com.tonyxlab.smartstep.presentation.screens.home.HomeViewModel
@@ -48,7 +48,7 @@ val viewModelModule = module {
 }
 
 val repositoryModule = module {
-    single<ActivityStats> { ActivityStatsImpl() }
+    single<ActivityStatsRepository> { ActivityStatsRepositoryImpl() }
     single<MetricsRepository> { MetricsRepositoryImpl(get()) }
 }
 

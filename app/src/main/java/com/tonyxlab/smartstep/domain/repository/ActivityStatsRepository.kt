@@ -2,7 +2,7 @@ package com.tonyxlab.smartstep.domain.repository
 
 import kotlinx.coroutines.flow.StateFlow
 
-interface ActivityStats {
+interface ActivityStatsRepository {
     val stepCount: StateFlow<Int>
     val dailyGoal: StateFlow<Int>
     fun updateStepCount(steps:Int)

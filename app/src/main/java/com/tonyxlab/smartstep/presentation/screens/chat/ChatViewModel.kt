@@ -7,7 +7,7 @@ import androidx.compose.foundation.text.input.delete
 import androidx.lifecycle.viewModelScope
 import com.tonyxlab.smartstep.domain.ai.AiCoach
 import com.tonyxlab.smartstep.domain.connectivity.ConnectivityObserver
-import com.tonyxlab.smartstep.domain.repository.ActivityStats
+import com.tonyxlab.smartstep.domain.repository.ActivityStatsRepository
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.chat.handling.ChatActionEvent
 import com.tonyxlab.smartstep.presentation.screens.chat.handling.ChatUiEvent
@@ -22,7 +22,7 @@ typealias ChatBaseViewModel = BaseViewModel<ChatUiState, ChatUiEvent, ChatAction
 class ChatViewModel(
     private val aiCoach: AiCoach,
     private val connectivityObserver: ConnectivityObserver,
-    private val activityStats: ActivityStats
+    private val activityStatsRepository: ActivityStatsRepository
 ) : ChatBaseViewModel() {
 
     private var hasStartedChatSession = false
@@ -57,8 +57,8 @@ class ChatViewModel(
     private fun observeStats() {
 
         combine(
-                activityStats.stepCount,
-                activityStats.dailyGoal
+                activityStatsRepository.stepCount,
+                activityStatsRepository.dailyGoal
         ) { steps, goal ->
             steps to goal
         }
