@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
+import com.tonyxlab.smartstep.data.motion.ActivityDurationTracker
 import com.tonyxlab.smartstep.data.motion.StepCounterManager
 import com.tonyxlab.smartstep.data.notification.StepNotificationHelper
 import com.tonyxlab.smartstep.domain.model.DailyMetric
@@ -22,32 +23,36 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
+import org.koin.android.scope.serviceScope
 import java.time.LocalDate
 
 class StepCounterService : Service() {
 
-    private val stepCounterManager: StepCounterManager by inject()
+
+
+private val stepCounterManager: StepCounterManager by inject()
     private val activityStatsRepository: ActivityStatsRepository by inject()
     private val metricsRepository: MetricsRepository by inject()
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    private var lastStepTimestampMillis: Long = 0L
-    private var isActivityOngoing: Boolean = false
-    private var activityTimerJob: Job? = null
-private var accumulatedActiveSeconds:Int = 0
+    private val activityDurationTracker = ActivityDurationTracker(
+            activityTimeoutSeconds = ACTIVITY_TIMEOUT_IN_SECONDS.toInt()
+    )
 
-
-    companion object {
-        var isRunning = false
-    }
+    private var currentDate: LocalDate = LocalDate.now()
+    private var activeSeconds: Int = 0
+    private var lastSavedActiveSeconds: Int = 0
 
     override fun onCreate() {
         super.onCreate()
 
         isRunning = true
+
         StepNotificationHelper.createChannel(this)
+
         startForeground(
                 StepNotificationHelper.NOTIFICATION_ID,
                 StepNotificationHelper.buildNotification(
@@ -59,88 +64,98 @@ private var accumulatedActiveSeconds:Int = 0
         )
 
         stepCounterManager.start()
+
         serviceScope.launch {
+            restoreTodayMetric()
+
             stepCounterManager.steps.collect { steps ->
-                activityStatsRepository.updateStepCount(steps)
-
-                StepNotificationHelper.updateNotification(
-                        context = this@StepCounterService,
-                        steps = steps,
-                        calories = 0,
-                        goal = 10_000
-                )
+                handleStepUpdate(steps)
             }
         }
     }
-private fun onStepActivityDetected() {
+    private suspend fun handleStepUpdate(steps: Int) {
+        checkForDateRollover()
 
-    lastStepTimestampMillis = System.currentTimeMillis()
+        val addedActiveSeconds = activityDurationTracker.onStepReading(steps)
 
-    if (!isActivityOngoing){
-        isActivityOngoing = true
-        startActivityTimer()
-    }
-}
-
-    private fun startActivityTimer() {
-        activityTimerJob?.cancel()
-        val today = LocalDate.now()
-        val now = System.currentTimeMillis()
-        activityTimerJob = serviceScope.launch {
-
-
-            // Restore today's saved active secs
-            accumulatedActiveSeconds = metricsRepository.getMetricForDate(today)?.activeSeconds ?: 0
-
-            while (isActive){
-                delay(1000)
-
-                val secondsSinceLastStep = (now -lastStepTimestampMillis)/1000
-
-               // User is active
-                if (secondsSinceLastStep<= ACTIVITY_TIMEOUT_IN_SECONDS){
-                    accumulatedActiveSeconds ++
-
-                    if (accumulatedActiveSeconds%METRIC_SAVE_INTERVAL_SECONDS == 0){
-
-                        persistActiveSeconds()
-                    }
-                }
-               // User is idle
-                else {
-                    isActivityOngoing = false
-                    persistActiveSeconds()
-                    cancel()
-
-                }
-
-            }
+        if (addedActiveSeconds > 0) {
+            activeSeconds += addedActiveSeconds
         }
-    }
 
-    private suspend fun persistActiveSeconds() {
-        val today = LocalDate.now()
-        val existing = metricsRepository.getMetricForDate(today)
-        val metric = DailyMetric(
-                date = today,
-                stepCount = existing?.stepCount ?: 0,
-                calories = existing?.calories ?: 0,
-                activeSeconds = maxOf(existing?.activeSeconds ?: 0, accumulatedActiveSeconds),
-                distanceKm = existing?.distanceKm ?: 0.0
+        activityStatsRepository.updateStepCount(steps)
+
+        if (shouldPersist(addedActiveSeconds)) {
+            persistStepAndActiveSeconds(steps)
+        }
+
+        StepNotificationHelper.updateNotification(
+                context = this@StepCounterService,
+                steps = steps,
+                calories = 0,
+                goal = 10_000
         )
-        metricsRepository.upsertDailyMetric(metric)
     }
+
+    private fun shouldPersist(addedActiveSeconds: Int): Boolean {
+        if (addedActiveSeconds <= 0) return false
+
+        return activeSeconds - lastSavedActiveSeconds >= METRIC_SAVE_INTERVAL_SECONDS
+    }
+
+    private suspend fun persistStepAndActiveSeconds(steps: Int) {
+        metricsRepository.upsertStepAndActiveSeconds(
+                date = currentDate,
+                steps = steps,
+                activeSeconds = activeSeconds
+        )
+
+        lastSavedActiveSeconds = activeSeconds
+    }
+
+      private suspend fun checkForDateRollover() {
+        val today = LocalDate.now()
+
+        if (today == currentDate) return
+
+        currentDate = today
+        activeSeconds = 0
+        lastSavedActiveSeconds = 0
+        activityDurationTracker.reset()
+
+        restoreTodayMetric()
+    }
+    private suspend fun restoreTodayMetric() {
+        val todayMetric = withContext(Dispatchers.IO) {
+            metricsRepository.getMetricForDate(currentDate)
+        }
+
+        activeSeconds = todayMetric?.activeSeconds ?: 0
+        lastSavedActiveSeconds = activeSeconds
+    }
+
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-
-
     override fun onDestroy() {
-        isActivityOngoing = false
-        activityTimerJob?.cancel()
-        serviceScope.launch { persistActiveSeconds() } // final flush on destroy
+        isRunning = false
+
+        serviceScope.launch {
+            val latestSteps = stepCounterManager.steps.value
+
+            metricsRepository.upsertStepAndActiveSeconds(
+                    date = currentDate,
+                    steps = latestSteps,
+                    activeSeconds = activeSeconds
+            )
+        }
+
         stepCounterManager.stop()
         serviceScope.cancel()
+
         super.onDestroy()
+    }
+
+    companion object {
+        var isRunning = false
     }
 }

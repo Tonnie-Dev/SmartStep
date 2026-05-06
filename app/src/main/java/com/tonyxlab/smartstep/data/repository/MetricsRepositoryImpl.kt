@@ -36,4 +36,16 @@ class MetricsRepositoryImpl (private val dao: MetricsDao): MetricsRepository {
     override fun observeMetricForDate(date: LocalDate): Flow<DailyMetric?> {
         return dao.observeMetricForDate(date = date.toEpochDay()).map { entity -> entity?.toModel() }
     }
+
+    override suspend fun upsertStepAndActiveSeconds(
+        date: LocalDate,
+        steps: Int,
+        activeSeconds: Int
+    ) {
+        dao.upsertStepAndActiveSeconds(
+                date = date.toEpochDay(),
+                steps = steps,
+                activeSeconds = activeSeconds
+        )
+    }
 }

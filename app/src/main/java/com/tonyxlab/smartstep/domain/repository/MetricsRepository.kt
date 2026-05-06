@@ -13,4 +13,9 @@ interface MetricsRepository {
     suspend fun upsertDailyMetric(dailyMetric: DailyMetric)
     suspend fun getMetricForDate(date: LocalDate): DailyMetric?
     fun observeMetricForDate(date: LocalDate): Flow<DailyMetric?>
+    suspend fun upsertStepAndActiveSeconds(
+        date: LocalDate,
+        steps: Int,
+        activeSeconds: Int
+    )
 }

@@ -30,4 +30,33 @@ interface MetricsDao{
     fun observeMetricForDate(date: Long): Flow<DailyMetricEntity?>
     @Query("SELECT * FROM daily_metrics_table WHERE date =:date LIMIT 1")
     fun getMetricForDate(date: Long): DailyMetricEntity?
+
+
+    @Query(
+            """
+        INSERT INTO daily_metrics_table(
+            date,
+            step_count,
+            calories,
+            active_seconds,
+            distance_km
+        )
+        VALUES(
+            :date,
+            :steps,
+            0,
+            :activeSeconds,
+            0.0
+        )
+        ON CONFLICT(date) DO UPDATE SET
+            step_count = MAX(step_count, excluded.step_count),
+            active_seconds = MAX(active_seconds, excluded.active_seconds)
+        """
+    )
+    suspend fun upsertStepAndActiveSeconds(
+        date: Long,
+        steps: Int,
+        activeSeconds: Int
+    )
 }
+
