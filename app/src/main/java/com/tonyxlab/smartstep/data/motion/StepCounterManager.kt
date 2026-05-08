@@ -38,7 +38,6 @@ class StepCounterManager(
 
     fun start() {
         val sensor = stepSensor ?: return
-
         sensorManager.registerListener(
                 this,
                 sensor,
@@ -54,7 +53,6 @@ class StepCounterManager(
         val sensorCurrentStepsTotal = event.values[0]
         val today = LocalDate.now()
         scope.launch {
-
             val (savedSteps, savedEpochDay) = baselineDataStore.getBaseline()
             baselineSteps = if (savedEpochDay == today.toEpochDay() && savedSteps > 0) {
                 savedSteps

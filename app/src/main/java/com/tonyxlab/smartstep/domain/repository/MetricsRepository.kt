@@ -1,7 +1,5 @@
 package com.tonyxlab.smartstep.domain.repository
 
-import androidx.room.Query
-import com.tonyxlab.smartstep.data.local.database.entity.DailyMetricEntity
 import com.tonyxlab.smartstep.domain.model.DailyMetric
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
@@ -10,12 +8,14 @@ interface MetricsRepository {
 
     fun getAllMetrics(): Flow<List<DailyMetric>>
     fun getWeeklyMetrics(startDate: LocalDate): Flow<List<DailyMetric>>
-    suspend fun upsertDailyMetric(dailyMetric: DailyMetric)
+    suspend fun upsertDailyMetric(
+        newDailyMetric: DailyMetric,
+        allowDecreases: Boolean
+    )
     suspend fun getMetricForDate(date: LocalDate): DailyMetric?
     fun observeMetricForDate(date: LocalDate): Flow<DailyMetric?>
-    suspend fun upsertStepAndActiveSeconds(
-        date: LocalDate,
-        steps: Int,
-        activeSeconds: Int
-    )
+    /*suspend fun upsertDailyMetric(
+        newDailyMetric: DailyMetric,
+        allowDecreases: Boolean
+    )*/
 }

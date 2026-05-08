@@ -13,7 +13,7 @@ import com.tonyxlab.smartstep.utils.AppDefaults
 import java.time.LocalDate
 
 data class HomeUiState(
-    val currentSteps: Int = 1995,
+    val currentSteps: Int = 0,
     val showExitDialog: Boolean = false,
     val showResetDialog: Boolean = false,
     val permissionUiState: PermissionUiState = PermissionUiState(),

@@ -53,7 +53,7 @@ object UnitConverter {
         return (lbs / KG_PER_LB).roundToInt()
     }
 
-    fun stepsToKm(heightInCm: Int, steps: Int): Double {
+    fun stepsToKm( steps: Int,heightInCm: Int,): Double {
         return (stepsToMeters(heightInCm, steps) / METERS_PER_KM).roundToOneDecimal()
     }
 

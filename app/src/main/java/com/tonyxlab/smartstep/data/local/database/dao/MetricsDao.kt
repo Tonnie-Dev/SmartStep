@@ -4,15 +4,12 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
 import com.tonyxlab.smartstep.data.local.database.entity.DailyMetricEntity
-import com.tonyxlab.smartstep.domain.model.DailyMetric
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MetricsDao{
-
-
     @Upsert
-    suspend fun upsertDailyMetric(dailyMetric: DailyMetricEntity)
+    suspend fun upsertDailyMetric(dailyMetricEntity: DailyMetricEntity)
 
     @Query("SELECT * FROM daily_metrics_table ORDER BY date DESC")
     fun getAllMetrics(): Flow<List<DailyMetricEntity>>
@@ -28,11 +25,11 @@ interface MetricsDao{
 
     @Query("SELECT * FROM daily_metrics_table WHERE date = :date LIMIT 1")
     fun observeMetricForDate(date: Long): Flow<DailyMetricEntity?>
+
     @Query("SELECT * FROM daily_metrics_table WHERE date =:date LIMIT 1")
     fun getMetricForDate(date: Long): DailyMetricEntity?
 
-
-    @Query(
+    /*@Query(
             """
         INSERT INTO daily_metrics_table(
             date,
@@ -57,6 +54,6 @@ interface MetricsDao{
         date: Long,
         steps: Int,
         activeSeconds: Int
-    )
+    )*/
 }
 

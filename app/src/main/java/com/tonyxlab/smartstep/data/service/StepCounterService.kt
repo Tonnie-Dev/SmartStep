@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
+import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.data.motion.ActivityDurationTracker
 import com.tonyxlab.smartstep.data.motion.StepCounterManager
 import com.tonyxlab.smartstep.data.notification.StepNotificationHelper
@@ -15,27 +16,22 @@ import com.tonyxlab.smartstep.domain.repository.ActivityStatsRepository
 import com.tonyxlab.smartstep.domain.repository.MetricsRepository
 import com.tonyxlab.smartstep.utils.MeasurementConstants.ACTIVITY_TIMEOUT_IN_SECONDS
 import com.tonyxlab.smartstep.utils.MeasurementConstants.METRIC_SAVE_INTERVAL_SECONDS
+import com.tonyxlab.smartstep.utils.UnitConverter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
-import org.koin.android.scope.serviceScope
 import java.time.LocalDate
 
-class StepCounterService : Service() {
-
-
-
-private val stepCounterManager: StepCounterManager by inject()
+class StepCounterService() : Service() {
+    private val stepCounterManager: StepCounterManager by inject()
     private val activityStatsRepository: ActivityStatsRepository by inject()
     private val metricsRepository: MetricsRepository by inject()
-
+    private val onboardingDataStore: OnboardingDataStore by inject()
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val activityDurationTracker = ActivityDurationTracker(
@@ -53,6 +49,7 @@ private val stepCounterManager: StepCounterManager by inject()
 
         StepNotificationHelper.createChannel(this)
 
+        // Temporary notification to satisfy foreground service requirement immediately
         startForeground(
                 StepNotificationHelper.NOTIFICATION_ID,
                 StepNotificationHelper.buildNotification(
@@ -68,11 +65,22 @@ private val stepCounterManager: StepCounterManager by inject()
         serviceScope.launch {
             restoreTodayMetric()
 
+            val initialSteps = stepCounterManager.steps.value
+            val (initialCalories, initialGoal) = getCalculatedNotificationData(initialSteps)
+
+            StepNotificationHelper.updateNotification(
+                    context = this@StepCounterService,
+                    steps = initialSteps,
+                    calories = initialCalories,
+                    goal = initialGoal
+            )
+
             stepCounterManager.steps.collect { steps ->
                 handleStepUpdate(steps)
             }
         }
     }
+
     private suspend fun handleStepUpdate(steps: Int) {
         checkForDateRollover()
 
@@ -91,8 +99,8 @@ private val stepCounterManager: StepCounterManager by inject()
         StepNotificationHelper.updateNotification(
                 context = this@StepCounterService,
                 steps = steps,
-                calories = 0,
-                goal = 10_000
+                calories = calculateCaloriesForSteps(steps),
+                goal = getDailyStepGoal()
         )
     }
 
@@ -103,16 +111,41 @@ private val stepCounterManager: StepCounterManager by inject()
     }
 
     private suspend fun persistStepAndActiveSeconds(steps: Int) {
-        metricsRepository.upsertStepAndActiveSeconds(
+        val savedMetric = withContext(Dispatchers.IO) {
+            metricsRepository.getMetricForDate(currentDate)
+        }
+
+        val calculatedDistanceKm =
+            UnitConverter.stepsToKm(steps, onboardingDataStore.heightInCm.first())
+
+        val calculatedCalories =
+            UnitConverter.stepsToCalories(
+                    steps,
+                    onboardingDataStore.weightInKg.first(),
+                    onboardingDataStore.selectedGender.first()
+            )
+        val metricToSave = savedMetric?.copy(
+                stepCount = steps,
+                activeSeconds = activeSeconds,
+                calories = calculatedCalories,
+                distanceKm = calculatedDistanceKm
+        ) ?: DailyMetric(
                 date = currentDate,
-                steps = steps,
-                activeSeconds = activeSeconds
+                stepCount = steps,
+                calories = calculatedCalories,
+                activeSeconds = activeSeconds,
+                distanceKm = calculatedDistanceKm
+        )
+
+        metricsRepository.upsertDailyMetric(
+                newDailyMetric = metricToSave,
+                allowDecreases = false
         )
 
         lastSavedActiveSeconds = activeSeconds
     }
 
-      private suspend fun checkForDateRollover() {
+    private suspend fun checkForDateRollover() {
         val today = LocalDate.now()
 
         if (today == currentDate) return
@@ -124,6 +157,17 @@ private val stepCounterManager: StepCounterManager by inject()
 
         restoreTodayMetric()
     }
+    private suspend fun calculateCaloriesForSteps(steps: Int): Int {
+        return UnitConverter.stepsToCalories(
+                steps = steps,
+                weight = onboardingDataStore.weightInKg.first(),
+                gender = onboardingDataStore.selectedGender.first()
+        )
+    }
+
+    private suspend fun getDailyStepGoal(): Int {
+        return onboardingDataStore.dailyStepGoal.first()
+    }
     private suspend fun restoreTodayMetric() {
         val todayMetric = withContext(Dispatchers.IO) {
             metricsRepository.getMetricForDate(currentDate)
@@ -133,24 +177,31 @@ private val stepCounterManager: StepCounterManager by inject()
         lastSavedActiveSeconds = activeSeconds
     }
 
+    private suspend fun getCalculatedNotificationData(steps: Int): Pair<Int, Int> {
+        val calculatedCalories = UnitConverter.stepsToCalories(
+                steps = steps,
+                weight = onboardingDataStore.weightInKg.first(),
+                gender = onboardingDataStore.selectedGender.first()
+        )
+
+        val stepGoal = onboardingDataStore.dailyStepGoal.first()
+
+        return calculatedCalories to stepGoal
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
         isRunning = false
 
-        serviceScope.launch {
-            val latestSteps = stepCounterManager.steps.value
+        val latestSteps = stepCounterManager.steps.value
 
-            metricsRepository.upsertStepAndActiveSeconds(
-                    date = currentDate,
-                    steps = latestSteps,
-                    activeSeconds = activeSeconds
-            )
+        serviceScope.launch {
+            persistStepAndActiveSeconds(latestSteps)
+            serviceScope.cancel()
         }
 
         stepCounterManager.stop()
-        serviceScope.cancel()
 
         super.onDestroy()
     }
