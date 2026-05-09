@@ -131,7 +131,7 @@ class HomeViewModel(
             HomeUiEvent.SaveStepGoal -> saveNewStepGoal()
 
             is HomeUiEvent.SelectStepGoal -> updateState {
-                stepsHandler.onSelectStepGoal(
+                stepsHandler.selectStepGoal(
                         state = it,
                         selectedSteps = event.selectedSteps
                 )
@@ -196,7 +196,10 @@ class HomeViewModel(
             }
 
             // Goal Picker
-            HomeUiEvent.ShowStepGoalSheet -> showStepGoalPicker()
+            HomeUiEvent.ShowStepGoalSheet -> {
+                updateState { state -> stepsHandler.showStepGoalPicker(state) }
+            }
+
             HomeUiEvent.DismissStepGoalSheet -> updateState {
                 stepsHandler.closeStepGoalSheet(it)
             }
@@ -340,16 +343,6 @@ class HomeViewModel(
         }
     }
 
-    private fun showStepGoalPicker() {
-        updateState {
-            it.copy(
-                    stepGoalSheetState = currentState.stepGoalSheetState.copy(
-                            pickerSheetVisible = true
-                    )
-            )
-        }
-    }
-
     private fun openPersonalSettings() {
         sendActionEvent(HomeActionEvent.OpenAppSettings)
     }
@@ -376,8 +369,6 @@ class HomeViewModel(
                 currentState.stepGoalSheetState.selectedStepsGoal.coerceAtLeast(1)
         val goal = overrideGoal ?: currentState.stepGoalSheetState.selectedStepsGoal
         /*   launch {
-
-
                                 aiCoach.refreshInsight(
                                         currentSteps = currentState.currentSteps,
                                         dailyGoal = goal,
@@ -418,33 +409,41 @@ class HomeViewModel(
 
     private fun saveEditedSteps() {
         launch {
+
             val selectedDate = currentState.stepEditorState.selectedDate
             val steps = currentState.stepEditorState.stepsTextFieldState.text
                     .toString()
                     .trim()
                     .toIntOrNull()
                 ?: 0
-
+            // Update live sensor baseline + save to DB,  old date → save to DB only
+            if (selectedDate == LocalDate.now()) {
+                stepCounterManager.editSteps(
+                        steps = steps,
+                        date = selectedDate
+                )
+            }
             updateState { state ->
                 val updatedState = state.copy(
-                        currentSteps = steps
+                        currentSteps = if (selectedDate == LocalDate.now()) {
+                            steps
+                        } else {
+                            state.currentSteps
+                        }
                 )
-
                 stepsHandler.recalculateDistanceAndCalories(updatedState)
             }
 
             persistManualSteps(
                     date = selectedDate,
-                    steps = steps
+                    steps = steps,
+                    allowDecreases = true
             )
         }
     }
 
     private suspend fun resetTodaySteps() {
-        val today = LocalDate.now()
-
         stepCounterManager.resetSteps()
-
         updateState { state ->
             val resetState = state.copy(
                     currentSteps = 0,
@@ -454,12 +453,11 @@ class HomeViewModel(
                             calories = 0
                     )
             )
-
             stepsHandler.updateDisplayedTime(resetState)
         }
 
         persistManualSteps(
-                date = today,
+                date = LocalDate.now(),
                 steps = 0,
                 allowDecreases = true
         )
@@ -479,7 +477,7 @@ class HomeViewModel(
                     activeSeconds = if (steps == 0) 0 else savedMetric.activeSeconds,
                     calories = if (steps == 0) 0 else currentState.metricDataState.calories,
                     distanceKm = if (steps == 0) 0.0 else currentState.metricDataState.distance
-                    ) ?: DailyMetric(
+            ) ?: DailyMetric(
                     date = date,
                     stepCount = steps,
                     activeSeconds = 0,

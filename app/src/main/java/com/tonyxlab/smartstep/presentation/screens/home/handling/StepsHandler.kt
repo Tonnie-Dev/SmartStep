@@ -78,7 +78,16 @@ class StepsHandler {
     }
 
     // Step Goal Picker
-    fun onSelectStepGoal(state: HomeUiState, selectedSteps: Int): HomeUiState {
+
+    fun showStepGoalPicker(state: HomeUiState): HomeUiState {
+       return     state.copy(
+                    stepGoalSheetState = state.stepGoalSheetState.copy(
+                            pickerSheetVisible = true
+                    )
+            )
+        }
+
+    fun selectStepGoal(state: HomeUiState, selectedSteps: Int): HomeUiState {
         return state.copy(
                 stepGoalSheetState = state.stepGoalSheetState.copy(
                         selectedStepsGoal = selectedSteps

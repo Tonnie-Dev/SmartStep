@@ -2,6 +2,7 @@
 
 package com.tonyxlab.smartstep.data.motion
 
+import android.R.attr.baseline
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -31,6 +32,8 @@ class StepCounterManager(
 
     private var baselineSteps: Float? = null
 
+    private var manualStepOffset: Int = 0
+
     private val _steps = MutableStateFlow(0)
     val steps = _steps.asStateFlow()
 
@@ -54,20 +57,30 @@ class StepCounterManager(
     override fun onSensorChanged(event: SensorEvent) {
         val sensorCurrentStepsTotal = event.values[0]
         latestSensorStepsValue = sensorCurrentStepsTotal
-        val today = LocalDate.now()
-        scope.launch {
-            val (savedSteps, savedEpochDay) = baselineDataStore.getBaseline()
-            baselineSteps = if (savedEpochDay == today.toEpochDay() && savedSteps > 0) {
-                savedSteps
-            } else {
-                sensorCurrentStepsTotal.also {
-                    baselineDataStore.setBaselineStepCount(
-                            steps = sensorCurrentStepsTotal,
-                            date = today
-                    )
-                }
-            }
-            updateSteps(sensorCurrentStepsTotal)
+        createBaseline(sensorCurrentStepsTotal)
+        updateSteps(sensorCurrentStepsTotal)
+
+    }
+
+    private fun createBaseline(sensorCurrentStepsTotal: Float) {
+        if (baselineSteps!= null) return
+
+            val today = LocalDate.now()
+            scope.launch {
+                val (savedSteps, savedEpochDay) = baselineDataStore.getBaseline()
+
+
+                    baselineSteps = if (savedEpochDay == today.toEpochDay() && savedSteps > 0) {
+                        savedSteps
+                    } else {
+                        sensorCurrentStepsTotal.also {
+                            baselineDataStore.setBaselineStepCount(
+                                    steps = sensorCurrentStepsTotal,
+                                    date = today
+                            )
+                        }
+                    }
+
         }
     }
 
@@ -76,15 +89,36 @@ class StepCounterManager(
                 .toInt()
                 .coerceAtLeast(0)
 
-        _steps.value = todaySteps
+        _steps.value = todaySteps + manualStepOffset
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+
+    suspend fun editSteps(steps: Int, date: LocalDate) {
+
+        val today = LocalDate.now()
+
+        if (date != today) return
+
+        val currentSensorValue = latestSensorStepsValue ?: return
+        baselineSteps = currentSensorValue
+
+        manualStepOffset = steps
+
+        baselineDataStore.setBaselineStepCount(
+                steps = currentSensorValue,
+                date = date
+        )
+        _steps.value = steps
+
+    }
 
     suspend fun resetSteps() {
         val currentSensorValue = latestSensorStepsValue ?: return
 
         baselineSteps = currentSensorValue
+        manualStepOffset = 0
+
         baselineDataStore.setBaselineStepCount(
                 steps = currentSensorValue,
                 date = LocalDate.now()
