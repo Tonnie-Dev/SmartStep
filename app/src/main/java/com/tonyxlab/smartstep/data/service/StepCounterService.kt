@@ -14,7 +14,6 @@ import com.tonyxlab.smartstep.data.notification.StepNotificationHelper
 import com.tonyxlab.smartstep.domain.model.DailyMetric
 import com.tonyxlab.smartstep.domain.repository.ActivityStatsRepository
 import com.tonyxlab.smartstep.domain.repository.MetricsRepository
-import com.tonyxlab.smartstep.utils.MeasurementConstants.ACTIVITY_TIMEOUT_IN_SECONDS
 import com.tonyxlab.smartstep.utils.MeasurementConstants.METRIC_SAVE_INTERVAL_SECONDS
 import com.tonyxlab.smartstep.utils.UnitConverter
 import kotlinx.coroutines.CoroutineScope
@@ -28,15 +27,15 @@ import org.koin.android.ext.android.inject
 import java.time.LocalDate
 
 class StepCounterService() : Service() {
-    private val stepCounterManager: StepCounterManager by inject()
-    private val activityStatsRepository: ActivityStatsRepository by inject()
-    private val metricsRepository: MetricsRepository by inject()
-    private val onboardingDataStore: OnboardingDataStore by inject()
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    private val activityDurationTracker = ActivityDurationTracker(
-            activityTimeoutSeconds = ACTIVITY_TIMEOUT_IN_SECONDS.toInt()
-    )
+    private val metricsRepository: MetricsRepository by inject()
+    private val activityStatsRepository: ActivityStatsRepository by inject()
+    private val onboardingDataStore: OnboardingDataStore by inject()
+
+    private val durationTracker: ActivityDurationTracker by inject()
+    private val stepCounterManager: StepCounterManager by inject()
+
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private var currentDate: LocalDate = LocalDate.now()
     private var activeSeconds: Int = 0
@@ -49,24 +48,24 @@ class StepCounterService() : Service() {
 
         StepNotificationHelper.createChannel(this)
 
-        // Temporary notification to satisfy foreground service requirement immediately
+        // Temporary notification to satisfy foreground service requirement
         startForeground(
                 StepNotificationHelper.NOTIFICATION_ID,
                 StepNotificationHelper.buildNotification(
                         context = this,
                         steps = 0,
                         calories = 0,
-                        goal = 10_000
+                        goal = 0
                 )
         )
 
         stepCounterManager.start()
 
         serviceScope.launch {
-            restoreTodayMetric()
+            restoreTodayTimeMetric()
 
             val initialSteps = stepCounterManager.steps.value
-            val (initialCalories, initialGoal) = getCalculatedNotificationData(initialSteps)
+            val (initialCalories, initialGoal) = getNotificationData(initialSteps)
 
             StepNotificationHelper.updateNotification(
                     context = this@StepCounterService,
@@ -84,7 +83,7 @@ class StepCounterService() : Service() {
     private suspend fun handleStepUpdate(steps: Int) {
         checkForDateRollover()
 
-        val addedActiveSeconds = activityDurationTracker.onStepReading(steps)
+        val addedActiveSeconds = durationTracker.onStepReading(steps)
 
         if (addedActiveSeconds > 0) {
             activeSeconds += addedActiveSeconds
@@ -153,10 +152,11 @@ class StepCounterService() : Service() {
         currentDate = today
         activeSeconds = 0
         lastSavedActiveSeconds = 0
-        activityDurationTracker.reset()
+        durationTracker.reset()
 
-        restoreTodayMetric()
+        restoreTodayTimeMetric()
     }
+
     private suspend fun calculateCaloriesForSteps(steps: Int): Int {
         return UnitConverter.stepsToCalories(
                 steps = steps,
@@ -168,7 +168,9 @@ class StepCounterService() : Service() {
     private suspend fun getDailyStepGoal(): Int {
         return onboardingDataStore.dailyStepGoal.first()
     }
-    private suspend fun restoreTodayMetric() {
+
+    private suspend fun restoreTodayTimeMetric() {
+
         val todayMetric = withContext(Dispatchers.IO) {
             metricsRepository.getMetricForDate(currentDate)
         }
@@ -177,16 +179,15 @@ class StepCounterService() : Service() {
         lastSavedActiveSeconds = activeSeconds
     }
 
-    private suspend fun getCalculatedNotificationData(steps: Int): Pair<Int, Int> {
-        val calculatedCalories = UnitConverter.stepsToCalories(
+    private suspend fun getNotificationData(steps: Int): Pair<Int, Int> {
+        val calories = UnitConverter.stepsToCalories(
                 steps = steps,
                 weight = onboardingDataStore.weightInKg.first(),
                 gender = onboardingDataStore.selectedGender.first()
         )
 
         val stepGoal = onboardingDataStore.dailyStepGoal.first()
-
-        return calculatedCalories to stepGoal
+        return calories to stepGoal
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

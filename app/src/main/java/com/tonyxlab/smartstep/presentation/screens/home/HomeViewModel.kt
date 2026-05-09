@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
-import kotlin.math.max
 
 typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeActionEvent>
 
@@ -257,7 +256,7 @@ class HomeViewModel(
     }
 
     private fun observeTodayMetrics() {
-       if (currentState.stepEditorState.paused) return
+        if (currentState.stepEditorState.paused) return
         launch {
             metricsRepository.observeMetricForDate(LocalDate.now())
                     .collect { metric ->
@@ -281,7 +280,6 @@ class HomeViewModel(
                                 stepsHandler.recalculateDistanceAndCalories(updatedState)
 
                             stepsHandler.updateDisplayedTime(recalculatedState)
-
                         }
                     }
         }
@@ -398,7 +396,6 @@ class HomeViewModel(
             }
 
             if (!isOnline) return@launch
-
             refreshInsight()
         }
     }
@@ -412,7 +409,6 @@ class HomeViewModel(
     private fun saveNewStepGoal() {
         val selectedStepGoal = currentState.stepGoalSheetState.selectedStepsGoal
         launch {
-
             onboardingDataStore.setDailyStepGoal(stepGoal = selectedStepGoal)
         }
         syncGoalToRepository(goal = selectedStepGoal)
@@ -444,24 +440,29 @@ class HomeViewModel(
         }
     }
 
-    private fun resetTodaySteps() {
-        launch {
-            val today = LocalDate.now()
+    private suspend fun resetTodaySteps() {
+        val today = LocalDate.now()
 
-            updateState { state ->
-                val resetState = state.copy(
-                        currentSteps = 0
-                )
+        stepCounterManager.resetSteps()
 
-                val resetTimeState = stepsHandler.resetActivityTime(resetState)
-                stepsHandler.recalculateDistanceAndCalories(resetTimeState)
-            }
-
-            persistManualSteps(
-                    date = today,
-                    steps = 0
+        updateState { state ->
+            val resetState = state.copy(
+                    currentSteps = 0,
+                    metricDataState = state.metricDataState.copy(
+                            activityDurationSeconds = 0,
+                            distance = 0.0,
+                            calories = 0
+                    )
             )
+
+            stepsHandler.updateDisplayedTime(resetState)
         }
+
+        persistManualSteps(
+                date = today,
+                steps = 0,
+                allowDecreases = true
+        )
     }
 
     private suspend fun persistManualSteps(
@@ -475,10 +476,9 @@ class HomeViewModel(
 
             val metricToSave = savedMetric?.copy(
                     stepCount = steps,
-                    activeSeconds = if (steps == 0)
-                        0
-                    else savedMetric.activeSeconds,
-
+                    activeSeconds = if (steps == 0) 0 else savedMetric.activeSeconds,
+                    calories = if (steps == 0) 0 else currentState.metricDataState.calories,
+                    distanceKm = if (steps == 0) 0.0 else currentState.metricDataState.distance
                     ) ?: DailyMetric(
                     date = date,
                     stepCount = steps,

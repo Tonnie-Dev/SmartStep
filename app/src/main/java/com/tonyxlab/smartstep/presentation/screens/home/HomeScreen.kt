@@ -5,6 +5,7 @@ package com.tonyxlab.smartstep.presentation.screens.home
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
@@ -25,7 +26,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,8 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonyxlab.smartstep.R
-import com.tonyxlab.smartstep.data.motion.MotionStepDetector
 import com.tonyxlab.smartstep.data.notification.StepNotificationHelper
+import com.tonyxlab.smartstep.data.service.StepCounterService
 import com.tonyxlab.smartstep.presentation.core.base.BaseContentLayout
 import com.tonyxlab.smartstep.presentation.core.components.AppTopBar
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
@@ -50,9 +50,9 @@ import com.tonyxlab.smartstep.presentation.screens.home.components.AiInsightCard
 import com.tonyxlab.smartstep.presentation.screens.home.components.CloseAppDialog
 import com.tonyxlab.smartstep.presentation.screens.home.components.DateSelector
 import com.tonyxlab.smartstep.presentation.screens.home.components.NavigationDrawer
+import com.tonyxlab.smartstep.presentation.screens.home.components.OverviewCard
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionUiHandler
 import com.tonyxlab.smartstep.presentation.screens.home.components.ResetStepsDialog
-import com.tonyxlab.smartstep.presentation.screens.home.components.OverviewCard
 import com.tonyxlab.smartstep.presentation.screens.home.components.StepGoalPicker
 import com.tonyxlab.smartstep.presentation.screens.home.components.StepsEditor
 import com.tonyxlab.smartstep.presentation.screens.home.components.WeeklyAnalyticsSection
@@ -61,6 +61,7 @@ import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
 import com.tonyxlab.smartstep.presentation.theme.SmartStepTheme
 import com.tonyxlab.smartstep.utils.OnResumeEffect
+import com.tonyxlab.smartstep.utils.SetStatusBarIconsColor
 import com.tonyxlab.smartstep.utils.isIgnoringBatteryOptimizations
 import com.tonyxlab.smartstep.utils.openAppSettings
 import com.tonyxlab.smartstep.utils.rememberIsDeviceWide
@@ -216,7 +217,7 @@ fun HomeScreenContent(
     onEvent: (HomeUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-
+    SetStatusBarIconsColor(darkIcons = true)
     val activity = LocalActivity.current ?: return
     val isDeviceWide = rememberIsDeviceWide()
 
@@ -228,21 +229,7 @@ fun HomeScreenContent(
         onEvent(HomeUiEvent.BackgroundAccessChanged(isBackgroundAccessGranted))
         onEvent(HomeUiEvent.OnReturnFromBackground)
     }
-    val context = LocalContext.current
 
-    /*DisposableEffect(uiState.stepEditorState.paused) {
-        val detector = MotionStepDetector(context) {
-            onEvent(HomeUiEvent.OnMotionDetected)
-        }
-
-        if (!uiState.stepEditorState.paused) {
-            detector.start()
-        }
-
-        onDispose {
-            detector.stop()
-        }
-    }*/
     Box(
             modifier = modifier
                     .fillMaxSize()
@@ -317,11 +304,7 @@ fun HomeScreenContent(
 }
 
 private fun Activity.exitSmartStep() {
-    /*    stopService(Intent(this, StepCounterService::class.java))
-
-        WorkManager.getInstance(applicationContext)
-                .cancelAllWorkByTag("step_tracking")*/
-
+        stopService(Intent(this, StepCounterService::class.java))
     finishAndRemoveTask()
 }
 

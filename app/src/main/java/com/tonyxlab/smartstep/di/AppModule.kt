@@ -14,6 +14,7 @@ import com.tonyxlab.smartstep.data.local.database.dao.MetricsDao
 import com.tonyxlab.smartstep.data.local.datastore.BaselineDataStore
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
+import com.tonyxlab.smartstep.data.motion.ActivityDurationTracker
 import com.tonyxlab.smartstep.data.motion.StepCounterManager
 import com.tonyxlab.smartstep.data.remote.connectivity.ConnectivityObserverImpl
 import com.tonyxlab.smartstep.data.repository.ActivityStatsRepositoryImpl
@@ -88,7 +89,7 @@ val connectivityModule = module {
     single<ConnectivityObserver> { ConnectivityObserverImpl(get()) }
 }
 
-val stepCounterManagerModule = module {
+val stepActivityCounterModule = module {
     single<StepCounterManager> {
         StepCounterManager(
                 context = androidContext(),
@@ -96,6 +97,8 @@ val stepCounterManagerModule = module {
                 scope = get()
         )
     }
+
+    single<ActivityDurationTracker>{ ActivityDurationTracker() }
 }
 
 val aiCoachModule = module {
@@ -120,5 +123,5 @@ val appModule = listOf(
         repositoryModule,
         handlersModule,
         coroutineScopeModule,
-        stepCounterManagerModule
+        stepActivityCounterModule
 )

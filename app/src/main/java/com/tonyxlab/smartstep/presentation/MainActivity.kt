@@ -1,3 +1,5 @@
+@file:RequiresApi(Build.VERSION_CODES.S)
+
 package com.tonyxlab.smartstep.presentation
 
 import android.os.Build
@@ -32,7 +34,7 @@ class MainActivity : ComponentActivity() {
     var isAppReady by mutableStateOf(false)
     var startDestination by mutableStateOf<NavDestination?>(null)
 
-    @RequiresApi(Build.VERSION_CODES.Q)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

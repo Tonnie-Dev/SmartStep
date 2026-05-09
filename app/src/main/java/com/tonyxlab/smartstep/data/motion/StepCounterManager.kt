@@ -21,7 +21,7 @@ class StepCounterManager(
     private val baselineDataStore: BaselineDataStore,
     private val scope: CoroutineScope,
 
-) : SensorEventListener {
+    ) : SensorEventListener {
 
     private val sensorManager =
         context.applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -33,6 +33,8 @@ class StepCounterManager(
 
     private val _steps = MutableStateFlow(0)
     val steps = _steps.asStateFlow()
+
+    private var latestSensorStepsValue: Float? = null
 
     fun isSensorAvailable(): Boolean = stepSensor != null
 
@@ -51,6 +53,7 @@ class StepCounterManager(
 
     override fun onSensorChanged(event: SensorEvent) {
         val sensorCurrentStepsTotal = event.values[0]
+        latestSensorStepsValue = sensorCurrentStepsTotal
         val today = LocalDate.now()
         scope.launch {
             val (savedSteps, savedEpochDay) = baselineDataStore.getBaseline()
@@ -77,4 +80,17 @@ class StepCounterManager(
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+
+    suspend fun resetSteps() {
+        val currentSensorValue = latestSensorStepsValue ?: return
+
+        baselineSteps = currentSensorValue
+        baselineDataStore.setBaselineStepCount(
+                steps = currentSensorValue,
+                date = LocalDate.now()
+        )
+
+        _steps.value = 0
+
+    }
 }

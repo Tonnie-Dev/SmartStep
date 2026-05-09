@@ -1,8 +1,11 @@
 package com.tonyxlab.smartstep.data.motion
 
+import com.tonyxlab.smartstep.utils.MeasurementConstants.ACTIVITY_TIMEOUT_IN_SECONDS
+
+class ActivityDurationTracker() {
 
 
-class ActivityDurationTracker(private val activityTimeoutSeconds: Int) {
+    private val activityTimeoutSeconds = ACTIVITY_TIMEOUT_IN_SECONDS
 
     private var previousSteps: Int? = null
     private var lastMovementTimestampMillis: Long? = null
