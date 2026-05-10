@@ -128,9 +128,11 @@ class StepsHandler {
                 .trim()
 
         val steps = stepsText.toIntOrNull() ?: 0
+        val isToday = state.stepEditorState.selectedDate == LocalDate.now()
+
 
         return state.copy(
-                currentSteps = steps,
+                currentSteps = if (isToday) steps else state.currentSteps,
                 stepEditorState = state.stepEditorState.copy(
                         isStepEditorVisible = false
                 )

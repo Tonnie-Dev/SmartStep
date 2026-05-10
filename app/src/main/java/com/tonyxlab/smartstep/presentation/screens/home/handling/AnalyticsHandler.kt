@@ -3,28 +3,38 @@
 package com.tonyxlab.smartstep.presentation.screens.home.handling
 
 import android.os.Build
+import android.text.format.DateUtils.isToday
 import androidx.annotation.RequiresApi
+import com.tonyxlab.smartstep.domain.model.DailyMetric
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
 
 class AnalyticsHandler {
+    fun populateStats(
+        state: HomeUiState,
+        weeklyMetrics: List<DailyMetric>,
+        today: LocalDate = LocalDate.now()
+    ): HomeUiState {
 
-
-    fun populateStats(state: HomeUiState): HomeUiState {
-
+        val metricsByDate = weeklyMetrics.associateBy { dailyMetric ->
+            dailyMetric.date
+        }
         val stats = (6 downTo 0).map { pastDays ->
 
-            val date = LocalDate.now()
-                    .minusDays(pastDays.toLong())
-            val isToday = pastDays == 0
+            val date =today.minusDays(pastDays.toLong())
+            val metric = metricsByDate[date]
+            val isToday = date == today
             DayStats(
-                    dayLabel = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
-                    steps = 1500,
-                    goalAtThatDay = if (isToday) state.stepGoalSheetState.selectedStepsGoal else 4000,
+                    dayLabel = date.dayOfWeek.getDisplayName(
+                            TextStyle.SHORT,
+                            Locale.getDefault()
+                    ),
+                    steps = metric?.stepCount ?:0,
+                    goalAtThatDay = metric?.dailyStepGoal
+                        ?: state.stepGoalSheetState.selectedStepsGoal,
                     isCurrentDay = isToday
             )
-
         }
 
         return state.copy(

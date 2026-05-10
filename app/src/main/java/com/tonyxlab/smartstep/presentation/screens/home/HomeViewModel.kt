@@ -16,6 +16,7 @@ import com.tonyxlab.smartstep.domain.repository.MetricsRepository
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
 import com.tonyxlab.smartstep.presentation.screens.home.handling.AnalyticsHandler
+import com.tonyxlab.smartstep.presentation.screens.home.handling.DayStats
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
@@ -28,6 +29,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
 
 typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeActionEvent>
 
@@ -56,9 +59,7 @@ class HomeViewModel(
         observeInsight()
         refreshInsight()
         observeTodayMetrics()
-        updateState {
-            analyticsHandler.populateStats(it)
-        }
+        observeWeeklyMetric()
     }
 
     override fun onEvent(event: HomeUiEvent) {
@@ -288,6 +289,27 @@ class HomeViewModel(
         }
     }
 
+    private fun observeWeeklyMetric() {
+        val today = LocalDate.now()
+
+        launch {
+
+            metricsRepository.getWeeklyMetrics(startDate = today.minusDays(6))
+                    .collect { weeklyMetrics ->
+
+                        updateState { uiState ->
+
+                            analyticsHandler.populateStats(
+                                    state = uiState,
+                                    weeklyMetrics = weeklyMetrics
+                            )
+                        }
+                    }
+
+        }
+
+    }
+
     private fun observeHeightAndWeight() {
         launch {
             val heightFlow = onboardingDataStore.heightInCm
@@ -412,18 +434,31 @@ class HomeViewModel(
         launch {
 
             val selectedDate = currentState.stepEditorState.selectedDate
+            val isToday = selectedDate == LocalDate.now()
+
             val steps = currentState.stepEditorState.stepsTextFieldState.text
                     .toString()
                     .trim()
                     .toIntOrNull()
                 ?: 0
+
             // Update live sensor baseline + save to DB,  old date → save to DB only
-            if (selectedDate == LocalDate.now()) {
+            if (isToday) {
                 stepCounterManager.editSteps(
                         steps = steps,
                         date = selectedDate
                 )
+
+                updateState { state ->
+                    val updatedState = state.copy(
+                            currentSteps = steps
+                    )
+
+                    stepsHandler.recalculateDistanceAndCalories(updatedState)
+                }
             }
+
+
             updateState { state ->
                 val updatedState = state.copy(
                         currentSteps = if (selectedDate == LocalDate.now()) {
@@ -499,6 +534,7 @@ class HomeViewModel(
             )
         }
     }
+
     private suspend fun persistTodayGoal(
         dailyStepGoal: Int
     ) {
@@ -523,6 +559,7 @@ class HomeViewModel(
             )
         }
     }
+
     private fun confirmExitDialog() {
         sendActionEvent(HomeActionEvent.CloseApp)
     }
