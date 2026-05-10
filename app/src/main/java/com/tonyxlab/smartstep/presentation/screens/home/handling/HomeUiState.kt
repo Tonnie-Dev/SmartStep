@@ -8,6 +8,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Stable
 import com.tonyxlab.smartstep.presentation.core.base.handling.UiState
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
+import com.tonyxlab.smartstep.presentation.screens.home.model.WeeklyDayStat
 import com.tonyxlab.smartstep.presentation.screens.onboarding.handling.Gender
 import com.tonyxlab.smartstep.utils.AppDefaults
 import java.time.LocalDate
@@ -68,7 +69,7 @@ data class HomeUiState(
 
     @Stable
     data class WeeklyAnalyticState(
-        val weeklyStats: List<DayStats> = emptyList(),
+        val weeklyStats: List<WeeklyDayStat> = emptyList(),
     ) {
         val dailyAverageSteps: Int
             get() = if (weeklyStats.isEmpty()) 0
@@ -81,18 +82,4 @@ data class HomeUiState(
         val isOnline: Boolean = false,
         val insightMessage: String = "",
     )
-}
-
-data class DayStats(
-    val dayLabel: String,
-    val steps: Int,
-    val goalAtThatDay: Int,
-    val isCurrentDay: Boolean = false
-) {
-
-    val progress: Float
-        get() = if (goalAtThatDay > 0)
-            (steps.toFloat() / goalAtThatDay).coerceAtMost(1f)
-        else
-            0f
 }

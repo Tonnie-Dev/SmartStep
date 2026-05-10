@@ -3,9 +3,9 @@
 package com.tonyxlab.smartstep.presentation.screens.home.handling
 
 import android.os.Build
-import android.text.format.DateUtils.isToday
 import androidx.annotation.RequiresApi
 import com.tonyxlab.smartstep.domain.model.DailyMetric
+import com.tonyxlab.smartstep.presentation.screens.home.model.WeeklyDayStat
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
@@ -22,18 +22,17 @@ class AnalyticsHandler {
         }
         val stats = (6 downTo 0).map { pastDays ->
 
-            val date =today.minusDays(pastDays.toLong())
+            val date = today.minusDays(pastDays.toLong())
             val metric = metricsByDate[date]
-            val isToday = date == today
-            DayStats(
+            
+            WeeklyDayStat(
                     dayLabel = date.dayOfWeek.getDisplayName(
                             TextStyle.SHORT,
                             Locale.getDefault()
                     ),
-                    steps = metric?.stepCount ?:0,
+                    steps = metric?.stepCount ?: 0,
                     goalAtThatDay = metric?.dailyStepGoal
                         ?: state.stepGoalSheetState.selectedStepsGoal,
-                    isCurrentDay = isToday
             )
         }
 

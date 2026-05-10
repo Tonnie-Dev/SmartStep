@@ -31,8 +31,9 @@ import androidx.compose.ui.unit.dp
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.screens.home.handling.AnalyticsHandler
-import com.tonyxlab.smartstep.presentation.screens.home.handling.DayStats
+
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
+import com.tonyxlab.smartstep.presentation.screens.home.model.WeeklyDayStat
 import com.tonyxlab.smartstep.presentation.theme.BackgroundWhite
 import com.tonyxlab.smartstep.presentation.theme.BodySmallRegular
 import com.tonyxlab.smartstep.presentation.theme.ProgressGreen
@@ -79,7 +80,7 @@ fun WeeklyAnalyticsSection(
 
 @Composable
 private fun DayProgressItem(
-    stats: DayStats,
+    stats: WeeklyDayStat,
     modifier: Modifier = Modifier
 ) {
 
@@ -125,9 +126,6 @@ private fun DayProgressItem(
 @Preview
 @Composable
 private fun WeeklyAnalyticsSectionPreview() {
-
-    val analyticsHandler = AnalyticsHandler()
-
     SmartStepTheme {
         Box(
                 modifier = Modifier

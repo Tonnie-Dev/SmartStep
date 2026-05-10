@@ -16,7 +16,6 @@ import com.tonyxlab.smartstep.domain.repository.MetricsRepository
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
 import com.tonyxlab.smartstep.presentation.screens.home.handling.AnalyticsHandler
-import com.tonyxlab.smartstep.presentation.screens.home.handling.DayStats
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
@@ -29,8 +28,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
-import java.time.format.TextStyle
-import java.util.Locale
 
 typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeActionEvent>
 
@@ -267,23 +264,19 @@ class HomeViewModel(
 
                         if (metric == null) return@collect
                         if (currentState.stepEditorState.paused) return@collect
+
                         updateState { state ->
 
-                            val safeStepCount = maxOf(
-                                    a = metric.stepCount,
-                                    b = currentState.currentSteps
-                            )
-
                             val updatedState = state.copy(
-                                    currentSteps = safeStepCount,
+                                    currentSteps = metric.stepCount,
                                     metricDataState = state.metricDataState.copy(
-                                            activityDurationSeconds = metric.activeSeconds
+                                            activityDurationSeconds = metric.activeSeconds,
+                                            calories = metric.calories,
+                                            distance = metric.distanceKm
                                     )
                             )
-                            val recalculatedState =
-                                stepsHandler.recalculateDistanceAndCalories(updatedState)
 
-                            stepsHandler.updateDisplayedTime(recalculatedState)
+                            stepsHandler.updateDisplayedTime(updatedState)
                         }
                     }
         }
@@ -458,7 +451,6 @@ class HomeViewModel(
                 }
             }
 
-
             updateState { state ->
                 val updatedState = state.copy(
                         currentSteps = if (selectedDate == LocalDate.now()) {
@@ -527,7 +519,6 @@ class HomeViewModel(
                     calories = if (steps == 0) 0 else currentState.metricDataState.calories,
                     distanceKm = if (steps == 0) 0.0 else currentState.metricDataState.distance
             )
-
             metricsRepository.upsertDailyMetric(
                     newDailyMetric = metricToSave,
                     allowDecreases = allowDecreases
