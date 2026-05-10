@@ -9,7 +9,6 @@ import com.tonyxlab.smartstep.domain.repository.MetricsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
-import kotlin.math.max
 
 class MetricsRepositoryImpl(private val dao: MetricsDao) : MetricsRepository {
     override fun getAllMetrics(): Flow<List<DailyMetric>> {
@@ -27,10 +26,6 @@ class MetricsRepositoryImpl(private val dao: MetricsDao) : MetricsRepository {
                 .map { entities -> entities.map(DailyMetricEntity::toModel) }
     }
 
-/*    override suspend fun upsertDailyMetric(dailyMetric: DailyMetric) {
-        dao.upsertDailyMetric(dailyMetric.toEntity())
-    }*/
-
     override suspend fun getMetricForDate(date: LocalDate): DailyMetric? {
         return dao.getMetricForDate(date.toEpochDay())
                 ?.toModel()
@@ -46,17 +41,51 @@ class MetricsRepositoryImpl(private val dao: MetricsDao) : MetricsRepository {
         allowDecreases: Boolean
     ) {
         val savedMetric = dao.getMetricForDate(newDailyMetric.date.toEpochDay())
-        val metricToSave = if (savedMetric == null || allowDecreases) {
-            newDailyMetric
-        } else {
-            newDailyMetric.copy(
-                    stepCount = maxOf(savedMetric.stepCount, newDailyMetric.stepCount),
-                    activeSeconds = max(savedMetric.activeSeconds, newDailyMetric.activeSeconds),
-                    calories = newDailyMetric.calories,
-                    distanceKm = newDailyMetric.distanceKm
-            )
+
+
+        val metricToSave = when {
+
+            savedMetric == null -> {
+                newDailyMetric
+            }
+
+            allowDecreases -> {
+                newDailyMetric.copy(
+                        dailyStepGoal = resolvedDailyStepGoal(
+                                savedStepGoal = savedMetric.dailyStepGoal,
+                                newDailyMetric = newDailyMetric
+                        )
+                )
+            }
+
+            else -> {
+
+                newDailyMetric.copy(
+                        stepCount = maxOf(savedMetric.stepCount, newDailyMetric.stepCount),
+                        activeSeconds = maxOf(savedMetric.activeSeconds, newDailyMetric.activeSeconds),
+                        calories = newDailyMetric.calories,
+                        distanceKm = newDailyMetric.distanceKm,
+                        dailyStepGoal = resolvedDailyStepGoal(
+                                savedStepGoal = savedMetric.dailyStepGoal,
+                                newDailyMetric = newDailyMetric
+                        )
+                )
+            }
+
+
         }
 
-        dao.upsertDailyMetric(metricToSave.toEntity())
+        dao.upsertDailyMetric(dailyMetricEntity = metricToSave.toEntity())
+    }
+
+    private fun resolvedDailyStepGoal(savedStepGoal: Int, newDailyMetric: DailyMetric): Int {
+
+        val today = LocalDate.now()
+
+        return if (newDailyMetric.date.isBefore(today))
+            savedStepGoal
+        else
+            newDailyMetric.dailyStepGoal
+
     }
 }

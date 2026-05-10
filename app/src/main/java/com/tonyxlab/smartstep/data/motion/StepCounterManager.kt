@@ -2,7 +2,6 @@
 
 package com.tonyxlab.smartstep.data.motion
 
-import android.R.attr.baseline
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent

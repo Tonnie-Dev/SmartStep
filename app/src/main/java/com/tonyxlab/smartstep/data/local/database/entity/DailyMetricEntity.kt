@@ -9,12 +9,19 @@ data class DailyMetricEntity(
     @PrimaryKey
     @ColumnInfo(name = "date")
     val date: Long,
+
     @ColumnInfo(name = "step_count")
     val stepCount: Int,
+
+    @ColumnInfo(name = "daily_step_goal")
+    val dailyStepGoal: Int,
+
     @ColumnInfo(name = "calories")
     val calories: Int,
+
     @ColumnInfo(name = "active_seconds")
     val activeSeconds: Int,
+
     @ColumnInfo(name = "distance_km")
     val distanceKm: Double
 )

@@ -61,13 +61,13 @@ object UnitConverter {
         return (stepsToMeters(heightInCm, steps) / METERS_PER_MILE).roundToOneDecimal()
     }
 
-    fun stepsToCalories(steps: Int, weight: Int, gender: Gender): Int {
+    fun stepsToCalories(steps: Int, weightInKg: Int, gender: Gender): Int {
 
         val genderFactor = when (gender) {
             Gender.MALE -> CALORY_GENDER_FACTOR_MALE
             Gender.FEMALE -> CALORY_GENDER_FACTOR_FEMALE
         }
-        val kcalPerStep = weight * CALORIES_PER_STEP * genderFactor
+        val kcalPerStep = weightInKg * CALORIES_PER_STEP * genderFactor
 
         return (kcalPerStep * steps).roundToInt()
     }

@@ -22,7 +22,7 @@ class StepsHandler {
 
         val caloriesBurnt = UnitConverter.stepsToCalories(
                 steps = state.currentSteps,
-                weight = weightInKg,
+                weightInKg = weightInKg,
                 gender = state.metricDataState.gender
         )
 

@@ -92,7 +92,7 @@ class StepCounterService() : Service() {
         activityStatsRepository.updateStepCount(steps)
 
         if (shouldPersist(addedActiveSeconds)) {
-            persistStepAndActiveSeconds(steps)
+          persistCurrentMetricSnapshot(steps)
         }
 
         StepNotificationHelper.updateNotification(
@@ -109,28 +109,48 @@ class StepCounterService() : Service() {
         return activeSeconds - lastSavedActiveSeconds >= METRIC_SAVE_INTERVAL_SECONDS
     }
 
-    private suspend fun persistStepAndActiveSeconds(steps: Int) {
+    private suspend fun persistCurrentMetricSnapshot(steps: Int) {
         val savedMetric = withContext(Dispatchers.IO) {
             metricsRepository.getMetricForDate(currentDate)
         }
 
+        val heightInCm = withContext(Dispatchers.IO) {
+            onboardingDataStore.heightInCm.first()
+        }
+
+        val weightInKg = withContext(Dispatchers.IO) {
+            onboardingDataStore.weightInKg.first()
+        }
+
+        val selectedGender = withContext(Dispatchers.IO) {
+            onboardingDataStore.selectedGender.first()
+        }
+
         val calculatedDistanceKm =
-            UnitConverter.stepsToKm(steps, onboardingDataStore.heightInCm.first())
+            UnitConverter.stepsToKm(
+                    steps = steps,
+                    heightInCm = heightInCm
+            )
 
         val calculatedCalories =
             UnitConverter.stepsToCalories(
-                    steps,
-                    onboardingDataStore.weightInKg.first(),
-                    onboardingDataStore.selectedGender.first()
+                    steps = steps,
+                    weightInKg = weightInKg,
+                    gender = selectedGender
             )
+
         val metricToSave = savedMetric?.copy(
                 stepCount = steps,
+                dailyStepGoal = savedMetric.dailyStepGoal,
                 activeSeconds = activeSeconds,
                 calories = calculatedCalories,
                 distanceKm = calculatedDistanceKm
         ) ?: DailyMetric(
                 date = currentDate,
                 stepCount = steps,
+                dailyStepGoal = withContext(Dispatchers.IO) {
+                    onboardingDataStore.dailyStepGoal.first()
+                },
                 calories = calculatedCalories,
                 activeSeconds = activeSeconds,
                 distanceKm = calculatedDistanceKm
@@ -160,7 +180,7 @@ class StepCounterService() : Service() {
     private suspend fun calculateCaloriesForSteps(steps: Int): Int {
         return UnitConverter.stepsToCalories(
                 steps = steps,
-                weight = onboardingDataStore.weightInKg.first(),
+                weightInKg = onboardingDataStore.weightInKg.first(),
                 gender = onboardingDataStore.selectedGender.first()
         )
     }
@@ -182,7 +202,7 @@ class StepCounterService() : Service() {
     private suspend fun getNotificationData(steps: Int): Pair<Int, Int> {
         val calories = UnitConverter.stepsToCalories(
                 steps = steps,
-                weight = onboardingDataStore.weightInKg.first(),
+                weightInKg = onboardingDataStore.weightInKg.first(),
                 gender = onboardingDataStore.selectedGender.first()
         )
 
@@ -198,7 +218,7 @@ class StepCounterService() : Service() {
         val latestSteps = stepCounterManager.steps.value
 
         serviceScope.launch {
-            persistStepAndActiveSeconds(latestSteps)
+            persistCurrentMetricSnapshot(latestSteps)
             serviceScope.cancel()
         }
 

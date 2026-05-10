@@ -401,6 +401,7 @@ class HomeViewModel(
         val selectedStepGoal = currentState.stepGoalSheetState.selectedStepsGoal
         launch {
             onboardingDataStore.setDailyStepGoal(stepGoal = selectedStepGoal)
+            persistTodayGoal(dailyStepGoal = selectedStepGoal)
         }
         syncGoalToRepository(goal = selectedStepGoal)
         refreshInsight(overrideGoal = selectedStepGoal)
@@ -469,28 +470,59 @@ class HomeViewModel(
         allowDecreases: Boolean = true
     ) {
         withContext(Dispatchers.IO) {
-
             val savedMetric = metricsRepository.getMetricForDate(date)
+
+            val goalToSave = if (date == LocalDate.now()) {
+                currentState.stepGoalSheetState.selectedStepsGoal
+            } else {
+                savedMetric?.dailyStepGoal ?: currentState.stepGoalSheetState.selectedStepsGoal
+            }
 
             val metricToSave = savedMetric?.copy(
                     stepCount = steps,
+                    dailyStepGoal = goalToSave,
                     activeSeconds = if (steps == 0) 0 else savedMetric.activeSeconds,
                     calories = if (steps == 0) 0 else currentState.metricDataState.calories,
                     distanceKm = if (steps == 0) 0.0 else currentState.metricDataState.distance
             ) ?: DailyMetric(
                     date = date,
                     stepCount = steps,
+                    dailyStepGoal = goalToSave,
                     activeSeconds = 0,
-                    calories = currentState.metricDataState.calories,
-                    distanceKm = currentState.metricDataState.distance,
+                    calories = if (steps == 0) 0 else currentState.metricDataState.calories,
+                    distanceKm = if (steps == 0) 0.0 else currentState.metricDataState.distance
             )
+
             metricsRepository.upsertDailyMetric(
                     newDailyMetric = metricToSave,
-                    allowDecreases = allowDecreases,
+                    allowDecreases = allowDecreases
             )
         }
     }
+    private suspend fun persistTodayGoal(
+        dailyStepGoal: Int
+    ) {
+        withContext(Dispatchers.IO) {
+            val today = LocalDate.now()
+            val savedMetric = metricsRepository.getMetricForDate(today)
 
+            val metricToSave = savedMetric?.copy(
+                    dailyStepGoal = dailyStepGoal
+            ) ?: DailyMetric(
+                    date = today,
+                    stepCount = currentState.currentSteps,
+                    dailyStepGoal = dailyStepGoal,
+                    activeSeconds = currentState.metricDataState.activityDurationSeconds,
+                    calories = currentState.metricDataState.calories,
+                    distanceKm = currentState.metricDataState.distance
+            )
+
+            metricsRepository.upsertDailyMetric(
+                    newDailyMetric = metricToSave,
+                    allowDecreases = true
+            )
+        }
+    }
     private fun confirmExitDialog() {
         sendActionEvent(HomeActionEvent.CloseApp)
     }

@@ -40,42 +40,6 @@ class BaselineDataStore(private val context: Context) {
         )
     }
 
-
-    suspend fun saveBaseline(steps: Float, date: LocalDate = LocalDate.now()){
-
-        context.dataStore.edit { prefs->
-
-            prefs [BASELINE_STEPS] = steps
-            prefs [BASELINE_DATE] = date.toEpochDay()
-        }
-
-
-    }
-
-    val baselineDate: Flow<Long> = context.dataStore.data.catch { e ->
-
-        if (e is IOException) {
-            emit(emptyPreferences())
-        } else {
-            throw e
-        }
-    }
-            .map { prefs ->
-
-                prefs[BaselineKeyPrefs.BASELINE_DATE] ?: 0L
-            }
-
-    val baselineStepCount: Flow<Float> =
-        context.dataStore.data.catch { e ->
-            if (e is IOException) {
-                emit(emptyPreferences())
-            } else throw e
-        }
-                .map { prefs ->
-
-                    prefs[BaselineKeyPrefs.BASELINE_STEPS] ?: 0f
-                }
-
     suspend fun setBaselineStepCount(steps: Float, date: LocalDate = LocalDate.now()) {
         context.dataStore.edit { prefs ->
             prefs[BaselineKeyPrefs.BASELINE_STEPS] = steps
@@ -83,9 +47,4 @@ class BaselineDataStore(private val context: Context) {
         }
     }
 
-    suspend fun clearBaselineStepCount() {
-        context.dataStore.edit { prefs ->
-            prefs.remove(BaselineKeyPrefs.BASELINE_STEPS)
-        }
-    }
 }
