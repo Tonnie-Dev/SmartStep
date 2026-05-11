@@ -20,8 +20,7 @@ class StepCounterManager(
     context: Context,
     private val baselineDataStore: BaselineDataStore,
     private val scope: CoroutineScope,
-
-    ) : SensorEventListener {
+) : SensorEventListener {
 
     private val sensorManager =
         context.applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -30,18 +29,16 @@ class StepCounterManager(
         sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
     private var baselineSteps: Float? = null
-
-    private var manualStepOffset: Int = 0
+    private var latestSensorStepsValue: Float? = null
 
     private val _steps = MutableStateFlow(0)
     val steps = _steps.asStateFlow()
-
-    private var latestSensorStepsValue: Float? = null
 
     fun isSensorAvailable(): Boolean = stepSensor != null
 
     fun start() {
         val sensor = stepSensor ?: return
+
         sensorManager.registerListener(
                 this,
                 sensor,
@@ -56,67 +53,74 @@ class StepCounterManager(
     override fun onSensorChanged(event: SensorEvent) {
         val sensorCurrentStepsTotal = event.values[0]
         latestSensorStepsValue = sensorCurrentStepsTotal
-        createBaseline(sensorCurrentStepsTotal)
-        updateSteps(sensorCurrentStepsTotal)
 
+        if (baselineSteps == null) {
+            createBaseline(sensorCurrentStepsTotal)
+            return
+        }
+
+        updateSteps(sensorCurrentStepsTotal)
     }
 
     private fun createBaseline(sensorCurrentStepsTotal: Float) {
-        if (baselineSteps!= null) return
+        if (baselineSteps != null) return
 
-            val today = LocalDate.now()
-            scope.launch {
-                val (savedSteps, savedEpochDay) = baselineDataStore.getBaseline()
+        val today = LocalDate.now()
 
+        scope.launch {
+            val (savedSteps, savedEpochDay) = baselineDataStore.getBaseline()
 
-                    baselineSteps = if (savedEpochDay == today.toEpochDay() && savedSteps > 0) {
-                        savedSteps
-                    } else {
-                        sensorCurrentStepsTotal.also {
-                            baselineDataStore.setBaselineStepCount(
-                                    steps = sensorCurrentStepsTotal,
-                                    date = today
-                            )
-                        }
-                    }
+            baselineSteps = if (savedEpochDay == today.toEpochDay() && savedSteps > 0f) {
+                savedSteps
+            } else {
+                sensorCurrentStepsTotal.also { currentSensorValue ->
+                    baselineDataStore.setBaselineStepCount(
+                            steps = currentSensorValue,
+                            date = today
+                    )
+                }
+            }
 
+            updateSteps(sensorCurrentStepsTotal)
         }
     }
 
     private fun updateSteps(totalSteps: Float) {
-        val todaySteps = (totalSteps - (baselineSteps ?: totalSteps))
+        val baseline = baselineSteps ?: totalSteps
+
+        val todaySteps = (totalSteps - baseline)
                 .toInt()
                 .coerceAtLeast(0)
 
-        _steps.value = todaySteps + manualStepOffset
+        _steps.value = todaySteps
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
 
     suspend fun editSteps(steps: Int, date: LocalDate) {
-
         val today = LocalDate.now()
 
         if (date != today) return
 
         val currentSensorValue = latestSensorStepsValue ?: return
-        baselineSteps = currentSensorValue
 
-        manualStepOffset = steps
+        val newBaseline = (currentSensorValue - steps)
+                .coerceAtLeast(0f)
+
+        baselineSteps = newBaseline
 
         baselineDataStore.setBaselineStepCount(
-                steps = currentSensorValue,
+                steps = newBaseline,
                 date = date
         )
-        _steps.value = steps
 
+        _steps.value = steps
     }
 
     suspend fun resetSteps() {
         val currentSensorValue = latestSensorStepsValue ?: return
 
         baselineSteps = currentSensorValue
-        manualStepOffset = 0
 
         baselineDataStore.setBaselineStepCount(
                 steps = currentSensorValue,
@@ -124,6 +128,5 @@ class StepCounterManager(
         )
 
         _steps.value = 0
-
     }
 }

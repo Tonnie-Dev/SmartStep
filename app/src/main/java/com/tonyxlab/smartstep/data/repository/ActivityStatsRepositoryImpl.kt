@@ -5,9 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class ActivityStatsRepositoryImpl(
-
-) : ActivityStatsRepository{
+class ActivityStatsRepositoryImpl : ActivityStatsRepository {
 
     private val _stepCount = MutableStateFlow(0)
     override val stepCount: StateFlow<Int>
@@ -17,11 +15,8 @@ class ActivityStatsRepositoryImpl(
     override val dailyGoal: StateFlow<Int>
         get() = _dailyGoal.asStateFlow()
 
-
-
     override fun updateStepCount(steps: Int) {
-       _stepCount.value = steps
-
+        _stepCount.value = steps
 
     }
 

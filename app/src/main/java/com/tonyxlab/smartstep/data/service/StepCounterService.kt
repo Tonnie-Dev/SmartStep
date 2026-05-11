@@ -108,11 +108,15 @@ class StepCounterService() : Service() {
 
         return activeSeconds - lastSavedActiveSeconds >= METRIC_SAVE_INTERVAL_SECONDS
     }
-
     private suspend fun persistCurrentMetricSnapshot(steps: Int) {
         val savedMetric = withContext(Dispatchers.IO) {
             metricsRepository.getMetricForDate(currentDate)
         }
+
+        val effectiveSteps = maxOf(
+                savedMetric?.stepCount ?: 0,
+                steps
+        )
 
         val heightInCm = withContext(Dispatchers.IO) {
             onboardingDataStore.heightInCm.first()
@@ -128,26 +132,26 @@ class StepCounterService() : Service() {
 
         val calculatedDistanceKm =
             UnitConverter.stepsToKm(
-                    steps = steps,
+                    steps = effectiveSteps,
                     heightInCm = heightInCm
             )
 
         val calculatedCalories =
             UnitConverter.stepsToCalories(
-                    steps = steps,
+                    steps = effectiveSteps,
                     weightInKg = weightInKg,
                     gender = selectedGender
             )
 
         val metricToSave = savedMetric?.copy(
-                stepCount = steps,
+                stepCount = effectiveSteps,
                 dailyStepGoal = savedMetric.dailyStepGoal,
-                activeSeconds = activeSeconds,
+                activeSeconds = maxOf(savedMetric.activeSeconds, activeSeconds),
                 calories = calculatedCalories,
                 distanceKm = calculatedDistanceKm
         ) ?: DailyMetric(
                 date = currentDate,
-                stepCount = steps,
+                stepCount = effectiveSteps,
                 dailyStepGoal = withContext(Dispatchers.IO) {
                     onboardingDataStore.dailyStepGoal.first()
                 },
