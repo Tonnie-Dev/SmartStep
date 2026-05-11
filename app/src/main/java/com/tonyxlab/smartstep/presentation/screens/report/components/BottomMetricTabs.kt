@@ -63,7 +63,7 @@ fun BottomMetricTabs(
 
                 MetricTabItem(
                         metricType = metricType,
-                        isSelected = uiState.selectedMetricType == metricType,
+                        isSelected = uiState.activityReportState.selectedMetricType == metricType,
                         onClick = { onEvent(ReportUiEvent.SelectMetricType(metricType )) },
                         modifier = Modifier.weight(1f)
                 )

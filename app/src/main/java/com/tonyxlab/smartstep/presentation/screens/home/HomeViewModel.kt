@@ -27,6 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.time.LocalDate
 
 typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeActionEvent>
@@ -166,12 +167,12 @@ class HomeViewModel(
             // Overview Card
             HomeUiEvent.PauseStepCounting -> {
                 updateState { stepsHandler.pauseStepCounting(it) }
-
             }
 
             HomeUiEvent.ViewReports -> {
                 sendActionEvent(HomeActionEvent.NavigateToReports)
             }
+
             // Date Selector
             is HomeUiEvent.OnDaySelected -> updateState {
                 stepsHandler.onDaySelected(currentState, event.value)
@@ -203,13 +204,10 @@ class HomeViewModel(
             }
 
             // Motion
-            HomeUiEvent.OnMotionDetected -> {/*onStepDetected()*/
-            }
+            HomeUiEvent.OnMotionDetected -> {/*onStepDetected()*/ }
 
             // Return from Background
-            HomeUiEvent.OnReturnFromBackground -> {
-                refreshInsight()
-            }
+            HomeUiEvent.OnReturnFromBackground -> { refreshInsight() }
 
             // Reset Dialog
             HomeUiEvent.ConfirmResetDialog -> {
@@ -264,9 +262,7 @@ class HomeViewModel(
 
                         if (metric == null) return@collect
                         if (currentState.stepEditorState.paused) return@collect
-
                         updateState { state ->
-
                             val updatedState = state.copy(
                                     currentSteps = metric.stepCount,
                                     metricDataState = state.metricDataState.copy(
@@ -275,7 +271,6 @@ class HomeViewModel(
                                             distance = metric.distanceKm
                                     )
                             )
-
                             stepsHandler.updateDisplayedTime(updatedState)
                         }
                     }

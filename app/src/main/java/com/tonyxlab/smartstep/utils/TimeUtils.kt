@@ -27,6 +27,12 @@ fun getTimeOfTheDay(): String {
     }
 }
 
+fun LocalDate.toDayName(): String{
+
+    val formatter = DateTimeFormatter.ofPattern("EEEE", Locale.getDefault())
+    return this.format(formatter)
+}
+
 
 object WeekUtils{
 

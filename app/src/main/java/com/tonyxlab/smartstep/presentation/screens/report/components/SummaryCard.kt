@@ -49,7 +49,7 @@ fun SummaryCard(
                 horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                    text = when(uiState.selectedMetricType) {
+                    text = when(uiState.activityReportState.selectedMetricType) {
                        MetricType.STEPS -> stringResource(id = R.string.label_steps)
                        MetricType.CALORIES -> stringResource(id = R.string.label_text_calories)
                        MetricType.TIME -> stringResource(id = R.string.label_text_minutes)
@@ -68,7 +68,7 @@ fun SummaryCard(
         Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceMedium)) {
 
             Text(
-                    text = uiState.stepCount.formatWithCommas(),
+                    text = uiState.activityReportState.totalDisplayValue,
                     style = MaterialTheme.typography.TittleAccent,
                     color = MaterialTheme.colorScheme.surface,
             )
@@ -76,7 +76,8 @@ fun SummaryCard(
             Text(
                     text = stringResource(
                             id = R.string.label_text_daily_average,
-                            uiState.averageSteps
+                           uiState.activityReportState.averageDisplayValue,
+                            uiState.activityReportState.selectedMetricType.unitName(isHeader = true)
                     ),
                     style = MaterialTheme.typography.BodyMediumRegular,
                     color = MaterialTheme.colorScheme.background,

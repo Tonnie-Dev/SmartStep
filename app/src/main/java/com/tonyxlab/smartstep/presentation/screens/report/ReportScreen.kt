@@ -18,11 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.base.BaseContentLayout
 import com.tonyxlab.smartstep.presentation.core.components.AppTopBar
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
 import com.tonyxlab.smartstep.presentation.navigation.Navigator
+import com.tonyxlab.smartstep.presentation.screens.report.components.ActivityReportSection
 import com.tonyxlab.smartstep.presentation.screens.report.components.BottomMetricTabs
 import com.tonyxlab.smartstep.presentation.screens.report.components.SummaryCard
 import com.tonyxlab.smartstep.presentation.screens.report.components.WeekSelector
@@ -84,11 +86,15 @@ fun ReportScreenContent(
                     uiState = uiState,
                     onEvent = onEvent
             )
-
+            ActivityReportSection(uiState = uiState)
         }
 
+
+
         BottomMetricTabs(
-                modifier = Modifier.align(alignment = Alignment.BottomCenter),
+                modifier = Modifier
+                        .align(alignment = Alignment.BottomCenter)
+                        .padding(horizontal = 16.dp),
                 uiState = uiState,
                 onEvent = onEvent
         )

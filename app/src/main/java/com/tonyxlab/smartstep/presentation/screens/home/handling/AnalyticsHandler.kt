@@ -24,7 +24,7 @@ class AnalyticsHandler {
 
             val date = today.minusDays(pastDays.toLong())
             val metric = metricsByDate[date]
-            
+
             WeeklyDayStat(
                     dayLabel = date.dayOfWeek.getDisplayName(
                             TextStyle.SHORT,

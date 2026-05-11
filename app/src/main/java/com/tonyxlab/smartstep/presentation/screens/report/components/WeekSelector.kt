@@ -64,7 +64,7 @@ fun WeekSelector(
 
             Text(
                  modifier = Modifier.width(MaterialTheme.spacing.spaceOneHundredFifty),
-                    text = uiState.weekDateState.currentWeekRange,
+                    text = uiState.weekDateState.displayRange,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
