@@ -23,8 +23,8 @@ enum class MetricType {
         return when (this) {
             STEPS -> "steps"
             CALORIES -> if (isHeader) "kcal"  else  "calories"
-            TIME -> "minutes"
-            DISTANCE -> "kilometers"
+            TIME ->if (isHeader) "min"  else  "minutes"
+            DISTANCE ->if (isHeader) "km"  else  "kilometers"
         }
     }
 

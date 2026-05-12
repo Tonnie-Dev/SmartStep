@@ -9,13 +9,15 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
@@ -29,10 +31,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight.Companion.W600
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.presentation.core.utils.spacing
-import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
 import com.tonyxlab.smartstep.presentation.screens.report.handling.ReportUiState
 import com.tonyxlab.smartstep.presentation.screens.report.model.ActivityState
 import com.tonyxlab.smartstep.presentation.screens.report.model.ActivityUiItem
@@ -48,31 +48,62 @@ import com.tonyxlab.smartstep.utils.toDayName
 @Composable
 fun ActivityReportSection(
     uiState: ReportUiState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isDeviceWide: Boolean = false
 ) {
     val items = uiState.activityReportState.weeklyMetrics
     val metricType = uiState.activityReportState.selectedMetricType
 
-    LazyColumn(
-            modifier = modifier.padding(bottom = MaterialTheme.spacing.spaceTen * 5),
-           verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)
-    ) {
+    if (isDeviceWide){
 
-        items(
-                items = items,
-                key = { it.date }
-        ) { metric ->
+        LazyVerticalGrid(
+                modifier = modifier
+                        .padding(bottom = MaterialTheme.spacing.spaceTen * 5),
+                columns = GridCells.Fixed(count = 2),
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)
+        ) {
+            items(
+                    items = items,
+                    key = { it.date }
+            ) { metric ->
 
-            ActivityItem(
-                    modifier = Modifier,
-                    activityUiItem = ActivityUiItem(
-                            dayName = metric.date.toDayName(),
-                            metricValue = metricType.getDisplayValue(metric),
-                            metricType = metricType,
-                            stepGoal = metric.dailyStepGoal,
-                            activityState = metric.toActivityState(metricType)
-                    )
-            )
+                ActivityItem(
+                        modifier = Modifier,
+                        activityUiItem = ActivityUiItem(
+                                dayName = metric.date.toDayName(),
+                                metricValue = metricType.getDisplayValue(metric),
+                                metricType = metricType,
+                                stepGoal = metric.dailyStepGoal,
+                                activityState = metric.toActivityState(metricType)
+                        )
+                )
+            }
+        }
+    }else {
+
+        LazyColumn(
+                modifier = modifier
+                        .padding(bottom = MaterialTheme.spacing.spaceTen * 5),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)
+        ) {
+
+            items(
+                    items = items,
+                    key = { it.date }
+            ) { metric ->
+
+                ActivityItem(
+                        modifier = Modifier,
+                        activityUiItem = ActivityUiItem(
+                                dayName = metric.date.toDayName(),
+                                metricValue = metricType.getDisplayValue(metric),
+                                metricType = metricType,
+                                stepGoal = metric.dailyStepGoal,
+                                activityState = metric.toActivityState(metricType)
+                        )
+                )
+            }
         }
     }
 }
@@ -114,10 +145,15 @@ fun ActivityItem(
                     style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = W600
                     ),
-                    color = if (isToday)
+                    color = when(activityUiItem.activityState){
+                        ActivityState.HAS_DATA ->MaterialTheme.colorScheme.onSecondary
+                        ActivityState.IN_PROGRESS ->MaterialTheme.colorScheme.primary
+                        ActivityState.NO_DATA ->MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                    /*color = if (isToday)
                         MaterialTheme.colorScheme.primary
                     else
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                        MaterialTheme.colorScheme.onSurfaceVariant*/
             )
 
             Box(
@@ -185,7 +221,6 @@ fun ActivityItem(
                 } else {
 
                     Text(
-
                             text = stringResource(
                                     id = R.string.label_text_step_goal,
                                     activityUiItem.stepGoal

@@ -59,11 +59,14 @@ fun OverviewCard(
                     .fillMaxWidth()
                     .clip(shape = MaterialTheme.shapes.RoundedCornerShape24)
                     .background(MaterialTheme.colorScheme.primary)
-                    .clickable{ onEvent(HomeUiEvent.ViewReports)}
+                    .clickable { onEvent(HomeUiEvent.ViewReports) }
                     .padding(all = MaterialTheme.spacing.spaceMedium),
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceMedium)
     ) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             Box(
                     modifier = Modifier
                             .size(MaterialTheme.spacing.spaceTen * 4)

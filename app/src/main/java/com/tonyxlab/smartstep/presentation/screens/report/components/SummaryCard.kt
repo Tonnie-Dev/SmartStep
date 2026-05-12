@@ -40,7 +40,6 @@ fun SummaryCard(
             modifier = modifier
                     .clip(MaterialTheme.shapes.large)
                     .background(MaterialTheme.colorScheme.primary)
-                    .fillMaxWidth()
                     .padding(all = MaterialTheme.spacing.spaceExtraSmall * 6)
     ) {
 
