@@ -81,24 +81,30 @@ class StepCounterService() : Service() {
     }
 
     private suspend fun handleStepUpdate(steps: Int) {
-        checkForDateRollover()
+        val didRollover = checkForDateRollover(steps)
 
-        val addedActiveSeconds = durationTracker.onStepReading(steps)
+        val safeSteps = if (didRollover) {
+            stepCounterManager.steps.value
+        } else {
+            steps
+        }
+
+        val addedActiveSeconds = durationTracker.onStepReading(safeSteps)
 
         if (addedActiveSeconds > 0) {
             activeSeconds += addedActiveSeconds
         }
 
-        activityStatsRepository.updateStepCount(steps)
+        activityStatsRepository.updateStepCount(safeSteps)
 
         if (shouldPersist(addedActiveSeconds)) {
-          persistCurrentMetricSnapshot(steps)
+            persistCurrentMetricSnapshot(safeSteps)
         }
 
         StepNotificationHelper.updateNotification(
                 context = this@StepCounterService,
-                steps = steps,
-                calories = calculateCaloriesForSteps(steps),
+                steps = safeSteps,
+                calories = calculateCaloriesForSteps(safeSteps),
                 goal = getDailyStepGoal()
         )
     }
@@ -168,17 +174,29 @@ class StepCounterService() : Service() {
         lastSavedActiveSeconds = activeSeconds
     }
 
-    private suspend fun checkForDateRollover() {
+    private suspend fun checkForDateRollover(steps: Int): Boolean {
         val today = LocalDate.now()
 
-        if (today == currentDate) return
+        if (today == currentDate) return false
+
+        val previousDate = currentDate
+
+        persistMetricSnapshotForDate(
+                date = previousDate,
+                steps = steps,
+                activeSeconds = activeSeconds
+        )
 
         currentDate = today
         activeSeconds = 0
         lastSavedActiveSeconds = 0
+
         durationTracker.reset()
+        stepCounterManager.resetSteps(today)
 
         restoreTodayTimeMetric()
+
+        return true
     }
 
     private suspend fun calculateCaloriesForSteps(steps: Int): Int {
@@ -192,7 +210,66 @@ class StepCounterService() : Service() {
     private suspend fun getDailyStepGoal(): Int {
         return onboardingDataStore.dailyStepGoal.first()
     }
+    private suspend fun persistMetricSnapshotForDate(
+        date: LocalDate,
+        steps: Int,
+        activeSeconds: Int
+    ) {
+        val savedMetric = withContext(Dispatchers.IO) {
+            metricsRepository.getMetricForDate(date)
+        }
 
+        val effectiveSteps = maxOf(
+                savedMetric?.stepCount ?: 0,
+                steps
+        )
+
+        val heightInCm = withContext(Dispatchers.IO) {
+            onboardingDataStore.heightInCm.first()
+        }
+
+        val weightInKg = withContext(Dispatchers.IO) {
+            onboardingDataStore.weightInKg.first()
+        }
+
+        val selectedGender = withContext(Dispatchers.IO) {
+            onboardingDataStore.selectedGender.first()
+        }
+
+        val calculatedDistanceKm =
+            UnitConverter.stepsToKm(
+                    steps = effectiveSteps,
+                    heightInCm = heightInCm
+            )
+
+        val calculatedCalories =
+            UnitConverter.stepsToCalories(
+                    steps = effectiveSteps,
+                    weightInKg = weightInKg,
+                    gender = selectedGender
+            )
+
+        val metricToSave = savedMetric?.copy(
+                stepCount = effectiveSteps,
+                activeSeconds = maxOf(savedMetric.activeSeconds, activeSeconds),
+                calories = calculatedCalories,
+                distanceKm = calculatedDistanceKm
+        ) ?: DailyMetric(
+                date = date,
+                stepCount = effectiveSteps,
+                dailyStepGoal = withContext(Dispatchers.IO) {
+                    onboardingDataStore.dailyStepGoal.first()
+                },
+                calories = calculatedCalories,
+                activeSeconds = activeSeconds,
+                distanceKm = calculatedDistanceKm
+        )
+
+        metricsRepository.upsertDailyMetric(
+                newDailyMetric = metricToSave,
+                allowDecreases = false
+        )
+    }
     private suspend fun restoreTodayTimeMetric() {
 
         val todayMetric = withContext(Dispatchers.IO) {

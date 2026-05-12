@@ -117,16 +117,18 @@ class StepCounterManager(
         _steps.value = steps
     }
 
-    suspend fun resetSteps() {
+    suspend fun resetSteps(date: LocalDate = LocalDate.now()) {
         val currentSensorValue = latestSensorStepsValue ?: return
 
         baselineSteps = currentSensorValue
 
         baselineDataStore.setBaselineStepCount(
                 steps = currentSensorValue,
-                date = LocalDate.now()
+                date = date
         )
 
         _steps.value = 0
     }
+
+
 }
