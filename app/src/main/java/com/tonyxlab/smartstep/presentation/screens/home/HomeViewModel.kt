@@ -55,9 +55,9 @@ class HomeViewModel(
         observePermissionStates()
         observeHeightAndWeight()
         observeInsight()
-        refreshInsight()
         observeTodayMetrics()
         observeWeeklyMetric()
+        refreshInsight()
     }
 
     override fun onEvent(event: HomeUiEvent) {
@@ -204,10 +204,13 @@ class HomeViewModel(
             }
 
             // Motion
-            HomeUiEvent.OnMotionDetected -> {/*onStepDetected()*/ }
+            HomeUiEvent.OnMotionDetected -> {/*onStepDetected()*/
+            }
 
             // Return from Background
-            HomeUiEvent.OnReturnFromBackground -> { refreshInsight() }
+            HomeUiEvent.OnReturnFromBackground -> {
+                refreshInsight()
+            }
 
             // Reset Dialog
             HomeUiEvent.ConfirmResetDialog -> {
@@ -378,14 +381,17 @@ class HomeViewModel(
         val progress = currentState.currentSteps.toFloat() /
                 currentState.stepGoalSheetState.selectedStepsGoal.coerceAtLeast(1)
         val goal = overrideGoal ?: currentState.stepGoalSheetState.selectedStepsGoal
-        /*   launch {
-                                aiCoach.refreshInsight(
-                                        currentSteps = currentState.currentSteps,
-                                        dailyGoal = goal,
-                                        progress = progress,
-                                        isOnline = currentState.insightMessageState.isOnline
-                                )
-           }*/
+        launch {
+
+            Timber.tag("HomeVM")
+                    .i("currentSteps is: ${currentState.currentSteps}")
+            aiCoach.refreshInsight(
+                    currentSteps = currentState.currentSteps,
+                    dailyGoal = goal,
+                    progress = progress,
+                    isOnline = currentState.insightMessageState.isOnline
+            )
+        }
     }
 
     private fun retryInsight() {
