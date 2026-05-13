@@ -5,9 +5,10 @@ package com.tonyxlab.smartstep.presentation.screens.chat
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.delete
 import androidx.lifecycle.viewModelScope
+import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.domain.ai.AiCoach
 import com.tonyxlab.smartstep.domain.connectivity.ConnectivityObserver
-import com.tonyxlab.smartstep.domain.repository.ActivityStatsRepository
+import com.tonyxlab.smartstep.domain.repository.MetricsRepository
 import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.chat.handling.ChatActionEvent
 import com.tonyxlab.smartstep.presentation.screens.chat.handling.ChatUiEvent
@@ -16,13 +17,15 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import java.time.LocalDate
 
 typealias ChatBaseViewModel = BaseViewModel<ChatUiState, ChatUiEvent, ChatActionEvent>
 
 class ChatViewModel(
     private val aiCoach: AiCoach,
     private val connectivityObserver: ConnectivityObserver,
-    private val activityStatsRepository: ActivityStatsRepository
+    private val metricsRepository: MetricsRepository,
+   private val onboardingDataStore: OnboardingDataStore
 ) : ChatBaseViewModel() {
 
     private var hasStartedChatSession = false
@@ -57,16 +60,18 @@ class ChatViewModel(
     private fun observeStats() {
 
         combine(
-                activityStatsRepository.stepCount,
-                activityStatsRepository.dailyGoal
-        ) { steps, goal ->
+                metricsRepository.observeMetricForDate(LocalDate.now()),
+                onboardingDataStore.dailyStepGoal
+
+        ) { dailyMetric, goal ->
+            val steps = dailyMetric?.stepCount ?: 0
             steps to goal
         }
                 .onEach { (steps, goal) ->
                     updateState { it.copy(stepCount = steps, dailyGoal = goal) }
                     if (!hasStartedChatSession && goal > 0) {
                         hasStartedChatSession = true
-                       startChatSession()
+                        startChatSession()
                     }
                 }
                 .launchIn(viewModelScope)
@@ -93,7 +98,6 @@ class ChatViewModel(
 
         launch {
             with(currentState) {
-
                 aiCoach.startChatSession(
                         currentSteps = stepCount,
                         dailyGoal = dailyGoal,

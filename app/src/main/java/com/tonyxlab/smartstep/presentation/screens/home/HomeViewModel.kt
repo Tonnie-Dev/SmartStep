@@ -24,6 +24,7 @@ import com.tonyxlab.smartstep.presentation.screens.home.handling.PermissionHandl
 import com.tonyxlab.smartstep.presentation.screens.home.handling.ResetExitHandler
 import com.tonyxlab.smartstep.presentation.screens.home.handling.StepsHandler
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -51,13 +52,15 @@ class HomeViewModel(
     override val initialState: HomeUiState
         get() = HomeUiState()
 
+    private var refreshInsightJob: Job? = null
+    private var stepsForLastInsight: Int? = null
+
     init {
         observePermissionStates()
         observeHeightAndWeight()
         observeInsight()
         observeTodayMetrics()
         observeWeeklyMetric()
-        refreshInsight()
     }
 
     override fun onEvent(event: HomeUiEvent) {
@@ -276,6 +279,8 @@ class HomeViewModel(
                             )
                             stepsHandler.updateDisplayedTime(updatedState)
                         }
+
+                        refreshInsightIfNeeded()
                     }
         }
     }
@@ -377,21 +382,40 @@ class HomeViewModel(
     }
 
     private fun refreshInsight(overrideGoal: Int? = null) {
+Timber.tag("HomeVM").i("insight refreshed")
+        val stateSnapshot = currentState
 
-        val progress = currentState.currentSteps.toFloat() /
-                currentState.stepGoalSheetState.selectedStepsGoal.coerceAtLeast(1)
-        val goal = overrideGoal ?: currentState.stepGoalSheetState.selectedStepsGoal
-        launch {
+        val steps = stateSnapshot.currentSteps
+        val goal = overrideGoal ?: stateSnapshot.stepGoalSheetState.selectedStepsGoal
+        val isOnline = stateSnapshot.insightMessageState.isOnline
 
-            Timber.tag("HomeVM")
-                    .i("currentSteps is: ${currentState.currentSteps}")
+        val progress = if (goal <= 0)
+            0f
+        else
+            steps.toFloat() / goal
+
+        refreshInsightJob?.cancel()
+
+
+        refreshInsightJob = launch {
             aiCoach.refreshInsight(
-                    currentSteps = currentState.currentSteps,
+                    currentSteps = steps,
                     dailyGoal = goal,
                     progress = progress,
-                    isOnline = currentState.insightMessageState.isOnline
+                    isOnline = isOnline
             )
         }
+
+    }
+
+    private fun refreshInsightIfNeeded() {
+
+        val steps = currentState.currentSteps
+
+        if (stepsForLastInsight == steps) return
+
+        stepsForLastInsight = steps
+        refreshInsight()
     }
 
     private fun retryInsight() {
@@ -415,13 +439,16 @@ class HomeViewModel(
 
     private fun saveNewStepGoal() {
         val selectedStepGoal = currentState.stepGoalSheetState.selectedStepsGoal
+
+        updateState { stepsHandler.closeStepGoalSheet(it) }
+
         launch {
             onboardingDataStore.setDailyStepGoal(stepGoal = selectedStepGoal)
             persistTodayGoal(dailyStepGoal = selectedStepGoal)
+            activityStatsRepository.updateDailyGoal(dailyGoal = selectedStepGoal)
+            syncGoalToRepository(goal = selectedStepGoal)
+            refreshInsight(overrideGoal = selectedStepGoal)
         }
-        syncGoalToRepository(goal = selectedStepGoal)
-        refreshInsight(overrideGoal = selectedStepGoal)
-        updateState { stepsHandler.closeStepGoalSheet(it) }
     }
 
     private fun saveEditedSteps() {
