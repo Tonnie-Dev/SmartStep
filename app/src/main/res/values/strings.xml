@@ -1,6 +1,6 @@
 <resources>
     <!-- App Name-->
-    <string name="app_name">SmartStep</string>
+    <string name="app_name">Strida</string>
 
     <string name="my_profile">My profile</string>
     <string name="skip">Skip</string>
