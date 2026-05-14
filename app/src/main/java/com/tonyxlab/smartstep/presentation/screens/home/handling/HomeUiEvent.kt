@@ -48,9 +48,6 @@ sealed interface HomeUiEvent : UiEvent {
     // Background Resumption
     data object OnReturnFromBackground: HomeUiEvent
 
-    // Motion
-    data object OnMotionDetected : HomeUiEvent
-
     // Reset Dialog
     data object ConfirmResetDialog : HomeUiEvent
     data object DismissResetDialog : HomeUiEvent

@@ -8,8 +8,8 @@ import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
-import com.tonyxlab.smartstep.data.motion.ActivityDurationTracker
-import com.tonyxlab.smartstep.data.motion.StepCounterManager
+import com.tonyxlab.smartstep.data.sensor.ActivityDurationTracker
+import com.tonyxlab.smartstep.data.sensor.StepCounterManager
 import com.tonyxlab.smartstep.data.notification.StepNotificationHelper
 import com.tonyxlab.smartstep.domain.model.DailyMetric
 import com.tonyxlab.smartstep.domain.repository.ActivityStatsRepository

@@ -1,4 +1,4 @@
-package com.tonyxlab.smartstep.data.motion
+package com.tonyxlab.smartstep.data.sensor
 
 import com.tonyxlab.smartstep.utils.MeasurementConstants.ACTIVITY_TIMEOUT_IN_SECONDS
 

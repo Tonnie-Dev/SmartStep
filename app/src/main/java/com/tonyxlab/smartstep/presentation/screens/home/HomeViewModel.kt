@@ -7,7 +7,7 @@ import androidx.annotation.RequiresApi
 import com.tonyxlab.smartstep.R
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
-import com.tonyxlab.smartstep.data.motion.StepCounterManager
+import com.tonyxlab.smartstep.data.sensor.StepCounterManager
 import com.tonyxlab.smartstep.domain.ai.AiCoach
 import com.tonyxlab.smartstep.domain.connectivity.ConnectivityObserver
 import com.tonyxlab.smartstep.domain.model.DailyMetric
@@ -17,6 +17,7 @@ import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
 import com.tonyxlab.smartstep.presentation.screens.home.handling.AnalyticsHandler
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent
+import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent.*
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
 import com.tonyxlab.smartstep.presentation.screens.home.handling.InsightHandler
@@ -28,7 +29,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.time.LocalDate
 
 typealias HomeBaseViewModel = BaseViewModel<HomeUiState, HomeUiEvent, HomeActionEvent>
@@ -45,9 +45,8 @@ class HomeViewModel(
     private val permissionHandler: PermissionHandler,
     private val resetExitHandler: ResetExitHandler,
     private val analyticsHandler: AnalyticsHandler,
-    private val insightHandler: InsightHandler,
-
-    ) : HomeBaseViewModel() {
+    private val insightHandler: InsightHandler
+) : HomeBaseViewModel() {
 
     override val initialState: HomeUiState
         get() = HomeUiState()
@@ -100,7 +99,7 @@ class HomeViewModel(
                         sendActionEvent(HomeActionEvent.StartStepCounterService)
                     } else {
                         sendActionEvent(
-                                HomeActionEvent.ShowToastMessage(
+                                ShowToastMessage(
                                         messageRes = R.string.toast_text_no_sensor
                                 )
                         )
@@ -150,9 +149,7 @@ class HomeViewModel(
                 updateState { state ->
                     val updatedState = stepsHandler.confirmStepEditor(state)
                     stepsHandler.recalculateDistanceAndCalories(updatedState)
-
                 }
-
                 saveEditedSteps()
             }
 
@@ -206,10 +203,6 @@ class HomeViewModel(
                 stepsHandler.closeStepGoalSheet(it)
             }
 
-            // Motion
-            HomeUiEvent.OnMotionDetected -> {/*onStepDetected()*/
-            }
-
             // Return from Background
             HomeUiEvent.OnReturnFromBackground -> {
                 refreshInsight()
@@ -217,7 +210,6 @@ class HomeViewModel(
 
             // Reset Dialog
             HomeUiEvent.ConfirmResetDialog -> {
-
                 updateState { state ->
                     val updatedState = resetExitHandler.confirmResetDialog(state)
                     val resetTimeState = stepsHandler.resetActivityTime(updatedState)
@@ -235,6 +227,7 @@ class HomeViewModel(
 
             // AI Coach
             HomeUiEvent.Retry -> retryInsight()
+
             HomeUiEvent.GetMoreInsights -> {
                 sendActionEvent(HomeActionEvent.NavigateToChat)
             }
@@ -268,6 +261,7 @@ class HomeViewModel(
 
                         if (metric == null) return@collect
                         if (currentState.stepEditorState.paused) return@collect
+
                         updateState { state ->
                             val updatedState = state.copy(
                                     currentSteps = metric.stepCount,
@@ -279,7 +273,6 @@ class HomeViewModel(
                             )
                             stepsHandler.updateDisplayedTime(updatedState)
                         }
-
                         refreshInsightIfNeeded()
                     }
         }
@@ -289,7 +282,6 @@ class HomeViewModel(
         val today = LocalDate.now()
 
         launch {
-
             metricsRepository.getWeeklyMetrics(startDate = today.minusDays(6))
                     .collect { weeklyMetrics ->
 
@@ -301,12 +293,11 @@ class HomeViewModel(
                             )
                         }
                     }
-
         }
-
     }
 
     private fun observeHeightAndWeight() {
+
         launch {
             val heightFlow = onboardingDataStore.heightInCm
             val weightFlow = onboardingDataStore.weightInKg
@@ -342,7 +333,6 @@ class HomeViewModel(
                                     state = uiState,
                                     insightState = insightState
                             )
-
                             handledState.copy(
                                     insightMessageState = handledState.insightMessageState.copy(
                                             isOnline = isOnline
@@ -382,7 +372,7 @@ class HomeViewModel(
     }
 
     private fun refreshInsight(overrideGoal: Int? = null) {
-Timber.tag("HomeVM").i("insight refreshed")
+
         val stateSnapshot = currentState
 
         val steps = stateSnapshot.currentSteps
@@ -396,7 +386,6 @@ Timber.tag("HomeVM").i("insight refreshed")
 
         refreshInsightJob?.cancel()
 
-
         refreshInsightJob = launch {
             aiCoach.refreshInsight(
                     currentSteps = steps,
@@ -405,7 +394,6 @@ Timber.tag("HomeVM").i("insight refreshed")
                     isOnline = isOnline
             )
         }
-
     }
 
     private fun refreshInsightIfNeeded() {
@@ -420,8 +408,10 @@ Timber.tag("HomeVM").i("insight refreshed")
 
     private fun retryInsight() {
         launch {
-            val isOnline = connectivityObserver.isOnline()
+            val isOnline = connectivityObserver
+                    .isOnline()
                     .first()
+
             updateState {
                 it.copy(insightMessageState = it.insightMessageState.copy(isOnline = isOnline))
             }
@@ -452,8 +442,8 @@ Timber.tag("HomeVM").i("insight refreshed")
     }
 
     private fun saveEditedSteps() {
-        launch {
 
+        launch {
             val selectedDate = currentState.stepEditorState.selectedDate
             val isToday = selectedDate == LocalDate.now()
 
@@ -474,7 +464,6 @@ Timber.tag("HomeVM").i("insight refreshed")
                     val updatedState = state.copy(
                             currentSteps = steps
                     )
-
                     stepsHandler.recalculateDistanceAndCalories(updatedState)
                 }
             }

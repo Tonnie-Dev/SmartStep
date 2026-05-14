@@ -14,8 +14,8 @@ import com.tonyxlab.smartstep.data.local.database.dao.MetricsDao
 import com.tonyxlab.smartstep.data.local.datastore.BaselineDataStore
 import com.tonyxlab.smartstep.data.local.datastore.OnboardingDataStore
 import com.tonyxlab.smartstep.data.local.datastore.PermPrefsDataStore
-import com.tonyxlab.smartstep.data.motion.ActivityDurationTracker
-import com.tonyxlab.smartstep.data.motion.StepCounterManager
+import com.tonyxlab.smartstep.data.sensor.ActivityDurationTracker
+import com.tonyxlab.smartstep.data.sensor.StepCounterManager
 import com.tonyxlab.smartstep.data.remote.connectivity.ConnectivityObserverImpl
 import com.tonyxlab.smartstep.data.repository.ActivityStatsRepositoryImpl
 import com.tonyxlab.smartstep.data.repository.MetricsRepositoryImpl

@@ -1,6 +1,6 @@
 @file:RequiresApi(Build.VERSION_CODES.O)
 
-package com.tonyxlab.smartstep.data.motion
+package com.tonyxlab.smartstep.data.sensor
 
 import android.content.Context
 import android.hardware.Sensor
@@ -80,7 +80,6 @@ class StepCounterManager(
                     )
                 }
             }
-
             updateSteps(sensorCurrentStepsTotal)
         }
     }
@@ -113,7 +112,6 @@ class StepCounterManager(
                 steps = newBaseline,
                 date = date
         )
-
         _steps.value = steps
     }
 
@@ -126,9 +124,6 @@ class StepCounterManager(
                 steps = currentSensorValue,
                 date = date
         )
-
         _steps.value = 0
     }
-
-
 }
