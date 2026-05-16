@@ -17,7 +17,7 @@ import com.tonyxlab.smartstep.presentation.core.base.BaseViewModel
 import com.tonyxlab.smartstep.presentation.screens.home.components.PermissionSheetType
 import com.tonyxlab.smartstep.presentation.screens.home.handling.AnalyticsHandler
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent
-import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent.*
+import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeActionEvent.ShowToastMessage
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiEvent
 import com.tonyxlab.smartstep.presentation.screens.home.handling.HomeUiState
 import com.tonyxlab.smartstep.presentation.screens.home.handling.InsightHandler
@@ -57,9 +57,11 @@ class HomeViewModel(
     init {
         observePermissionStates()
         observeHeightAndWeight()
+        observeStepGoal()
         observeInsight()
         observeTodayMetrics()
         observeWeeklyMetric()
+
     }
 
     override fun onEvent(event: HomeUiEvent) {
@@ -251,6 +253,25 @@ class HomeViewModel(
                 }
             }
         }
+    }
+
+    private fun observeStepGoal() {
+        launch {
+
+            onboardingDataStore.dailyStepGoal.collect {
+
+                goal ->
+
+                updateState {
+                    it.copy(
+                            stepGoalSheetState = currentState.stepGoalSheetState.copy(
+                                    selectedStepsGoal = goal
+                            )
+                    )
+                }
+            }
+        }
+
     }
 
     private fun observeTodayMetrics() {
@@ -516,10 +537,12 @@ class HomeViewModel(
         withContext(Dispatchers.IO) {
             val savedMetric = metricsRepository.getMetricForDate(date)
 
+            val savedGoalFromDataStore = onboardingDataStore.dailyStepGoal.first()
+
             val goalToSave = if (date == LocalDate.now()) {
-                currentState.stepGoalSheetState.selectedStepsGoal
+                savedGoalFromDataStore
             } else {
-                savedMetric?.dailyStepGoal ?: currentState.stepGoalSheetState.selectedStepsGoal
+                savedMetric?.dailyStepGoal ?: savedGoalFromDataStore
             }
 
             val metricToSave = savedMetric?.copy(
@@ -536,6 +559,7 @@ class HomeViewModel(
                     calories = if (steps == 0) 0 else currentState.metricDataState.calories,
                     distanceKm = if (steps == 0) 0.0 else currentState.metricDataState.distance
             )
+
             metricsRepository.upsertDailyMetric(
                     newDailyMetric = metricToSave,
                     allowDecreases = allowDecreases

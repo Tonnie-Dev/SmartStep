@@ -22,6 +22,7 @@ class OnboardingDataStore(private val context: Context) {
     private object OnboardingKeyPreferences {
         val ONBOARDING_SEEN = booleanPreferencesKey("onboarding_seen")
         val SELECTED_GENDER = stringPreferencesKey("selected_gender")
+
         val HEIGHT_MODE = stringPreferencesKey("height_mode")
         val HEIGHT_IN_CM = intPreferencesKey("height_in_cm")
         val WEIGHT_MODE = stringPreferencesKey("weight_mode")
