@@ -24,6 +24,7 @@ import com.tonyxlab.smartstep.presentation.screens.home.handling.InsightHandler
 import com.tonyxlab.smartstep.presentation.screens.home.handling.PermissionHandler
 import com.tonyxlab.smartstep.presentation.screens.home.handling.ResetExitHandler
 import com.tonyxlab.smartstep.presentation.screens.home.handling.StepsHandler
+import com.tonyxlab.smartstep.utils.UnitConverter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
@@ -463,7 +464,6 @@ class HomeViewModel(
     }
 
     private fun saveEditedSteps() {
-
         launch {
             val selectedDate = currentState.stepEditorState.selectedDate
             val isToday = selectedDate == LocalDate.now()
@@ -489,16 +489,7 @@ class HomeViewModel(
                 }
             }
 
-            updateState { state ->
-                val updatedState = state.copy(
-                        currentSteps = if (selectedDate == LocalDate.now()) {
-                            steps
-                        } else {
-                            state.currentSteps
-                        }
-                )
-                stepsHandler.recalculateDistanceAndCalories(updatedState)
-            }
+
 
             persistManualSteps(
                     date = selectedDate,
@@ -506,6 +497,7 @@ class HomeViewModel(
                     allowDecreases = true
             )
         }
+
     }
 
     private suspend fun resetTodaySteps() {
@@ -539,25 +531,48 @@ class HomeViewModel(
 
             val savedGoalFromDataStore = onboardingDataStore.dailyStepGoal.first()
 
+            val heightInCm = onboardingDataStore.heightInCm.first()
+            val weightInKg = onboardingDataStore.weightInKg.first()
+            val selectedGender = onboardingDataStore.selectedGender.first()
+
             val goalToSave = if (date == LocalDate.now()) {
                 savedGoalFromDataStore
             } else {
                 savedMetric?.dailyStepGoal ?: savedGoalFromDataStore
             }
 
+            val calculatedCalories = if (steps == 0) {
+                0
+            } else {
+                UnitConverter.stepsToCalories(
+                        steps = steps,
+                        weightInKg = weightInKg,
+                        gender = selectedGender
+                )
+            }
+
+            val calculatedDistanceKm = if (steps == 0) {
+                0.0
+            } else {
+                UnitConverter.stepsToKm(
+                        steps = steps,
+                        heightInCm = heightInCm
+                )
+            }
+
             val metricToSave = savedMetric?.copy(
                     stepCount = steps,
                     dailyStepGoal = goalToSave,
                     activeSeconds = if (steps == 0) 0 else savedMetric.activeSeconds,
-                    calories = if (steps == 0) 0 else currentState.metricDataState.calories,
-                    distanceKm = if (steps == 0) 0.0 else currentState.metricDataState.distance
+                    calories = calculatedCalories,
+                    distanceKm = calculatedDistanceKm
             ) ?: DailyMetric(
                     date = date,
                     stepCount = steps,
                     dailyStepGoal = goalToSave,
                     activeSeconds = 0,
-                    calories = if (steps == 0) 0 else currentState.metricDataState.calories,
-                    distanceKm = if (steps == 0) 0.0 else currentState.metricDataState.distance
+                    calories = calculatedCalories,
+                    distanceKm = calculatedDistanceKm
             )
 
             metricsRepository.upsertDailyMetric(
